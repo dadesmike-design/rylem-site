@@ -33,16 +33,7 @@
     font-size: 0.95rem;
     margin-bottom: 35px;
   }
-  .week-label {
-    text-align: center;
-    color: #FFD700;
-    font-size: 1rem;
-    font-weight: 700;
-    margin-bottom: 30px;
-    letter-spacing: 1px;
-  }
 
-  /* Section headers */
   .section-header {
     display: flex;
     align-items: center;
@@ -60,7 +51,6 @@
   }
   .section-header .emoji { font-size: 1.4rem; }
 
-  /* Table styles */
   table {
     width: 100%;
     border-collapse: collapse;
@@ -89,13 +79,8 @@
   }
   tbody td:not(:first-child):not(:nth-child(2)) { text-align: center; }
   
-  .rank {
-    font-size: 1.3rem;
-    width: 40px;
-  }
-  .name-cell {
-    font-weight: 700;
-  }
+  .rank { font-size: 1.3rem; width: 40px; }
+  .name-cell { font-weight: 700; }
   .name-cell .role {
     display: block;
     font-size: 0.7rem;
@@ -108,13 +93,11 @@
   .stat-highlight { color: #4ECDC4; font-weight: 700; }
   .stat-gold { color: #FFD700; font-weight: 900; }
 
-  /* Leader row */
   .leader-row {
     background: linear-gradient(90deg, rgba(255, 215, 0, 0.08), transparent) !important;
   }
   .leader-row td { border-bottom: 1px solid rgba(255, 215, 0, 0.15) !important; }
 
-  /* Points bar */
   .points-bar-wrapper {
     display: flex;
     align-items: center;
@@ -137,9 +120,8 @@
   .points-bar-fill.purple { background: linear-gradient(90deg, #9B59B6, #8E44AD); }
   .points-bar-fill.red { background: linear-gradient(90deg, #FF6B6B, #E74C3C); }
   .points-bar-fill.blue { background: linear-gradient(90deg, #3498DB, #2980B9); }
-  .points-val { font-weight: 900; min-width: 40px; text-align: right; }
+  .points-bar-fill.orange { background: linear-gradient(90deg, #FF8C42, #E67E22); }
 
-  /* Badge pills */
   .badge-pill {
     display: inline-block;
     padding: 3px 10px;
@@ -155,7 +137,6 @@
   .badge-purple { background: rgba(155,89,182,0.15); color: #9B59B6; border: 1px solid rgba(155,89,182,0.3); }
   .badge-locked { background: rgba(255,255,255,0.03); color: #555; border: 1px solid rgba(255,255,255,0.06); }
 
-  /* Totals row */
   .totals-row td {
     font-weight: 900;
     color: #FFD700;
@@ -163,33 +144,6 @@
     padding-top: 14px;
   }
 
-  /* Level indicator */
-  .level-badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 0.65rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-  .level-rookie { background: rgba(255,255,255,0.08); color: #8b8fa3; }
-  .level-hunter { background: rgba(78,205,196,0.15); color: #4ECDC4; }
-  .level-closer { background: rgba(155,89,182,0.15); color: #9B59B6; }
-  .level-rainmaker { background: rgba(255,215,0,0.15); color: #FFD700; }
-
-  /* Footer */
-  .footer {
-    text-align: center;
-    margin-top: 40px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(255,255,255,0.06);
-    color: #555;
-    font-size: 0.75rem;
-  }
-  .footer a { color: #FFD700; text-decoration: none; }
-
-  /* Weekly challenge */
   .challenge-card {
     background: linear-gradient(135deg, rgba(255,215,0,0.08), rgba(255,165,0,0.04));
     border: 1px solid rgba(255,215,0,0.2);
@@ -206,6 +160,16 @@
   }
   .challenge-card p { color: #c0c4d6; font-size: 0.95rem; }
   .challenge-card .bonus { color: #4ECDC4; font-weight: 700; }
+
+  .footer {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    color: #555;
+    font-size: 0.75rem;
+  }
+  .footer a { color: #FFD700; text-decoration: none; }
 
   @media (max-width: 600px) {
     h1 { font-size: 1.6rem; }
@@ -259,8 +223,45 @@
     </tr>
     <tr>
       <td class="rank">🥉</td>
-      <td class="name-cell">April Thompson <span class="role">BDM</span></td>
+      <td class="name-cell">April Melton <span class="role">BDM</span></td>
       <td class="stat">0</td>
+      <td class="stat">0</td>
+      <td class="stat">0</td>
+      <td class="stat">0</td>
+      <td class="stat">0</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ═══════ SDR / SUPPORT SPECIALISTS ═══════ -->
+<div class="section-header">
+  <span class="emoji">📞</span>
+  <h2>SDR / Support Specialists</h2>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:40px">#</th>
+      <th>Name</th>
+      <th>Emails</th>
+      <th>Calls</th>
+      <th>Meetings Set</th>
+      <th>Points</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="rank">—</td>
+      <td class="name-cell">Jean Michelle Tayco <span class="role">Support Specialist / SDR</span></td>
+      <td class="stat">0</td>
+      <td class="stat">0</td>
+      <td class="stat">0</td>
+      <td class="stat">0</td>
+    </tr>
+    <tr>
+      <td class="rank">—</td>
+      <td class="name-cell">Dee <span class="role">Support Specialist / SDR</span></td>
       <td class="stat">0</td>
       <td class="stat">0</td>
       <td class="stat">0</td>
@@ -290,7 +291,7 @@
   <tbody>
     <tr class="leader-row">
       <td class="rank">🥇</td>
-      <td class="name-cell">Maritess Hernandez <span class="role">Recruiter</span></td>
+      <td class="name-cell">Tet Hernandez <span class="role">Recruiter</span></td>
       <td class="stat-highlight">16</td>
       <td class="stat-highlight">11</td>
       <td class="stat">3</td>
@@ -308,6 +309,24 @@
     </tr>
     <tr>
       <td class="rank">🥉</td>
+      <td class="name-cell">Isaac Reyes <span class="role">Recruiter</span></td>
+      <td class="stat">0</td>
+      <td class="stat">0</td>
+      <td class="stat">0</td>
+      <td class="stat">0</td>
+      <td class="stat">—</td>
+    </tr>
+    <tr>
+      <td class="rank">4</td>
+      <td class="name-cell">Chino Matura <span class="role">Recruiter</span></td>
+      <td class="stat">0</td>
+      <td class="stat">0</td>
+      <td class="stat">0</td>
+      <td class="stat">0</td>
+      <td class="stat">—</td>
+    </tr>
+    <tr>
+      <td class="rank">5</td>
       <td class="name-cell">Joelle Davis <span class="role">Recruiter</span></td>
       <td class="stat">0</td>
       <td class="stat">0</td>
@@ -327,10 +346,10 @@
   </tbody>
 </table>
 
-<!-- ═══════ SOURCING TEAM (Philippines) ═══════ -->
+<!-- ═══════ SOURCING TEAM ═══════ -->
 <div class="section-header">
   <span class="emoji">🔍</span>
-  <h2>Sourcing Team — This Week</h2>
+  <h2>Sourcing — This Week (Notes Logged)</h2>
 </div>
 
 <table>
@@ -338,84 +357,64 @@
     <tr>
       <th style="width:40px">#</th>
       <th>Name</th>
-      <th>Notes Logged</th>
+      <th>Notes</th>
+      <th>LinkedIn Profiles</th>
+      <th>Meetings Set</th>
       <th>Activity</th>
     </tr>
   </thead>
   <tbody>
     <tr class="leader-row">
       <td class="rank">🥇</td>
-      <td class="name-cell">Isaac Reyes <span class="role">Sourcing Specialist</span></td>
-      <td class="stat-highlight">130</td>
+      <td class="name-cell">Joel <span class="role">Sourcing — LinkedIn + Meeting Setting</span></td>
+      <td class="stat">—</td>
+      <td class="stat">—</td>
+      <td class="stat">—</td>
       <td>
         <div class="points-bar-wrapper">
-          <div class="points-bar"><div class="points-bar-fill gold" style="width:100%"></div></div>
+          <div class="points-bar"><div class="points-bar-fill orange" style="width:50%"></div></div>
         </div>
       </td>
     </tr>
     <tr>
       <td class="rank">🥈</td>
+      <td class="name-cell">Angel <span class="role">Sourcing — LinkedIn + Meeting Setting</span></td>
+      <td class="stat">—</td>
+      <td class="stat">—</td>
+      <td class="stat">—</td>
+      <td>
+        <div class="points-bar-wrapper">
+          <div class="points-bar"><div class="points-bar-fill orange" style="width:50%"></div></div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td class="rank">🥉</td>
       <td class="name-cell">Lea Rivera <span class="role">Sourcing Specialist</span></td>
       <td class="stat-highlight">98</td>
+      <td class="stat">—</td>
+      <td class="stat">—</td>
       <td>
         <div class="points-bar-wrapper">
           <div class="points-bar"><div class="points-bar-fill teal" style="width:75%"></div></div>
         </div>
       </td>
     </tr>
-    <tr>
-      <td class="rank">🥉</td>
-      <td class="name-cell">Chino Matura <span class="role">Sourcing Specialist</span></td>
-      <td class="stat-highlight">85</td>
-      <td>
-        <div class="points-bar-wrapper">
-          <div class="points-bar"><div class="points-bar-fill purple" style="width:65%"></div></div>
-        </div>
-      </td>
-    </tr>
-    <tr>
-      <td class="rank">4</td>
-      <td class="name-cell">Sheila Marie Alarte <span class="role">Recruiter — Screening Lead</span></td>
-      <td class="stat">33</td>
-      <td>
-        <div class="points-bar-wrapper">
-          <div class="points-bar"><div class="points-bar-fill blue" style="width:25%"></div></div>
-        </div>
-      </td>
-    </tr>
-    <tr>
-      <td class="rank">5</td>
-      <td class="name-cell">Aya Delos Santos <span class="role">Sourcing Specialist</span></td>
-      <td class="stat">0</td>
-      <td>
-        <div class="points-bar-wrapper">
-          <div class="points-bar"><div class="points-bar-fill blue" style="width:0%"></div></div>
-        </div>
-      </td>
-    </tr>
-    <tr>
-      <td class="rank">5</td>
-      <td class="name-cell">Lanni Aguilan <span class="role">Sourcing Specialist</span></td>
-      <td class="stat">0</td>
-      <td>
-        <div class="points-bar-wrapper">
-          <div class="points-bar"><div class="points-bar-fill blue" style="width:0%"></div></div>
-        </div>
-      </td>
-    </tr>
     <tr class="totals-row">
       <td></td>
-      <td>TOTAL</td>
+      <td>TOTAL NOTES (ALL STAFF)</td>
       <td>346</td>
+      <td></td>
+      <td></td>
       <td></td>
     </tr>
   </tbody>
 </table>
 
-<!-- ═══════ LEADERSHIP ═══════ -->
+<!-- ═══════ OPERATIONS / LEADERSHIP ═══════ -->
 <div class="section-header">
   <span class="emoji">⭐</span>
-  <h2>Leadership</h2>
+  <h2>Operations & Leadership</h2>
 </div>
 
 <table>
@@ -442,6 +441,18 @@
     </tr>
     <tr>
       <td class="rank">⭐</td>
+      <td class="name-cell">Aya Delos Santos</td>
+      <td class="stat">HR</td>
+      <td class="stat">0</td>
+    </tr>
+    <tr>
+      <td class="rank">⭐</td>
+      <td class="name-cell">Lanni Aguilan</td>
+      <td class="stat">Accounting</td>
+      <td class="stat">0</td>
+    </tr>
+    <tr>
+      <td class="rank">⭐</td>
       <td class="name-cell">Lisa Flores</td>
       <td class="stat">Admin</td>
       <td class="stat">0</td>
@@ -460,6 +471,7 @@
   <span class="badge-pill badge-teal">📧 Email Machine — Mike (37 emails)</span>
   <span class="badge-pill badge-locked">🔒 Cold Caller — 20+ calls</span>
   <span class="badge-pill badge-locked">🔒 Screen Machine — 20+ screens/wk</span>
+  <span class="badge-pill badge-locked">🔒 Meeting Maker — 3+ meetings set</span>
   <span class="badge-pill badge-locked">🔒 Matchmaker — 5+ placements</span>
   <span class="badge-pill badge-locked">🔒 On Fire — 5-day streak</span>
   <span class="badge-pill badge-locked">🔒 Closer — 3+ meetings booked</span>
@@ -492,14 +504,14 @@
   <tbody>
     <tr>
       <td class="stat">Email Sent</td><td class="stat-highlight">+3</td>
-      <td class="stat">Meeting Booked</td><td class="stat-gold">+25</td>
+      <td class="stat">Meeting Booked/Set</td><td class="stat-gold">+25</td>
     </tr>
     <tr>
       <td class="stat">Call Logged</td><td class="stat-highlight">+5</td>
       <td class="stat">Submittal Made</td><td class="stat-highlight">+15</td>
     </tr>
     <tr>
-      <td class="stat">LinkedIn Sent</td><td class="stat-highlight">+3</td>
+      <td class="stat">LinkedIn Outreach</td><td class="stat-highlight">+3</td>
       <td class="stat">Interview Scheduled</td><td class="stat-highlight">+15</td>
     </tr>
     <tr>
@@ -518,11 +530,15 @@
       <td class="stat">Client Call</td><td class="stat-highlight">+8</td>
       <td class="stat">Referral Given</td><td class="stat-highlight">+10</td>
     </tr>
+    <tr>
+      <td class="stat">LinkedIn Profile Sourced</td><td class="stat-highlight">+2</td>
+      <td class="stat">Meeting Set for BDM</td><td class="stat-gold">+25</td>
+    </tr>
   </tbody>
 </table>
 
 <div class="footer">
-  <p>Rylem Staffing — Gamification Scoreboard v1.0</p>
+  <p>Rylem Staffing — Gamification Scoreboard v1.1</p>
   <p style="margin-top:5px;">Levels: Rookie (0–499) → Hunter (500–1,499) → Closer (1,500–3,999) → Rainmaker (4,000+)</p>
   <p style="margin-top:8px;"><a href="wheel.html">🎰 Spin the Prize Wheel →</a></p>
 </div>

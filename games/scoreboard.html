@@ -1,206 +1,532 @@
 <!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background:#0a0e1a;font-family:'Segoe UI',Arial,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0e1a;padding:20px 0;">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="background:#111827;border-radius:16px;overflow:hidden;border:1px solid #1e293b;">
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rylem Scoreboard 🏆</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #0a0e1a 0%, #1a1040 50%, #0a0e1a 100%);
+    min-height: 100vh;
+    color: #fff;
+    padding: 30px 20px;
+  }
+  .container { max-width: 900px; margin: 0 auto; }
+  
+  h1 {
+    text-align: center;
+    font-size: 2.2rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #FFD700, #FFA500, #FF6347);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #8b8fa3;
+    font-size: 0.95rem;
+    margin-bottom: 35px;
+  }
+  .week-label {
+    text-align: center;
+    color: #FFD700;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+    letter-spacing: 1px;
+  }
 
-<!-- HEADER -->
-<tr><td style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);padding:30px 40px;text-align:center;">
-<div style="font-size:40px;margin-bottom:8px;">🏆🔥⚡</div>
-<h1 style="color:#f8fafc;font-size:28px;margin:0;font-weight:800;letter-spacing:-0.5px;">RYLEM WEEKLY SCOREBOARD</h1>
-<p style="color:#94a3b8;font-size:14px;margin:8px 0 0;">Week of March 17–21, 2026</p>
-</td></tr>
+  /* Section headers */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 35px 0 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(255, 215, 0, 0.2);
+  }
+  .section-header h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #FFD700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  .section-header .emoji { font-size: 1.4rem; }
 
-<!-- LEADERBOARD -->
-<tr><td style="padding:30px 40px 10px;">
-<h2 style="color:#e2e8f0;font-size:18px;margin:0 0 20px;border-bottom:1px solid #1e293b;padding-bottom:10px;">📊 LEADERBOARD</h2>
+  /* Table styles */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 10px;
+  }
+  thead th {
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #8b8fa3;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  thead th:not(:first-child):not(:nth-child(2)) { text-align: center; }
+  
+  tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.2s;
+  }
+  tbody tr:hover { background: rgba(255,255,255,0.03); }
+  
+  tbody td {
+    padding: 12px;
+    font-size: 0.95rem;
+  }
+  tbody td:not(:first-child):not(:nth-child(2)) { text-align: center; }
+  
+  .rank {
+    font-size: 1.3rem;
+    width: 40px;
+  }
+  .name-cell {
+    font-weight: 700;
+  }
+  .name-cell .role {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 400;
+    color: #8b8fa3;
+    margin-top: 2px;
+  }
+  
+  .stat { font-weight: 600; color: #c0c4d6; }
+  .stat-highlight { color: #4ECDC4; font-weight: 700; }
+  .stat-gold { color: #FFD700; font-weight: 900; }
 
-<!-- #1 Mike -->
-<table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#fbbf24 0%,#f59e0b 100%);border-radius:12px;margin-bottom:12px;">
-<tr>
-<td style="padding:16px 20px;width:50px;">
-<div style="background:#fff;color:#f59e0b;width:36px;height:36px;border-radius:50%;text-align:center;line-height:36px;font-weight:900;font-size:18px;">1</div>
-</td>
-<td style="padding:16px 0;">
-<div style="color:#1a1a2e;font-weight:800;font-size:16px;">Mike Dades</div>
-<div style="color:#92400e;font-size:12px;">CEO • Pipeline Full 🏆</div>
-</td>
-<td style="padding:16px 20px;text-align:right;">
-<div style="color:#1a1a2e;font-weight:900;font-size:24px;">151</div>
-<div style="color:#92400e;font-size:11px;font-weight:600;">POINTS</div>
-</td>
-</tr>
+  /* Leader row */
+  .leader-row {
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.08), transparent) !important;
+  }
+  .leader-row td { border-bottom: 1px solid rgba(255, 215, 0, 0.15) !important; }
+
+  /* Points bar */
+  .points-bar-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .points-bar {
+    flex: 1;
+    height: 8px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .points-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s ease;
+  }
+  .points-bar-fill.gold { background: linear-gradient(90deg, #FFD700, #FFA500); }
+  .points-bar-fill.teal { background: linear-gradient(90deg, #4ECDC4, #2ECC71); }
+  .points-bar-fill.purple { background: linear-gradient(90deg, #9B59B6, #8E44AD); }
+  .points-bar-fill.red { background: linear-gradient(90deg, #FF6B6B, #E74C3C); }
+  .points-bar-fill.blue { background: linear-gradient(90deg, #3498DB, #2980B9); }
+  .points-val { font-weight: 900; min-width: 40px; text-align: right; }
+
+  /* Badge pills */
+  .badge-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge-gold { background: rgba(255,215,0,0.15); color: #FFD700; border: 1px solid rgba(255,215,0,0.3); }
+  .badge-teal { background: rgba(78,205,196,0.15); color: #4ECDC4; border: 1px solid rgba(78,205,196,0.3); }
+  .badge-purple { background: rgba(155,89,182,0.15); color: #9B59B6; border: 1px solid rgba(155,89,182,0.3); }
+  .badge-locked { background: rgba(255,255,255,0.03); color: #555; border: 1px solid rgba(255,255,255,0.06); }
+
+  /* Totals row */
+  .totals-row td {
+    font-weight: 900;
+    color: #FFD700;
+    border-top: 2px solid rgba(255, 215, 0, 0.3) !important;
+    padding-top: 14px;
+  }
+
+  /* Level indicator */
+  .level-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .level-rookie { background: rgba(255,255,255,0.08); color: #8b8fa3; }
+  .level-hunter { background: rgba(78,205,196,0.15); color: #4ECDC4; }
+  .level-closer { background: rgba(155,89,182,0.15); color: #9B59B6; }
+  .level-rainmaker { background: rgba(255,215,0,0.15); color: #FFD700; }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    color: #555;
+    font-size: 0.75rem;
+  }
+  .footer a { color: #FFD700; text-decoration: none; }
+
+  /* Weekly challenge */
+  .challenge-card {
+    background: linear-gradient(135deg, rgba(255,215,0,0.08), rgba(255,165,0,0.04));
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-top: 25px;
+  }
+  .challenge-card h3 {
+    color: #FFD700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+  .challenge-card p { color: #c0c4d6; font-size: 0.95rem; }
+  .challenge-card .bonus { color: #4ECDC4; font-weight: 700; }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 1.6rem; }
+    tbody td, thead th { padding: 8px 6px; font-size: 0.8rem; }
+    .rank { font-size: 1rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>🏆 Rylem Weekly Scoreboard</h1>
+<p class="subtitle">Week of March 17–21, 2026</p>
+
+<!-- ═══════ SALES TEAM ═══════ -->
+<div class="section-header">
+  <span class="emoji">💰</span>
+  <h2>Sales Team</h2>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:40px">#</th>
+      <th>Name</th>
+      <th>Emails</th>
+      <th>Calls</th>
+      <th>Meetings</th>
+      <th>Leads</th>
+      <th>Points</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="leader-row">
+      <td class="rank">🥇</td>
+      <td class="name-cell">Mike Dades <span class="role">CEO / Lead Generator</span></td>
+      <td class="stat-highlight">37</td>
+      <td class="stat">0</td>
+      <td class="stat">0</td>
+      <td class="stat-highlight">25</td>
+      <td class="stat-gold">151</td>
+    </tr>
+    <tr>
+      <td class="rank">🥈</td>
+      <td class="name-cell">Julia Dusseau <span class="role">BDM — Northwest</span></td>
+      <td class="stat">0</td>
+      <td class="stat">0</td>
+      <td class="stat">0</td>
+      <td class="stat">0</td>
+      <td class="stat">0</td>
+    </tr>
+    <tr>
+      <td class="rank">🥉</td>
+      <td class="name-cell">April Thompson <span class="role">BDM</span></td>
+      <td class="stat">0</td>
+      <td class="stat">0</td>
+      <td class="stat">0</td>
+      <td class="stat">0</td>
+      <td class="stat">0</td>
+    </tr>
+  </tbody>
 </table>
 
-<!-- #2 Julia -->
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#1e293b;border-radius:12px;margin-bottom:12px;border:1px solid #334155;">
-<tr>
-<td style="padding:14px 20px;width:50px;">
-<div style="background:#334155;color:#94a3b8;width:36px;height:36px;border-radius:50%;text-align:center;line-height:36px;font-weight:900;font-size:18px;">2</div>
-</td>
-<td style="padding:14px 0;">
-<div style="color:#e2e8f0;font-weight:700;font-size:15px;">Julia Dusseau</div>
-<div style="color:#64748b;font-size:12px;">BDM • Rookie</div>
-</td>
-<td style="padding:14px 20px;text-align:right;">
-<div style="color:#e2e8f0;font-weight:800;font-size:22px;">0</div>
-<div style="color:#64748b;font-size:11px;font-weight:600;">POINTS</div>
-</td>
-</tr>
+<!-- ═══════ RECRUITING TEAM ═══════ -->
+<div class="section-header">
+  <span class="emoji">🎯</span>
+  <h2>Recruiting Team — March MTD</h2>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:40px">#</th>
+      <th>Name</th>
+      <th>Submittals</th>
+      <th>Client Subs</th>
+      <th>Interviews</th>
+      <th>Hires</th>
+      <th>Conv %</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="leader-row">
+      <td class="rank">🥇</td>
+      <td class="name-cell">Maritess Hernandez <span class="role">Recruiter</span></td>
+      <td class="stat-highlight">16</td>
+      <td class="stat-highlight">11</td>
+      <td class="stat">3</td>
+      <td class="stat-gold">1</td>
+      <td class="stat-highlight">69%</td>
+    </tr>
+    <tr>
+      <td class="rank">🥈</td>
+      <td class="name-cell">Sheila Marie Alarte <span class="role">Recruiter — Screening Lead</span></td>
+      <td class="stat-highlight">11</td>
+      <td class="stat-highlight">10</td>
+      <td class="stat-highlight">4</td>
+      <td class="stat-gold">1</td>
+      <td class="stat-highlight">91%</td>
+    </tr>
+    <tr>
+      <td class="rank">🥉</td>
+      <td class="name-cell">Joelle Davis <span class="role">Recruiter</span></td>
+      <td class="stat">0</td>
+      <td class="stat">0</td>
+      <td class="stat">0</td>
+      <td class="stat">0</td>
+      <td class="stat">—</td>
+    </tr>
+    <tr class="totals-row">
+      <td></td>
+      <td>TOTAL</td>
+      <td>27</td>
+      <td>21</td>
+      <td>7</td>
+      <td>2</td>
+      <td>78%</td>
+    </tr>
+  </tbody>
 </table>
 
-<!-- #3 April -->
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#1e293b;border-radius:12px;margin-bottom:12px;border:1px solid #334155;">
-<tr>
-<td style="padding:14px 20px;width:50px;">
-<div style="background:#334155;color:#94a3b8;width:36px;height:36px;border-radius:50%;text-align:center;line-height:36px;font-weight:900;font-size:18px;">3</div>
-</td>
-<td style="padding:14px 0;">
-<div style="color:#e2e8f0;font-weight:700;font-size:15px;">April</div>
-<div style="color:#64748b;font-size:12px;">BDM • Rookie</div>
-</td>
-<td style="padding:14px 20px;text-align:right;">
-<div style="color:#e2e8f0;font-weight:800;font-size:22px;">0</div>
-<div style="color:#64748b;font-size:11px;font-weight:600;">POINTS</div>
-</td>
-</tr>
+<!-- ═══════ SOURCING TEAM (Philippines) ═══════ -->
+<div class="section-header">
+  <span class="emoji">🔍</span>
+  <h2>Sourcing Team — This Week</h2>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:40px">#</th>
+      <th>Name</th>
+      <th>Notes Logged</th>
+      <th>Activity</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="leader-row">
+      <td class="rank">🥇</td>
+      <td class="name-cell">Isaac Reyes <span class="role">Sourcing Specialist</span></td>
+      <td class="stat-highlight">130</td>
+      <td>
+        <div class="points-bar-wrapper">
+          <div class="points-bar"><div class="points-bar-fill gold" style="width:100%"></div></div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td class="rank">🥈</td>
+      <td class="name-cell">Lea Rivera <span class="role">Sourcing Specialist</span></td>
+      <td class="stat-highlight">98</td>
+      <td>
+        <div class="points-bar-wrapper">
+          <div class="points-bar"><div class="points-bar-fill teal" style="width:75%"></div></div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td class="rank">🥉</td>
+      <td class="name-cell">Chino Matura <span class="role">Sourcing Specialist</span></td>
+      <td class="stat-highlight">85</td>
+      <td>
+        <div class="points-bar-wrapper">
+          <div class="points-bar"><div class="points-bar-fill purple" style="width:65%"></div></div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td class="rank">4</td>
+      <td class="name-cell">Sheila Marie Alarte <span class="role">Recruiter — Screening Lead</span></td>
+      <td class="stat">33</td>
+      <td>
+        <div class="points-bar-wrapper">
+          <div class="points-bar"><div class="points-bar-fill blue" style="width:25%"></div></div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td class="rank">5</td>
+      <td class="name-cell">Aya Delos Santos <span class="role">Sourcing Specialist</span></td>
+      <td class="stat">0</td>
+      <td>
+        <div class="points-bar-wrapper">
+          <div class="points-bar"><div class="points-bar-fill blue" style="width:0%"></div></div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td class="rank">5</td>
+      <td class="name-cell">Lanni Aguilan <span class="role">Sourcing Specialist</span></td>
+      <td class="stat">0</td>
+      <td>
+        <div class="points-bar-wrapper">
+          <div class="points-bar"><div class="points-bar-fill blue" style="width:0%"></div></div>
+        </div>
+      </td>
+    </tr>
+    <tr class="totals-row">
+      <td></td>
+      <td>TOTAL</td>
+      <td>346</td>
+      <td></td>
+    </tr>
+  </tbody>
 </table>
 
-<!-- #4 Sheila -->
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#1e293b;border-radius:12px;margin-bottom:12px;border:1px solid #334155;">
-<tr>
-<td style="padding:14px 20px;width:50px;">
-<div style="background:#334155;color:#94a3b8;width:36px;height:36px;border-radius:50%;text-align:center;line-height:36px;font-weight:900;font-size:18px;">4</div>
-</td>
-<td style="padding:14px 0;">
-<div style="color:#e2e8f0;font-weight:700;font-size:15px;">Sheila Alarte</div>
-<div style="color:#64748b;font-size:12px;">Recruiter • Rookie</div>
-</td>
-<td style="padding:14px 20px;text-align:right;">
-<div style="color:#e2e8f0;font-weight:800;font-size:22px;">0</div>
-<div style="color:#64748b;font-size:11px;font-weight:600;">POINTS</div>
-</td>
-</tr>
+<!-- ═══════ LEADERSHIP ═══════ -->
+<div class="section-header">
+  <span class="emoji">⭐</span>
+  <h2>Leadership</h2>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:40px">#</th>
+      <th>Name</th>
+      <th>Role</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="rank">⭐</td>
+      <td class="name-cell">Liza Valencia</td>
+      <td class="stat">Director, Recruiting Strategy</td>
+      <td class="stat">0</td>
+    </tr>
+    <tr>
+      <td class="rank">⭐</td>
+      <td class="name-cell">Jon Bobillo</td>
+      <td class="stat">Operations</td>
+      <td class="stat">0</td>
+    </tr>
+    <tr>
+      <td class="rank">⭐</td>
+      <td class="name-cell">Lisa Flores</td>
+      <td class="stat">Admin</td>
+      <td class="stat">0</td>
+    </tr>
+  </tbody>
 </table>
-</td></tr>
 
-<!-- MIKE'S STATS -->
-<tr><td style="padding:10px 40px 20px;">
-<h2 style="color:#e2e8f0;font-size:18px;margin:0 0 16px;border-bottom:1px solid #1e293b;padding-bottom:10px;">🔥 MIKE'S WEEK</h2>
-<table width="100%" cellpadding="0" cellspacing="0">
-<tr>
-<td width="25%" style="padding:8px;text-align:center;">
-<div style="background:#1e293b;border-radius:10px;padding:16px 8px;border:1px solid #334155;">
-<div style="color:#3b82f6;font-size:28px;font-weight:900;">37</div>
-<div style="color:#64748b;font-size:11px;font-weight:600;margin-top:4px;">EMAILS</div>
+<!-- ═══════ BADGES ═══════ -->
+<div class="section-header">
+  <span class="emoji">🏅</span>
+  <h2>Badges Earned</h2>
 </div>
-</td>
-<td width="25%" style="padding:8px;text-align:center;">
-<div style="background:#1e293b;border-radius:10px;padding:16px 8px;border:1px solid #334155;">
-<div style="color:#8b5cf6;font-size:28px;font-weight:900;">25+</div>
-<div style="color:#64748b;font-size:11px;font-weight:600;margin-top:4px;">LEADS</div>
+
+<div style="margin-bottom: 20px;">
+  <span class="badge-pill badge-gold">🏆 Pipeline Full — Mike</span>
+  <span class="badge-pill badge-teal">📧 Email Machine — Mike (37 emails)</span>
+  <span class="badge-pill badge-locked">🔒 Cold Caller — 20+ calls</span>
+  <span class="badge-pill badge-locked">🔒 Screen Machine — 20+ screens/wk</span>
+  <span class="badge-pill badge-locked">🔒 Matchmaker — 5+ placements</span>
+  <span class="badge-pill badge-locked">🔒 On Fire — 5-day streak</span>
+  <span class="badge-pill badge-locked">🔒 Closer — 3+ meetings booked</span>
+  <span class="badge-pill badge-locked">🔒 Rainmaker — 4,000+ points</span>
+  <span class="badge-pill badge-locked">🔒 Top Dog — #1 for 4 weeks straight</span>
 </div>
-</td>
-<td width="25%" style="padding:8px;text-align:center;">
-<div style="background:#1e293b;border-radius:10px;padding:16px 8px;border:1px solid #334155;">
-<div style="color:#10b981;font-size:28px;font-weight:900;">0</div>
-<div style="color:#64748b;font-size:11px;font-weight:600;margin-top:4px;">MEETINGS</div>
+
+<!-- ═══════ WEEKLY CHALLENGE ═══════ -->
+<div class="challenge-card">
+  <h3>🔥 Weekly Challenge</h3>
+  <p>Log <strong>20 calls</strong> this week → <span class="bonus">+50 bonus points</span></p>
+  <p style="margin-top:8px; font-size:0.8rem; color:#8b8fa3;">Challenge ends Sunday 3/23. Anyone who hits 20 gets the bonus.</p>
 </div>
-</td>
-<td width="25%" style="padding:8px;text-align:center;">
-<div style="background:#1e293b;border-radius:10px;padding:16px 8px;border:1px solid #334155;">
-<div style="color:#f59e0b;font-size:28px;font-weight:900;">2</div>
-<div style="color:#64748b;font-size:11px;font-weight:600;margin-top:4px;">STREAK</div>
+
+<!-- ═══════ POINT VALUES ═══════ -->
+<div class="section-header" style="margin-top:35px;">
+  <span class="emoji">📊</span>
+  <h2>How to Earn Points</h2>
 </div>
-</td>
-</tr>
+
+<table>
+  <thead>
+    <tr>
+      <th>Action</th>
+      <th>Points</th>
+      <th>Action</th>
+      <th>Points</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="stat">Email Sent</td><td class="stat-highlight">+3</td>
+      <td class="stat">Meeting Booked</td><td class="stat-gold">+25</td>
+    </tr>
+    <tr>
+      <td class="stat">Call Logged</td><td class="stat-highlight">+5</td>
+      <td class="stat">Submittal Made</td><td class="stat-highlight">+15</td>
+    </tr>
+    <tr>
+      <td class="stat">LinkedIn Sent</td><td class="stat-highlight">+3</td>
+      <td class="stat">Interview Scheduled</td><td class="stat-highlight">+15</td>
+    </tr>
+    <tr>
+      <td class="stat">New Lead Added</td><td class="stat-highlight">+2</td>
+      <td class="stat">Offer Extended</td><td class="stat-highlight">+20</td>
+    </tr>
+    <tr>
+      <td class="stat">Follow-Up Done</td><td class="stat-highlight">+5</td>
+      <td class="stat">Placement</td><td class="stat-gold">+100</td>
+    </tr>
+    <tr>
+      <td class="stat">Candidate Screen</td><td class="stat-highlight">+5</td>
+      <td class="stat">Deal Won</td><td class="stat-gold">+200</td>
+    </tr>
+    <tr>
+      <td class="stat">Client Call</td><td class="stat-highlight">+8</td>
+      <td class="stat">Referral Given</td><td class="stat-highlight">+10</td>
+    </tr>
+  </tbody>
 </table>
-</td></tr>
 
-<!-- LEVEL PROGRESS -->
-<tr><td style="padding:0 40px 20px;">
-<div style="background:#1e293b;border-radius:12px;padding:20px;border:1px solid #334155;">
-<div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-<span style="color:#e2e8f0;font-weight:700;font-size:14px;">🎖️ Rookie → Hunter</span>
-<span style="color:#3b82f6;font-weight:700;font-size:14px;">151 / 500</span>
+<div class="footer">
+  <p>Rylem Staffing — Gamification Scoreboard v1.0</p>
+  <p style="margin-top:5px;">Levels: Rookie (0–499) → Hunter (500–1,499) → Closer (1,500–3,999) → Rainmaker (4,000+)</p>
+  <p style="margin-top:8px;"><a href="wheel.html">🎰 Spin the Prize Wheel →</a></p>
 </div>
-<div style="background:#0f172a;border-radius:8px;height:12px;overflow:hidden;">
-<div style="background:linear-gradient(90deg,#3b82f6,#8b5cf6);height:100%;border-radius:8px;width:30%;"></div>
-</div>
-<div style="color:#64748b;font-size:12px;margin-top:6px;">349 points to Hunter level 🏹</div>
-</div>
-</td></tr>
 
-<!-- BADGES -->
-<tr><td style="padding:0 40px 20px;">
-<h2 style="color:#e2e8f0;font-size:18px;margin:0 0 16px;border-bottom:1px solid #1e293b;padding-bottom:10px;">🏅 BADGES EARNED</h2>
-<table width="100%" cellpadding="0" cellspacing="0">
-<tr>
-<td width="33%" style="padding:6px;text-align:center;">
-<div style="background:#1e293b;border-radius:10px;padding:16px;border:1px solid #334155;">
-<div style="font-size:32px;">🏆</div>
-<div style="color:#f59e0b;font-weight:700;font-size:12px;margin-top:6px;">Pipeline Full</div>
-<div style="color:#64748b;font-size:10px;">20+ active leads</div>
 </div>
-</td>
-<td width="33%" style="padding:6px;text-align:center;">
-<div style="background:#0f172a;border-radius:10px;padding:16px;border:1px dashed #334155;">
-<div style="font-size:32px;opacity:0.3;">📧</div>
-<div style="color:#334155;font-weight:700;font-size:12px;margin-top:6px;">Email Machine</div>
-<div style="color:#334155;font-size:10px;">13 more to unlock</div>
-</div>
-</td>
-<td width="33%" style="padding:6px;text-align:center;">
-<div style="background:#0f172a;border-radius:10px;padding:16px;border:1px dashed #334155;">
-<div style="font-size:32px;opacity:0.3;">🔥</div>
-<div style="color:#334155;font-weight:700;font-size:12px;margin-top:6px;">On Fire</div>
-<div style="color:#334155;font-size:10px;">3 more days</div>
-</div>
-</td>
-</tr>
-</table>
-</td></tr>
-
-<!-- WEEKLY CHALLENGE -->
-<tr><td style="padding:0 40px 20px;">
-<div style="background:linear-gradient(135deg,#1e1b4b 0%,#312e81 100%);border-radius:12px;padding:20px;border:1px solid #4338ca;">
-<div style="color:#a5b4fc;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;">⚡ WEEKLY CHALLENGE</div>
-<div style="color:#e0e7ff;font-size:18px;font-weight:800;margin:8px 0 4px;">Launch Week: Log 20 Calls</div>
-<div style="color:#818cf8;font-size:13px;">First team member to hit 20 calls wins 50 bonus points</div>
-<div style="background:#0f0e2a;border-radius:8px;height:10px;overflow:hidden;margin-top:12px;">
-<div style="background:linear-gradient(90deg,#6366f1,#a78bfa);height:100%;border-radius:8px;width:0%;"></div>
-</div>
-<div style="color:#6366f1;font-size:12px;margin-top:6px;">0 / 20 calls — get dialing! 📞</div>
-</div>
-</td></tr>
-
-<!-- HOW POINTS WORK -->
-<tr><td style="padding:0 40px 30px;">
-<h2 style="color:#e2e8f0;font-size:18px;margin:0 0 16px;border-bottom:1px solid #1e293b;padding-bottom:10px;">💡 HOW TO EARN POINTS</h2>
-<table width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;">
-<tr style="color:#64748b;font-weight:600;"><td style="padding:6px 0;border-bottom:1px solid #1e293b;">Activity</td><td style="padding:6px 0;text-align:right;border-bottom:1px solid #1e293b;">Points</td></tr>
-<tr><td style="color:#e2e8f0;padding:6px 0;border-bottom:1px solid #1e293b;">📧 Email Sent</td><td style="color:#3b82f6;padding:6px 0;text-align:right;border-bottom:1px solid #1e293b;font-weight:700;">+3</td></tr>
-<tr><td style="color:#e2e8f0;padding:6px 0;border-bottom:1px solid #1e293b;">📞 Call Logged</td><td style="color:#3b82f6;padding:6px 0;text-align:right;border-bottom:1px solid #1e293b;font-weight:700;">+5</td></tr>
-<tr><td style="color:#e2e8f0;padding:6px 0;border-bottom:1px solid #1e293b;">🔗 LinkedIn Message</td><td style="color:#3b82f6;padding:6px 0;text-align:right;border-bottom:1px solid #1e293b;font-weight:700;">+3</td></tr>
-<tr><td style="color:#e2e8f0;padding:6px 0;border-bottom:1px solid #1e293b;">🎯 New Lead</td><td style="color:#3b82f6;padding:6px 0;text-align:right;border-bottom:1px solid #1e293b;font-weight:700;">+2</td></tr>
-<tr><td style="color:#e2e8f0;padding:6px 0;border-bottom:1px solid #1e293b;">🎙️ Candidate Screen</td><td style="color:#8b5cf6;padding:6px 0;text-align:right;border-bottom:1px solid #1e293b;font-weight:700;">+5</td></tr>
-<tr><td style="color:#e2e8f0;padding:6px 0;border-bottom:1px solid #1e293b;">📋 Submittal Made</td><td style="color:#8b5cf6;padding:6px 0;text-align:right;border-bottom:1px solid #1e293b;font-weight:700;">+15</td></tr>
-<tr><td style="color:#e2e8f0;padding:6px 0;border-bottom:1px solid #1e293b;">🤝 Meeting Booked</td><td style="color:#10b981;padding:6px 0;text-align:right;border-bottom:1px solid #1e293b;font-weight:700;">+25</td></tr>
-<tr><td style="color:#e2e8f0;padding:6px 0;border-bottom:1px solid #1e293b;">💰 Placement</td><td style="color:#f59e0b;padding:6px 0;text-align:right;border-bottom:1px solid #1e293b;font-weight:700;">+100</td></tr>
-<tr><td style="color:#e2e8f0;padding:6px 0;">🚀 Deal Won</td><td style="color:#ef4444;padding:6px 0;text-align:right;font-weight:700;">+200</td></tr>
-</table>
-</td></tr>
-
-<!-- FOOTER -->
-<tr><td style="background:#0f172a;padding:20px 40px;text-align:center;border-top:1px solid #1e293b;">
-<div style="color:#64748b;font-size:12px;">Powered by Rylem AI • Updated automatically every hour</div>
-<div style="color:#475569;font-size:11px;margin-top:4px;">Levels: Rookie → Hunter (500) → Closer (1,500) → Rainmaker (4,000)</div>
-</td></tr>
-
-</table>
-</td></tr>
-</table>
 </body>
 </html>

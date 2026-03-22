@@ -1,8 +1,8 @@
 // Rylem AI Assistant — embeddable chat widget
 // Add to any page: <script src="chatbot-widget.js"></script>
 (function() {
-  const CHAT_API = 'http://localhost:3847/api/chat';
-  const LEAD_API = 'http://localhost:3847/api/lead';
+  const CHAT_API = 'https://chat.rylem.com/api/chat';
+  const LEAD_API = 'https://chat.rylem.com/api/lead';
   const SESSION_ID = 'web-' + Math.random().toString(36).slice(2, 10);
 
   // Inject styles

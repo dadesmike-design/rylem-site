@@ -121,4 +121,8 @@
 
   sendBtn.addEventListener('click', send);
   input.addEventListener('keydown', e => { if (e.key === 'Enter' && !sendBtn.disabled) send(); });
+
+  // Tracking pixel — logs every page visit for company identification
+  const tp = new Image();
+  tp.src = 'https://chat.rylem.com/t.gif?p=' + encodeURIComponent(window.location.href) + '&_=' + Date.now();
 })();

@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tech Overview for Recruiters | Rylem Staffing</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #0a0a0f;
+    color: #e0e0e8;
+    line-height: 1.7;
+  }
+  
+  /* NAV */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(10,10,15,0.92); backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding: 16px 40px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .nav-brand { font-weight: 700; font-size: 18px; color: #fff; }
+  .nav-brand span { color: #6366f1; }
+  .nav-links { display: flex; gap: 24px; }
+  .nav-links a {
+    color: #888; text-decoration: none; font-size: 13px; font-weight: 500;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: #fff; }
+  .nav-links a.active { color: #6366f1; }
+  
+  /* HERO */
+  .hero {
+    padding: 140px 40px 80px;
+    text-align: center;
+    background: radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.12) 0%, transparent 60%);
+  }
+  .hero-badge {
+    display: inline-block; padding: 6px 16px; border-radius: 20px;
+    background: rgba(99,102,241,0.15); color: #818cf8;
+    font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 1.5px; margin-bottom: 24px;
+  }
+  .hero h1 {
+    font-size: 52px; font-weight: 800; color: #fff;
+    line-height: 1.1; max-width: 700px; margin: 0 auto 20px;
+  }
+  .hero h1 em { font-style: normal; color: #6366f1; }
+  .hero p {
+    font-size: 18px; color: #888; max-width: 560px; margin: 0 auto 40px;
+  }
+  .hero-stats {
+    display: flex; justify-content: center; gap: 60px; margin-top: 40px;
+  }
+  .hero-stat { text-align: center; }
+  .hero-stat .num { font-size: 32px; font-weight: 700; color: #fff; }
+  .hero-stat .label { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+  
+  /* SECTIONS */
+  .section {
+    padding: 80px 40px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .section-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 2px; color: #6366f1; margin-bottom: 12px;
+  }
+  .section h2 {
+    font-size: 36px; font-weight: 700; color: #fff; margin-bottom: 16px;
+  }
+  .section .subtitle {
+    font-size: 16px; color: #888; max-width: 600px; margin-bottom: 48px;
+  }
+  
+  /* CARDS */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  .card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 32px;
+    transition: all 0.3s;
+  }
+  .card:hover {
+    border-color: rgba(99,102,241,0.3);
+    background: rgba(99,102,241,0.04);
+    transform: translateY(-2px);
+  }
+  .card-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; margin-bottom: 20px;
+  }
+  .card-icon.purple { background: rgba(99,102,241,0.15); }
+  .card-icon.blue { background: rgba(59,130,246,0.15); }
+  .card-icon.green { background: rgba(34,197,94,0.15); }
+  .card-icon.orange { background: rgba(249,115,22,0.15); }
+  .card-icon.pink { background: rgba(236,72,153,0.15); }
+  .card-icon.cyan { background: rgba(6,182,212,0.15); }
+  .card h3 { font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 10px; }
+  .card p { font-size: 14px; color: #999; line-height: 1.7; }
+  .card .tech-tags { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag {
+    display: inline-block; padding: 4px 10px; border-radius: 6px;
+    background: rgba(255,255,255,0.05); color: #aaa;
+    font-size: 11px; font-weight: 500;
+  }
+  
+  /* DIAGRAM - MODERN ARCHITECTURE */
+  .arch-diagram {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 20px;
+    padding: 48px;
+    margin: 40px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .arch-diagram::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle at 30% 50%, rgba(99,102,241,0.05) 0%, transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(59,130,246,0.05) 0%, transparent 50%);
+  }
+  .arch-layers {
+    display: flex; gap: 16px; position: relative; z-index: 1;
+    flex-wrap: wrap; justify-content: center;
+  }
+  .arch-layer {
+    flex: 1; min-width: 200px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 24px;
+    text-align: center;
+  }
+  .arch-layer .layer-name {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.5px; margin-bottom: 16px;
+  }
+  .arch-layer.frontend .layer-name { color: #818cf8; }
+  .arch-layer.backend .layer-name { color: #34d399; }
+  .arch-layer.data .layer-name { color: #f59e0b; }
+  .arch-layer.infra .layer-name { color: #f472b6; }
+  .arch-layer.devops .layer-name { color: #22d3ee; }
+  
+  .tech-pill {
+    display: inline-block; padding: 6px 12px; border-radius: 8px;
+    background: rgba(255,255,255,0.05); color: #ccc;
+    font-size: 12px; font-weight: 500; margin: 3px;
+  }
+  .arch-arrow {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; color: #333; min-width: 30px;
+  }
+  
+  /* COMPARISON TABLE */
+  .compare-table {
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    overflow: hidden;
+    margin: 40px 0;
+  }
+  .compare-table th {
+    background: rgba(99,102,241,0.08);
+    padding: 16px 20px;
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; color: #818cf8;
+    text-align: left;
+  }
+  .compare-table td {
+    padding: 14px 20px;
+    border-top: 1px solid rgba(255,255,255,0.04);
+    font-size: 14px; color: #bbb;
+  }
+  .compare-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .compare-table .category-label {
+    font-weight: 600; color: #fff; font-size: 13px;
+  }
+  
+  /* ROLE CARDS */
+  .role-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .role-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 28px;
+    transition: all 0.3s;
+  }
+  .role-card:hover { border-color: rgba(99,102,241,0.2); }
+  .role-card .salary { font-size: 12px; color: #6366f1; font-weight: 600; margin-top: 12px; }
+  .role-card h4 { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 8px; }
+  .role-card p { font-size: 13px; color: #888; }
+  
+  /* TIP BOXES */
+  .tip-box {
+    background: rgba(99,102,241,0.06);
+    border-left: 3px solid #6366f1;
+    border-radius: 0 12px 12px 0;
+    padding: 20px 24px;
+    margin: 24px 0;
+  }
+  .tip-box .tip-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    color: #818cf8; margin-bottom: 6px;
+  }
+  .tip-box p { font-size: 14px; color: #bbb; }
+  
+  /* FLOW DIAGRAM */
+  .flow {
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 12px; margin: 40px 0; padding: 40px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+  }
+  .flow-step {
+    background: rgba(99,102,241,0.1);
+    border: 1px solid rgba(99,102,241,0.2);
+    border-radius: 12px;
+    padding: 16px 24px;
+    text-align: center;
+    min-width: 120px;
+  }
+  .flow-step .step-num {
+    font-size: 10px; font-weight: 700; color: #6366f1;
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .flow-step .step-name { font-size: 14px; font-weight: 600; color: #fff; margin-top: 4px; }
+  .flow-step .step-desc { font-size: 11px; color: #888; margin-top: 4px; }
+  .flow-arrow { font-size: 20px; color: #444; }
+  
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+    margin: 40px 0;
+  }
+  
+  /* FOOTER */
+  .footer {
+    text-align: center; padding: 60px 40px;
+    border-top: 1px solid rgba(255,255,255,0.04);
+    color: #444; font-size: 13px;
+  }
+  
+  /* CHEAT SHEET */
+  .cheat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .cheat-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 24px;
+  }
+  .cheat-card h4 { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 12px; }
+  .cheat-card ul { list-style: none; }
+  .cheat-card li {
+    padding: 6px 0; font-size: 13px; color: #999;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .cheat-card li:last-child { border: none; }
+  .cheat-card li strong { color: #ccc; }
+
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 32px; }
+    .section { padding: 40px 20px; }
+    .hero { padding: 120px 20px 60px; }
+    .hero-stats { flex-direction: column; gap: 20px; }
+    .arch-layers { flex-direction: column; }
+    .flow { flex-direction: column; }
+    .flow-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-brand">Rylem<span>Academy</span></div>
+  <div class="nav-links">
+    <a href="#foundations" class="active">Foundations</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#stacks">Tech Stacks</a>
+    <a href="#roles">Roles</a>
+    <a href="#sdlc">SDLC</a>
+    <a href="#cloud">Cloud & DevOps</a>
+    <a href="#cheatsheet">Cheat Sheet</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">Recruiter Training • Tech Overview</div>
+  <h1>How <em>Technology</em> Actually Works</h1>
+  <p>A visual guide for recruiters. Understand what you're selling, talk to candidates with confidence, and match the right talent to the right stack.</p>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="num">7</div>
+      <div class="label">Modules</div>
+    </div>
+    <div class="hero-stat">
+      <div class="num">~20 min</div>
+      <div class="label">Read Time</div>
+    </div>
+    <div class="hero-stat">
+      <div class="num">2026</div>
+      <div class="label">Updated</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 1: FOUNDATIONS -->
+<section class="section" id="foundations">
+  <div class="section-label">Module 1</div>
+  <h2>The Basics: Hardware vs Software</h2>
+  <p class="subtitle">Every tech role falls into one of these two worlds — or the bridge between them.</p>
+  
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon purple">🖥️</div>
+      <h3>Hardware</h3>
+      <p>The physical stuff you can touch. Servers, laptops, network switches, CPUs, GPUs. When a company says "infrastructure," they usually mean hardware + the software that runs it.</p>
+      <div class="tip-box" style="margin-top:16px">
+        <div class="tip-label">Recruiter Tip</div>
+        <p>Hardware roles (Network Engineer, Systems Admin, Data Center Tech) are often on-site. Remote is rare. Pay attention to location requirements.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon blue">💻</div>
+      <h3>Software</h3>
+      <p>The programs, apps, and systems that run on hardware. Everything from your phone's apps to Netflix's recommendation engine to a company's internal tools.</p>
+      <div class="tip-box" style="margin-top:16px">
+        <div class="tip-label">Recruiter Tip</div>
+        <p>Software roles are the bulk of tech hiring. They're more likely to be remote-friendly. Focus on languages, frameworks, and cloud experience.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SECTION 2: ARCHITECTURE -->
+<section class="section" id="architecture">
+  <div class="section-label">Module 2</div>
+  <h2>How Modern Apps Are Built</h2>
+  <p class="subtitle">Think of a modern app like a restaurant: the dining room (frontend), the kitchen (backend), the pantry (database), and the delivery trucks (APIs).</p>
+  
+  <div class="arch-diagram">
+    <div class="arch-layers">
+      <div class="arch-layer frontend">
+        <div class="layer-name">🎨 Frontend</div>
+        <p style="font-size:12px;color:#888;margin-bottom:12px">What users see and interact with</p>
+        <span class="tech-pill">React</span>
+        <span class="tech-pill">TypeScript</span>
+        <span class="tech-pill">Next.js</span>
+        <span class="tech-pill">Vue</span>
+        <span class="tech-pill">Angular</span>
+        <span class="tech-pill">HTML/CSS</span>
+        <span class="tech-pill">Tailwind</span>
+        <span class="tech-pill">Swift (iOS)</span>
+        <span class="tech-pill">Kotlin (Android)</span>
+        <span class="tech-pill">React Native</span>
+      </div>
+      
+      <div class="arch-arrow">→</div>
+      
+      <div class="arch-layer backend">
+        <div class="layer-name">⚙️ Backend / APIs</div>
+        <p style="font-size:12px;color:#888;margin-bottom:12px">Business logic, processing, rules</p>
+        <span class="tech-pill">Node.js</span>
+        <span class="tech-pill">Python</span>
+        <span class="tech-pill">Java</span>
+        <span class="tech-pill">C# / .NET</span>
+        <span class="tech-pill">Go</span>
+        <span class="tech-pill">Rust</span>
+        <span class="tech-pill">Ruby</span>
+        <span class="tech-pill">REST APIs</span>
+        <span class="tech-pill">GraphQL</span>
+        <span class="tech-pill">gRPC</span>
+      </div>
+      
+      <div class="arch-arrow">→</div>
+      
+      <div class="arch-layer data">
+        <div class="layer-name">🗄️ Data Layer</div>
+        <p style="font-size:12px;color:#888;margin-bottom:12px">Where information lives</p>
+        <span class="tech-pill">PostgreSQL</span>
+        <span class="tech-pill">MySQL</span>
+        <span class="tech-pill">MongoDB</span>
+        <span class="tech-pill">Redis</span>
+        <span class="tech-pill">Elasticsearch</span>
+        <span class="tech-pill">Snowflake</span>
+        <span class="tech-pill">DynamoDB</span>
+        <span class="tech-pill">SQL Server</span>
+      </div>
+    </div>
+    
+    <div style="margin-top:24px; display:flex; gap:16px; flex-wrap:wrap; justify-content:center; position:relative; z-index:1;">
+      <div class="arch-layer infra" style="flex:1; min-width:200px;">
+        <div class="layer-name">☁️ Cloud / Infrastructure</div>
+        <span class="tech-pill">AWS</span>
+        <span class="tech-pill">Azure</span>
+        <span class="tech-pill">GCP</span>
+        <span class="tech-pill">Docker</span>
+        <span class="tech-pill">Kubernetes</span>
+        <span class="tech-pill">Terraform</span>
+      </div>
+      <div class="arch-layer devops" style="flex:1; min-width:200px;">
+        <div class="layer-name">🔄 DevOps / CI/CD</div>
+        <span class="tech-pill">GitHub Actions</span>
+        <span class="tech-pill">Jenkins</span>
+        <span class="tech-pill">CircleCI</span>
+        <span class="tech-pill">ArgoCD</span>
+        <span class="tech-pill">Datadog</span>
+        <span class="tech-pill">Splunk</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="tip-box">
+    <div class="tip-label">Why This Matters for Recruiting</div>
+    <p>When a hiring manager says "We need a full-stack engineer," they want someone who can work across Frontend + Backend. When they say "We need a DevOps engineer," they want the Cloud/Infrastructure + CI/CD layer. Understanding these layers helps you match resumes to job descriptions accurately.</p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SECTION 3: TECH STACKS -->
+<section class="section" id="stacks">
+  <div class="section-label">Module 3</div>
+  <h2>Tech Stacks: Old vs Modern</h2>
+  <p class="subtitle">A "stack" is the combination of technologies a company uses. Here's how they've evolved.</p>
+  
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th>Layer</th>
+        <th>Legacy (2010s)</th>
+        <th>Modern (2024-2026)</th>
+        <th>What Changed</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="category-label">Frontend</td>
+        <td>jQuery, HTML/CSS, Angular.js</td>
+        <td>React, Next.js, TypeScript, Tailwind</td>
+        <td>Component-based, type-safe, faster</td>
+      </tr>
+      <tr>
+        <td class="category-label">Backend</td>
+        <td>Java, PHP, Ruby on Rails, C# .NET</td>
+        <td>Node.js, Python, Go, Rust, .NET 8</td>
+        <td>Microservices, serverless, faster</td>
+      </tr>
+      <tr>
+        <td class="category-label">Database</td>
+        <td>MySQL, SQL Server, Oracle</td>
+        <td>PostgreSQL, MongoDB, Redis, Snowflake</td>
+        <td>Cloud-native, real-time, data lakes</td>
+      </tr>
+      <tr>
+        <td class="category-label">Hosting</td>
+        <td>On-prem servers, co-location</td>
+        <td>AWS, Azure, GCP, Vercel, Cloudflare</td>
+        <td>Cloud-first, pay-per-use, global scale</td>
+      </tr>
+      <tr>
+        <td class="category-label">Deployment</td>
+        <td>Manual FTP, quarterly releases</td>
+        <td>CI/CD pipelines, deploy 50x/day</td>
+        <td>Automated, continuous, zero-downtime</td>
+      </tr>
+      <tr>
+        <td class="category-label">AI / ML</td>
+        <td>Didn't exist in most companies</td>
+        <td>OpenAI, LLMs, MLOps, vector DBs</td>
+        <td>Every company is adding AI roles now</td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <div class="tip-box">
+    <div class="tip-label">Recruiter Tip — Stack Translation</div>
+    <p><strong>Microsoft shop?</strong> Look for: C#, .NET, Azure, SQL Server, TypeScript, Teams<br>
+    <strong>Startup / modern?</strong> Look for: Python, React, AWS, PostgreSQL, Docker, Kubernetes<br>
+    <strong>Enterprise / legacy?</strong> Look for: Java, Oracle, SAP, on-prem, Waterfall<br>
+    <strong>AI / ML team?</strong> Look for: Python, PyTorch, TensorFlow, Hugging Face, MLflow, vector DBs</p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SECTION 4: ROLES -->
+<section class="section" id="roles">
+  <div class="section-label">Module 4</div>
+  <h2>Tech Roles Explained</h2>
+  <p class="subtitle">The same person might be called different titles at different companies. Focus on what they DO, not what they're called.</p>
+  
+  <div class="role-grid">
+    <div class="role-card">
+      <h4>🏗️ Software Architect</h4>
+      <p>Designs the overall system. Picks technologies. Makes decisions that affect the whole engineering org. Rarely writes daily code anymore.</p>
+      <div class="salary">$180K–$280K+ | Senior/Staff level</div>
+    </div>
+    <div class="role-card">
+      <h4>👨‍💻 Software Engineer / Developer</h4>
+      <p>Writes the actual code. Builds features, fixes bugs, writes tests. The backbone of any engineering team. Levels: Junior → Mid → Senior → Staff → Principal.</p>
+      <div class="salary">$90K–$250K+ | All levels</div>
+    </div>
+    <div class="role-card">
+      <h4>🎨 Frontend Engineer</h4>
+      <p>Specializes in what users see — buttons, pages, animations. Works with React, CSS, TypeScript. Partners closely with designers.</p>
+      <div class="salary">$100K–$200K | Mid-Senior</div>
+    </div>
+    <div class="role-card">
+      <h4>⚙️ Backend Engineer</h4>
+      <p>Builds the server-side logic, APIs, and database interactions. The "behind the scenes" work. Python, Java, Go, Node.js.</p>
+      <div class="salary">$110K–$220K | Mid-Senior</div>
+    </div>
+    <div class="role-card">
+      <h4>🔧 Full-Stack Engineer</h4>
+      <p>Can work on both frontend AND backend. Jack of all trades. Very common at startups where teams are small.</p>
+      <div class="salary">$110K–$230K | Mid-Senior</div>
+    </div>
+    <div class="role-card">
+      <h4>☁️ DevOps / SRE / Platform Engineer</h4>
+      <p>Keeps systems running. Manages cloud infrastructure, deployments, monitoring. Site Reliability Engineer (SRE) is Google's version. Hottest hiring category in 2026.</p>
+      <div class="salary">$130K–$250K | Mid-Senior</div>
+    </div>
+    <div class="role-card">
+      <h4>📊 Data Engineer</h4>
+      <p>Builds pipelines that move and transform data. Works with Spark, Airflow, Snowflake, dbt. Different from Data Scientist (who analyzes data).</p>
+      <div class="salary">$120K–$220K | Mid-Senior</div>
+    </div>
+    <div class="role-card">
+      <h4>🤖 AI / ML Engineer</h4>
+      <p>Builds machine learning models and AI features. Python, PyTorch, LLMs, prompt engineering. The fastest-growing role category in tech right now.</p>
+      <div class="salary">$150K–$350K+ | Mid-Senior</div>
+    </div>
+    <div class="role-card">
+      <h4>🔒 Security Engineer</h4>
+      <p>Protects systems from hackers. Penetration testing, compliance, incident response. Every company needs them — most are understaffed.</p>
+      <div class="salary">$130K–$250K | Mid-Senior</div>
+    </div>
+    <div class="role-card">
+      <h4>🛠️ Systems / IT Administrator</h4>
+      <p>Manages internal tools, networks, servers. Keeps the lights on. Often works with Active Directory, Office 365, networking gear.</p>
+      <div class="salary">$70K–$140K | Junior-Senior</div>
+    </div>
+    <div class="role-card">
+      <h4>📋 Product Manager (Technical)</h4>
+      <p>Not an engineer, but works with engineers daily. Decides WHAT to build and WHY. Bridges business and technology. Often needs technical literacy.</p>
+      <div class="salary">$120K–$220K | Mid-Senior</div>
+    </div>
+    <div class="role-card">
+      <h4>🧪 QA / Test Engineer</h4>
+      <p>Makes sure software works before it ships. Manual testing → automated testing → SDET (writes code to test code). Critical but often overlooked.</p>
+      <div class="salary">$80K–$170K | All levels</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SECTION 5: SDLC -->
+<section class="section" id="sdlc">
+  <div class="section-label">Module 5</div>
+  <h2>How Software Gets Built: SDLC</h2>
+  <p class="subtitle">Waterfall is the old way. Agile is the current standard. Here's what your candidates live every day.</p>
+  
+  <h3 style="color:#fff; margin-bottom:16px; font-size:20px;">Waterfall (Legacy — still used in government/defense)</h3>
+  <div class="flow">
+    <div class="flow-step">
+      <div class="step-num">Step 1</div>
+      <div class="step-name">Requirements</div>
+      <div class="step-desc">Gather all needs upfront</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="step-num">Step 2</div>
+      <div class="step-name">Design</div>
+      <div class="step-desc">Architect the solution</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="step-num">Step 3</div>
+      <div class="step-name">Build</div>
+      <div class="step-desc">Write all the code</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="step-num">Step 4</div>
+      <div class="step-name">Test</div>
+      <div class="step-desc">Find bugs at the end</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="step-num">Step 5</div>
+      <div class="step-name">Deploy</div>
+      <div class="step-desc">Ship it (pray it works)</div>
+    </div>
+  </div>
+  
+  <h3 style="color:#fff; margin: 32px 0 16px; font-size:20px;">Agile (Modern — 90% of tech companies)</h3>
+  <div class="flow" style="background: rgba(99,102,241,0.03);">
+    <div class="flow-step" style="border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.08);">
+      <div class="step-num" style="color:#34d399">Sprint</div>
+      <div class="step-name">Plan</div>
+      <div class="step-desc">Pick work for 2 weeks</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" style="border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.08);">
+      <div class="step-num" style="color:#34d399">Sprint</div>
+      <div class="step-name">Build + Test</div>
+      <div class="step-desc">Code & test together</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" style="border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.08);">
+      <div class="step-num" style="color:#34d399">Sprint</div>
+      <div class="step-name">Review</div>
+      <div class="step-desc">Demo to stakeholders</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" style="border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.08);">
+      <div class="step-num" style="color:#34d399">Sprint</div>
+      <div class="step-name">Ship</div>
+      <div class="step-desc">Deploy to production</div>
+    </div>
+    <div class="flow-arrow">🔄</div>
+    <div class="flow-step" style="border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.08);">
+      <div class="step-num" style="color:#34d399">Repeat</div>
+      <div class="step-name">Retro</div>
+      <div class="step-desc">What went well? Fix it.</div>
+    </div>
+  </div>
+  
+  <div class="tip-box">
+    <div class="tip-label">Recruiter Tip — Agile Vocabulary</div>
+    <p><strong>Sprint:</strong> A 1-4 week work cycle (usually 2 weeks)<br>
+    <strong>Standup:</strong> Daily 15-min team check-in<br>
+    <strong>Scrum Master:</strong> Facilitates the Agile process (not a manager)<br>
+    <strong>Product Owner:</strong> Decides what to build next<br>
+    <strong>Backlog:</strong> The prioritized list of things to build<br>
+    <strong>Kanban:</strong> Alternative to Scrum — continuous flow, no sprints</p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SECTION 6: CLOUD & DEVOPS -->
+<section class="section" id="cloud">
+  <div class="section-label">Module 6</div>
+  <h2>Cloud, AI & DevOps</h2>
+  <p class="subtitle">The three biggest shifts in tech hiring. If your candidate knows these, they're in demand.</p>
+  
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon green">☁️</div>
+      <h3>Cloud Computing</h3>
+      <p>Instead of buying servers, companies rent computing power from AWS, Azure, or Google Cloud. Almost every modern company has moved to cloud.</p>
+      <div class="tech-tags">
+        <span class="tag">AWS (Amazon) — #1 market share</span>
+        <span class="tag">Azure (Microsoft) — #2, big in enterprise</span>
+        <span class="tag">GCP (Google) — #3, strong in data/AI</span>
+      </div>
+      <div class="tip-box" style="margin-top:16px">
+        <div class="tip-label">Recruiter Tip</div>
+        <p>AWS certifications (Solutions Architect, Developer) are the most in-demand cloud certs. Azure certs are key for Microsoft shops. Ask candidates which cloud they've worked in — it matters.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon cyan">🔄</div>
+      <h3>DevOps & CI/CD</h3>
+      <p>DevOps = Development + Operations working together. CI/CD = Continuous Integration / Continuous Deployment — automating the process of shipping code. Companies that do this well deploy new features multiple times per day.</p>
+      <div class="tech-tags">
+        <span class="tag">Docker — packages apps in containers</span>
+        <span class="tag">Kubernetes (K8s) — orchestrates containers</span>
+        <span class="tag">Terraform — infrastructure as code</span>
+        <span class="tag">Jenkins / GitHub Actions — automation</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon pink">🤖</div>
+      <h3>AI & Machine Learning</h3>
+      <p>The hottest area in tech. Every company is adding AI features. Large Language Models (LLMs like ChatGPT) have created entirely new role categories.</p>
+      <div class="tech-tags">
+        <span class="tag">Python — the #1 AI language</span>
+        <span class="tag">PyTorch / TensorFlow — ML frameworks</span>
+        <span class="tag">LLMs — Large Language Models</span>
+        <span class="tag">RAG — Retrieval Augmented Generation</span>
+        <span class="tag">Vector DBs — Pinecone, Weaviate</span>
+        <span class="tag">MLOps — deploying ML to production</span>
+      </div>
+      <div class="tip-box" style="margin-top:16px">
+        <div class="tip-label">Recruiter Tip</div>
+        <p>AI/ML roles pay 20-40% more than equivalent software roles. If a candidate has production ML experience (not just Kaggle), they're extremely valuable.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SECTION 7: CHEAT SHEET -->
+<section class="section" id="cheatsheet">
+  <div class="section-label">Module 7</div>
+  <h2>Recruiter Cheat Sheet</h2>
+  <p class="subtitle">Quick reference cards. Print these. Pin them. Use them on every intake call.</p>
+  
+  <div class="cheat-grid">
+    <div class="cheat-card">
+      <h4>🗣️ Intake Call Questions (Tech Roles)</h4>
+      <ul>
+        <li>"What's your tech stack?" (frontend, backend, cloud)</li>
+        <li>"Is this a new role or backfill?"</li>
+        <li>"Agile or Waterfall? Scrum or Kanban?"</li>
+        <li>"What cloud platform?" (AWS / Azure / GCP)</li>
+        <li>"Monolith or microservices?"</li>
+        <li>"What's the team size and who do they report to?"</li>
+        <li>"Any required certifications?"</li>
+        <li>"CI/CD pipeline — what tools?"</li>
+      </ul>
+    </div>
+    <div class="cheat-card">
+      <h4>🔍 Resume Red/Green Flags</h4>
+      <ul>
+        <li><strong style="color:#34d399">✅ Green:</strong> GitHub profile with real contributions</li>
+        <li><strong style="color:#34d399">✅ Green:</strong> Specific tech versions (React 18, .NET 8)</li>
+        <li><strong style="color:#34d399">✅ Green:</strong> Quantified impact ("reduced latency 40%")</li>
+        <li><strong style="color:#34d399">✅ Green:</strong> Cloud certifications (AWS SA, Azure)</li>
+        <li><strong style="color:#ef4444">🚩 Red:</strong> Lists 20+ technologies with no depth</li>
+        <li><strong style="color:#ef4444">🚩 Red:</strong> "Proficient in all programming languages"</li>
+        <li><strong style="color:#ef4444">🚩 Red:</strong> No measurable achievements</li>
+        <li><strong style="color:#ef4444">🚩 Red:</strong> Only lists outdated tech (jQuery, COBOL)</li>
+      </ul>
+    </div>
+    <div class="cheat-card">
+      <h4>💰 2026 Salary Ranges (US, W2)</h4>
+      <ul>
+        <li><strong>Junior SWE:</strong> $85K–$130K</li>
+        <li><strong>Mid SWE:</strong> $130K–$180K</li>
+        <li><strong>Senior SWE:</strong> $170K–$250K</li>
+        <li><strong>Staff/Principal:</strong> $220K–$350K+</li>
+        <li><strong>DevOps/SRE:</strong> $140K–$260K</li>
+        <li><strong>Data Engineer:</strong> $130K–$230K</li>
+        <li><strong>AI/ML Engineer:</strong> $160K–$350K+</li>
+        <li><strong>IT Admin/SysAdmin:</strong> $70K–$140K</li>
+      </ul>
+    </div>
+    <div class="cheat-card">
+      <h4>🔤 Acronym Decoder</h4>
+      <ul>
+        <li><strong>API:</strong> Application Programming Interface (how systems talk)</li>
+        <li><strong>CI/CD:</strong> Continuous Integration / Continuous Deployment</li>
+        <li><strong>SaaS:</strong> Software as a Service (cloud apps)</li>
+        <li><strong>SDLC:</strong> Software Development Lifecycle</li>
+        <li><strong>SRE:</strong> Site Reliability Engineering</li>
+        <li><strong>LLM:</strong> Large Language Model (ChatGPT, etc.)</li>
+        <li><strong>K8s:</strong> Kubernetes (container orchestration)</li>
+        <li><strong>IaC:</strong> Infrastructure as Code (Terraform)</li>
+        <li><strong>RAG:</strong> Retrieval Augmented Generation (AI + search)</li>
+        <li><strong>SDET:</strong> Software Dev Engineer in Test</li>
+      </ul>
+    </div>
+    <div class="cheat-card">
+      <h4>🏢 Common Stack by Company Type</h4>
+      <ul>
+        <li><strong>Microsoft ecosystem:</strong> C#, .NET, Azure, SQL Server, Teams</li>
+        <li><strong>Startup (Series A-C):</strong> React, Node/Python, AWS, PostgreSQL</li>
+        <li><strong>Enterprise (F500):</strong> Java, Spring, Oracle, on-prem + cloud hybrid</li>
+        <li><strong>AI company:</strong> Python, PyTorch, AWS/GCP, Snowflake, vector DBs</li>
+        <li><strong>Fintech:</strong> Java/Go, Kafka, PostgreSQL, strict security</li>
+        <li><strong>Gaming:</strong> C++, Unreal/Unity, cloud backend, GPU</li>
+      </ul>
+    </div>
+    <div class="cheat-card">
+      <h4>📞 Candidate Screening Questions</h4>
+      <ul>
+        <li>"Walk me through a project you built end-to-end"</li>
+        <li>"Which cloud have you deployed to in production?"</li>
+        <li>"Do you prefer frontend, backend, or full-stack?"</li>
+        <li>"What's your experience with CI/CD pipelines?"</li>
+        <li>"Have you worked in Agile? What was your sprint cadence?"</li>
+        <li>"What's the largest team / codebase you've worked in?"</li>
+        <li>"Any experience with containerization (Docker/K8s)?"</li>
+        <li>"What's your ideal next role?"</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p>Rylem Academy — Tech Overview for Recruiters | Updated March 2026</p>
+  <p style="margin-top:8px; color:#333;">Built by Rylem AI. This is Module 1 of 6 planned training modules.</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+# Ignore large/private files from GitHub Pages
+.env
+*.mp3
+*.wav
+*.xlsx
+*.csv
+*.pdf
+data/
+memory/
+rc-recordings/
+rc_recordings/
+scripts/
+node_modules/
+cloudflare-worker/
+*.bak
+.openclaw/

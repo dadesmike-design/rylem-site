@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JXEZQFCJ5W"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-JXEZQFCJ5W');
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Career Opportunities | Rylem</title>
+<meta name="description" content="Rylem works on critical initiatives across technology, AI, finance, and business operations. If you've built, scaled, or stabilized something meaningful, we should know each other.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#2563eb;--blue-hover:#1d4ed8;--blue-light:#60a5fa;--dark:#0c1829;--text:#1a1a2e;--muted:#6b7280;--light:#f8f9fc;--border:#e5e7eb;--white:#fff}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(12,24,41,.97);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.06);height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 5vw}
+.nav-logo{font-size:1.5rem;font-weight:900;color:#fff;letter-spacing:-.03em}
+.nav-logo span{color:var(--blue-light)}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-links a{color:rgba(255,255,255,.65);font-size:.875rem;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:#fff}
+.nav-links a.active{color:#fff}
+
+/* HERO */
+.hero{position:relative;padding:160px 5vw 100px;background:var(--dark);overflow:hidden}
+.hero::before{content:'';position:absolute;top:-100px;right:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(37,99,235,.12) 0%,transparent 70%);border-radius:50%}
+.hero-content{position:relative;z-index:1;max-width:900px;margin:0 auto;text-align:center}
+.hero h1{font-size:clamp(2.4rem,4.5vw,3.6rem);font-weight:900;color:#fff;line-height:1.08;margin-bottom:24px;letter-spacing:-.04em}
+.hero p{font-size:1.15rem;color:rgba(255,255,255,.65);max-width:650px;margin:0 auto 40px;line-height:1.8}
+.btn-primary{display:inline-flex;align-items:center;justify-content:center;background:var(--blue);color:#fff;padding:16px 40px;border:none;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;transition:all .25s}
+.btn-primary:hover{background:var(--blue-hover);transform:translateY(-2px);box-shadow:0 8px 24px rgba(37,99,235,.35)}
+
+/* STEP IN */
+.stepin{padding:100px 5vw;background:var(--white)}
+.stepin .container{max-width:1100px;margin:0 auto}
+.stepin-header{text-align:center;margin-bottom:72px}
+.tag{display:inline-block;background:#eef2ff;color:var(--blue);padding:6px 18px;border-radius:100px;font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:16px}
+.stepin-header h2{font-size:clamp(1.8rem,3vw,2.4rem);font-weight:800;letter-spacing:-.03em;margin-bottom:14px}
+.stepin-header p{font-size:1.05rem;color:var(--muted);max-width:640px;margin:0 auto;line-height:1.8}
+.stepin-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:28px}
+.stepin-card{background:var(--light);border:1px solid var(--border);border-radius:14px;padding:40px 32px;transition:all .3s}
+.stepin-card:hover{border-color:var(--blue);box-shadow:0 12px 40px rgba(37,99,235,.08);transform:translateY(-2px)}
+.stepin-card h3{font-size:1.15rem;font-weight:700;color:var(--text);margin-bottom:14px}
+.stepin-card p{font-size:.92rem;color:var(--muted);line-height:1.8}
+
+/* CAPABILITIES */
+.capabilities{padding:100px 5vw;background:var(--dark)}
+.capabilities .container{max-width:1100px;margin:0 auto}
+.cap-header{text-align:center;margin-bottom:72px}
+.tag-dark{display:inline-block;background:rgba(37,99,235,.15);color:var(--blue-light);padding:6px 18px;border-radius:100px;font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:16px}
+.cap-header h2{font-size:clamp(1.8rem,3vw,2.4rem);font-weight:800;letter-spacing:-.03em;margin-bottom:14px;color:#fff}
+.cap-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:28px}
+.cap-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:40px 32px;transition:all .3s}
+.cap-card:hover{border-color:var(--blue);background:rgba(255,255,255,.06)}
+.cap-card h3{font-size:1.15rem;font-weight:700;color:#fff;margin-bottom:10px}
+.cap-card p{font-size:.92rem;color:rgba(255,255,255,.55);line-height:1.8}
+
+/* BUILT FOR */
+.built{padding:100px 5vw;background:var(--white)}
+.built .container{max-width:800px;margin:0 auto;text-align:center}
+.built h2{font-size:clamp(1.8rem,3vw,2.4rem);font-weight:800;letter-spacing:-.03em;margin-bottom:24px}
+.built p{font-size:1.05rem;color:var(--muted);line-height:1.8;margin-bottom:16px}
+
+/* GET DISCOVERED */
+.discovered{padding:100px 5vw;background:var(--light)}
+.discovered .container{max-width:800px;margin:0 auto;text-align:center}
+.discovered h2{font-size:clamp(1.8rem,3vw,2.4rem);font-weight:800;letter-spacing:-.03em;margin-bottom:24px}
+.discovered p{font-size:1.05rem;color:var(--muted);line-height:1.8;margin-bottom:16px}
+.discovered .email-link{color:var(--blue);font-weight:700;font-size:1.15rem}
+.discovered .include-list{text-align:left;max-width:480px;margin:24px auto 0;list-style:none;padding:0}
+.discovered .include-list li{font-size:.95rem;color:var(--muted);line-height:1.8;padding:6px 0 6px 24px;position:relative}
+.discovered .include-list li::before{content:'→';position:absolute;left:0;color:var(--blue);font-weight:700}
+.discovered .note{font-size:.95rem;color:var(--text);margin-top:28px;font-weight:500}
+
+/* FOOTER */
+.footer{background:#060d18;padding:48px 5vw;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:24px}
+.footer-brand{color:rgba(255,255,255,.35);font-size:.85rem}
+.footer-links{display:flex;gap:28px}
+.footer-links a{color:rgba(255,255,255,.35);font-size:.85rem;transition:color .2s}
+.footer-links a:hover{color:#fff}
+
+/* MOBILE */
+@media(max-width:768px){
+.hero{padding:140px 5vw 80px}
+.hero h1{font-size:2rem}
+.stepin-grid{grid-template-columns:1fr}
+.cap-grid{grid-template-columns:1fr}
+}
+.nav-hamburger{display:none;background:none;border:none;cursor:pointer;padding:8px;z-index:1001}
+@media(max-width:768px){
+.nav-hamburger{display:block}
+.nav-links{display:none;position:fixed;top:72px;left:0;right:0;background:rgba(12,24,41,.98);flex-direction:column;padding:24px 5vw;gap:0;border-bottom:1px solid rgba(255,255,255,.1)}
+.nav-links.nav-open{display:flex}
+.nav-links a{padding:14px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:1rem}
+}
+</style>
+<meta property="og:title" content="Career Opportunities — Rylem">
+<meta property="og:description" content="Rylem works on critical initiatives across technology, AI, finance, and business operations. If you've built something meaningful, we should know each other.">
+<meta property="og:image" content="https://www.rylem.com/logo-dark.png">
+<meta property="og:url" content="https://www.rylem.com">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Rylem">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Career Opportunities — Rylem">
+<meta name="twitter:description" content="Rylem works on critical initiatives across technology, AI, finance, and business operations. If you've built something meaningful, we should know each other.">
+<meta name="twitter:image" content="https://www.rylem.com/logo-dark.png">
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-MV7PM657');</script>
+<!-- End Google Tag Manager -->
+<!-- Microsoft Clarity -->
+<script type="text/javascript">
+(function(c,l,a,r,i,t,y){
+c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+})(window, document, "clarity", "script", "vy0xm1e72v");
+</script>
+<!-- LinkedIn Insight Tag -->
+<script type="text/javascript">
+_linkedin_partner_id = "8952388";
+window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
+window._linkedin_data_partner_ids.push(_linkedin_partner_id);
+(function(l) {
+if (!l){window.lintrk = function(a,b){window.lintrk.q.push([a,b])};
+window.lintrk.q=[]}
+var s = document.getElementsByTagName("script")[0];
+var b = document.createElement("script");
+b.type = "text/javascript";b.async = true;
+b.src = "https://snap.licdn.com/li.lms-analytics/insight.min.js";
+s.parentNode.insertBefore(b, s);})(window.lintrk);
+</script>
+<noscript><img height="1" width="1" style="display:none;" alt=""
+src="https://px.ads.linkedin.com/collect/?pid=8952388&fmt=gif" /></noscript>
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MV7PM657"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+<!-- NAV -->
+<nav class="nav">
+<a href="index.html" class="nav-logo"><img src="logo-white.png" alt="Rylem" style="height:40px;width:auto"></a>
+<div class="nav-links">
+<a href="hire-talent.html">Work With Us</a>
+<a href="capabilities.html">Capabilities</a>
+<a href="about.html">About Us</a>
+<a href="careers.html" class="active">Career Opportunities</a>
+<a href="insights.html">Insights</a>
+</div>
+<button class="nav-hamburger" onclick="document.querySelector('.nav-links').classList.toggle('nav-open')" aria-label="Menu">
+<svg viewBox="0 0 24 24" width="28" height="28"><line x1="3" y1="6" x2="21" y2="6" stroke="#fff" stroke-width="2"/><line x1="3" y1="12" x2="21" y2="12" stroke="#fff" stroke-width="2"/><line x1="3" y1="18" x2="21" y2="18" stroke="#fff" stroke-width="2"/></svg>
+</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+<div class="hero-content">
+<h1>Move Critical Initiatives Forward</h1>
+<p>When timelines are tight, teams are stretched, or the stakes are high, we step in to help organizations execute.</p>
+<a href="https://calendly.com/miked-rylem/30min" target="_blank" class="btn-primary">Discuss Your Initiative</a>
+</div>
+</section>
+
+<!-- WHERE WE STEP IN -->
+<section class="stepin">
+<div class="container">
+<div class="stepin-header">
+<h2>Where We Step In</h2>
+<p>We're brought in when internal teams are at capacity and execution can't slip.</p>
+</div>
+<div class="stepin-grid">
+
+<div class="stepin-card">
+<h3>Launching an AI Platform Under Pressure</h3>
+<p>When timelines slip and internal teams are stretched, we step in to move initiatives from concept to production — without slowing the business.</p>
+</div>
+
+<div class="stepin-card">
+<h3>Stabilizing Finance During Growth or Disruption</h3>
+<p>When visibility is limited or operations are strained, we step in to bring structure, control, and clarity back to the numbers.</p>
+</div>
+
+<div class="stepin-card">
+<h3>Scaling Engineering Without Breaking Delivery</h3>
+<p>When output needs to increase without introducing risk, we step in to accelerate delivery while maintaining stability.</p>
+</div>
+
+<div class="stepin-card">
+<h3>Fixing Messaging That Isn't Converting</h3>
+<p>When positioning falls flat or growth stalls, we step in to reset the narrative and drive campaigns that create real traction.</p>
+</div>
+
+</div>
+</div>
+</section>
+
+<!-- CAPABILITIES WE BRING IN WHEN IT MATTERS -->
+<section class="capabilities">
+<div class="container">
+<div class="cap-header">
+<h2 style="color:#fff">Capabilities We Bring In When It Matters</h2>
+</div>
+<div class="cap-grid">
+
+<div class="cap-card">
+<h3>Technology &amp; Engineering</h3>
+<p>Building platforms, scaling systems, and delivering complex technical initiatives.</p>
+</div>
+
+<div class="cap-card">
+<h3>Finance &amp; Accounting</h3>
+<p>Establishing control, improving visibility, and strengthening financial operations.</p>
+</div>
+
+<div class="cap-card">
+<h3>Product, Marketing &amp; Creative</h3>
+<p>Clarifying positioning, refining messaging, and executing go-to-market initiatives.</p>
+</div>
+
+<div class="cap-card">
+<h3>Business Operations</h3>
+<p>Driving execution, improving processes, and scaling internal operations.</p>
+</div>
+
+</div>
+</div>
+</section>
+
+<!-- BUILT FOR TEAMS SOLVING REAL PROBLEMS -->
+<section class="built">
+<div class="container">
+<h2>Built for Teams Solving Real Problems</h2>
+<p>We partner with organizations navigating complexity — whether that's launching something new, stabilizing what's broken, or scaling what's working.</p>
+<p>Our work sits at the intersection of speed, precision, and trust. When execution matters, we're brought in to help move things forward.</p>
+</div>
+</section>
+
+<!-- GET DISCOVERED -->
+<section class="discovered">
+<div class="container">
+<h2>Get Discovered</h2>
+<p>Rylem works on critical initiatives across technology, AI, finance, and business operations.</p>
+<p>Most of the work we do isn't publicly posted. It moves quickly and gets filled through trusted relationships.</p>
+<p>If you've built, scaled, or stabilized something meaningful, we should know each other.</p>
+<p style="margin-top:32px">Send your LinkedIn or resume to:</p>
+<a href="mailto:recruiting@rylem.com" class="email-link">recruiting@rylem.com</a>
+<ul class="include-list">
+<li>What you've worked on</li>
+<li>What you want to work on next</li>
+<li>Location or remote preference</li>
+</ul>
+<p class="note">Every submission is reviewed. If there's alignment, we'll reach out directly.</p>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+<div class="footer-brand">© 2026 Rylem. All rights reserved.</div>
+<div class="footer-links">
+<a href="index.html">Home</a>
+<a href="hire-talent.html">Work With Us</a>
+<a href="capabilities.html">Capabilities</a>
+<a href="about.html">About Us</a>
+<a href="careers.html">Career Opportunities</a>
+<a href="insights.html">Insights</a>
+</div>
+</footer>
+
+</body>
+</html>

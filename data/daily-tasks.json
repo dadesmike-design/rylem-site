@@ -1,0 +1,1527 @@
+{
+  "generatedAt": "2026-04-01T13:30:10.908311Z",
+  "date": "2026-04-01",
+  "reps": {
+    "mike": {
+      "name": "Mike Dades",
+      "role": "CEO",
+      "email": "miked@rylem.com",
+      "tasks": [
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Tyler Technologies",
+          "contact": "Kerry Lewandowski",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 2
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Included Health",
+          "contact": "Jim O'Gorman",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 3
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Tyler Technologies",
+          "contact": "Kerry Lewandowski",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 2
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Included Health",
+          "contact": "Jim O'Gorman",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 3
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Menlo Security",
+          "contact": "Tim Olson",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 23
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Tyler Technologies",
+          "contact": "Kerry Lewandowski",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 2
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Included Health",
+          "contact": "Jim O'Gorman",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 3
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Menlo Security",
+          "contact": "Tim Olson",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 23
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Tyler Technologies",
+          "contact": "Kerry Lewandowski",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 2
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Included Health",
+          "contact": "Jim O'Gorman",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 3
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Menlo Security",
+          "contact": "Tim Olson",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 23
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Tyler Technologies",
+          "contact": "Kerry Lewandowski",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-25: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 2
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Included Health",
+          "contact": "Jim O'Gorman",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-25: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 3
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Menlo Security",
+          "contact": "Tim Olson",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-25: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 23
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Tyler Technologies",
+          "contact": "Kerry Lewandowski",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-26: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 2
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Included Health",
+          "contact": "Jim O'Gorman",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-26: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 3
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Menlo Security",
+          "contact": "Tim Olson",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-26: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 23
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Tyler Technologies",
+          "contact": "Kerry Lewandowski",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 2
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Included Health",
+          "contact": "Jim O'Gorman",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 3
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Menlo Security",
+          "contact": "Tim Olson",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 23
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Tyler Technologies",
+          "contact": "Kerry Lewandowski",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 2
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Included Health",
+          "contact": "Jim O'Gorman",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 3
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Menlo Security",
+          "contact": "Tim Olson",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 23
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Tyler Technologies",
+          "contact": "Kerry Lewandowski",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-31: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 2
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Included Health",
+          "contact": "Jim O'Gorman",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-31: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 3
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Menlo Security",
+          "contact": "Tim Olson",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-31: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 23
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "normal",
+          "company": "Tyler Technologies",
+          "contact": "Kerry Lewandowski",
+          "title": "VP HR",
+          "action": "LinkedIn connection request \u2014 NO pitch, just connect",
+          "email": "kerry.lewandowski@tylertech.com",
+          "phone": "",
+          "linkedin": "",
+          "step": 1,
+          "day": 1,
+          "lead_id": 2
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "normal",
+          "company": "Included Health",
+          "contact": "Jim O'Gorman",
+          "title": "VP Talent",
+          "action": "LinkedIn connection request \u2014 NO pitch, just connect",
+          "email": "jim.ogorman@includedhealth.com",
+          "phone": "",
+          "linkedin": "",
+          "step": 1,
+          "day": 1,
+          "lead_id": 3
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "normal",
+          "company": "Menlo Security",
+          "contact": "Tim Olson",
+          "title": "VP of Engineering",
+          "action": "LinkedIn connection request \u2014 NO pitch, just connect",
+          "email": "tolson@menlosecurity.com",
+          "phone": "",
+          "linkedin": "https://www.linkedin.com/in/timolson4/",
+          "step": 1,
+          "day": 1,
+          "lead_id": 23
+        }
+      ],
+      "stats": {
+        "hot": 0,
+        "email": 0,
+        "linkedin": 4,
+        "phone": 0,
+        "overdue": 35,
+        "total": 39
+      }
+    },
+    "julia": {
+      "name": "Julia Dusseau",
+      "role": "BDM",
+      "email": null,
+      "tasks": [
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Statsig",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 6
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Databricks",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 8
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Carta",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 9
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "DoorDash",
+          "contact": "Liangxiao Z.",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 10
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "OpenAI",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 11
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Anthropic",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 12
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Toast",
+          "contact": "Jerome Luo",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 17
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Databricks",
+          "contact": "Akhil Gupta",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 22
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Statsig",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 6
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Databricks",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 8
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Carta",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 9
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "DoorDash",
+          "contact": "Liangxiao Z.",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 10
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "OpenAI",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 11
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Anthropic",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 12
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Toast",
+          "contact": "Jerome Luo",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 17
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Databricks",
+          "contact": "Akhil Gupta",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 22
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Statsig",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 6
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Databricks",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 8
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Carta",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 9
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "DoorDash",
+          "contact": "Liangxiao Z.",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 10
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "OpenAI",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 11
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Anthropic",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 12
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Toast",
+          "contact": "Jerome Luo",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 17
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Databricks",
+          "contact": "Akhil Gupta",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 22
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Statsig",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 6
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Databricks",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 8
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Carta",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 9
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "DoorDash",
+          "contact": "Liangxiao Z.",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 10
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "OpenAI",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 11
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Anthropic",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 12
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Toast",
+          "contact": "Jerome Luo",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 17
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Databricks",
+          "contact": "Akhil Gupta",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 22
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Statsig",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-25: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 6
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Databricks",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-25: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 8
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Carta",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-25: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 9
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "DoorDash",
+          "contact": "Liangxiao Z.",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-25: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 10
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "OpenAI",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-25: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 11
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Anthropic",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-25: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 12
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Toast",
+          "contact": "Jerome Luo",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-25: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 17
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Databricks",
+          "contact": "Akhil Gupta",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-25: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 22
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Statsig",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-26: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 6
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Databricks",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-26: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 8
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Carta",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-26: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 9
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "DoorDash",
+          "contact": "Liangxiao Z.",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-26: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 10
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "OpenAI",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-26: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 11
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Anthropic",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-26: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 12
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Toast",
+          "contact": "Jerome Luo",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-26: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 17
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Databricks",
+          "contact": "Akhil Gupta",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-26: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 22
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Statsig",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 6
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Databricks",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 8
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Carta",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 9
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "DoorDash",
+          "contact": "Liangxiao Z.",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 10
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "OpenAI",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 11
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Anthropic",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 12
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Toast",
+          "contact": "Jerome Luo",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 17
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Databricks",
+          "contact": "Akhil Gupta",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 22
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Statsig",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 6
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Databricks",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 8
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Carta",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 9
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "DoorDash",
+          "contact": "Liangxiao Z.",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 10
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "OpenAI",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 11
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Anthropic",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 12
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Toast",
+          "contact": "Jerome Luo",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 17
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Databricks",
+          "contact": "Akhil Gupta",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 22
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Statsig",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-31: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 6
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Databricks",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-31: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 8
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Carta",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-31: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 9
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "DoorDash",
+          "contact": "Liangxiao Z.",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-31: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 10
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "OpenAI",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-31: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 11
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Anthropic",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-31: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 12
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Toast",
+          "contact": "Jerome Luo",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-31: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 17
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Databricks",
+          "contact": "Akhil Gupta",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-31: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 22
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "normal",
+          "company": "Statsig",
+          "contact": "Contact TBD",
+          "title": "",
+          "action": "LinkedIn connection request \u2014 NO pitch, just connect",
+          "email": "",
+          "phone": "",
+          "linkedin": "",
+          "step": 1,
+          "day": 1,
+          "lead_id": 6
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "normal",
+          "company": "Databricks",
+          "contact": "Contact TBD",
+          "title": "",
+          "action": "LinkedIn connection request \u2014 NO pitch, just connect",
+          "email": "",
+          "phone": "",
+          "linkedin": "",
+          "step": 1,
+          "day": 1,
+          "lead_id": 8
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "normal",
+          "company": "Carta",
+          "contact": "Contact TBD",
+          "title": "",
+          "action": "LinkedIn connection request \u2014 NO pitch, just connect",
+          "email": "",
+          "phone": "",
+          "linkedin": "",
+          "step": 1,
+          "day": 1,
+          "lead_id": 9
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "normal",
+          "company": "DoorDash",
+          "contact": "Liangxiao Z.",
+          "title": "VP Engineering",
+          "action": "LinkedIn connection request \u2014 NO pitch, just connect",
+          "email": "",
+          "phone": "",
+          "linkedin": "",
+          "step": 1,
+          "day": 1,
+          "lead_id": 10
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "normal",
+          "company": "OpenAI",
+          "contact": "Contact TBD",
+          "title": "",
+          "action": "LinkedIn connection request \u2014 NO pitch, just connect",
+          "email": "",
+          "phone": "",
+          "linkedin": "",
+          "step": 1,
+          "day": 1,
+          "lead_id": 11
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "normal",
+          "company": "Anthropic",
+          "contact": "Contact TBD",
+          "title": "",
+          "action": "LinkedIn connection request \u2014 NO pitch, just connect",
+          "email": "",
+          "phone": "",
+          "linkedin": "",
+          "step": 1,
+          "day": 1,
+          "lead_id": 12
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "normal",
+          "company": "Toast",
+          "contact": "Jerome Luo",
+          "title": "Dir Finance",
+          "action": "LinkedIn connection request \u2014 NO pitch, just connect",
+          "email": "jerome.luo@toasttab.com",
+          "phone": "",
+          "linkedin": "",
+          "step": 1,
+          "day": 1,
+          "lead_id": 17
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "normal",
+          "company": "Databricks",
+          "contact": "Akhil Gupta",
+          "title": "VP Eng",
+          "action": "LinkedIn connection request \u2014 NO pitch, just connect",
+          "email": "akhil.gupta@databricks.com",
+          "phone": "",
+          "linkedin": "",
+          "step": 1,
+          "day": 1,
+          "lead_id": 22
+        }
+      ],
+      "stats": {
+        "hot": 0,
+        "email": 0,
+        "linkedin": 8,
+        "phone": 0,
+        "overdue": 72,
+        "total": 80
+      }
+    },
+    "april": {
+      "name": "April Thompson",
+      "role": "BDM",
+      "email": null,
+      "tasks": [
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "ClickHouse",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 13
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Samsara",
+          "contact": "Angelina E.",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 14
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Vanta",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 15
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Ramp",
+          "contact": "Ryan Delgado",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 18
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Wiz",
+          "contact": "Jonathan Costet",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 19
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Scale AI",
+          "contact": "Nate Herman",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 21
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "ClickHouse",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 13
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Samsara",
+          "contact": "Angelina E.",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 14
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Vanta",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 15
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Ramp",
+          "contact": "Ryan Delgado",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 18
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Wiz",
+          "contact": "Jonathan Costet",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 19
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Scale AI",
+          "contact": "Nate Herman",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 21
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "ClickHouse",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 13
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Samsara",
+          "contact": "Angelina E.",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 14
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Vanta",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 15
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Ramp",
+          "contact": "Ryan Delgado",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 18
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Wiz",
+          "contact": "Jonathan Costet",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 19
+        },
+        {
+          "type": "email",
+          "priority": "overdue",
+          "company": "Scale AI",
+          "contact": "Nate Herman",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: CEO intro email \u2014 personalized to company situation",
+          "lead_id": 21
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "ClickHouse",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 13
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Samsara",
+          "contact": "Angelina E.",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 14
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Vanta",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 15
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Ramp",
+          "contact": "Ryan Delgado",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 18
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Wiz",
+          "contact": "Jonathan Costet",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 19
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Scale AI",
+          "contact": "Nate Herman",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-24: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 21
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "ClickHouse",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-25: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 13
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Samsara",
+          "contact": "Angelina E.",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-25: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 14
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Vanta",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-25: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 15
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Ramp",
+          "contact": "Ryan Delgado",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-25: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 18
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Wiz",
+          "contact": "Jonathan Costet",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-25: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 19
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Scale AI",
+          "contact": "Nate Herman",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-25: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 21
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "ClickHouse",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-26: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 13
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Samsara",
+          "contact": "Angelina E.",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-26: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 14
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Vanta",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-26: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 15
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Ramp",
+          "contact": "Ryan Delgado",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-26: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 18
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Wiz",
+          "contact": "Jonathan Costet",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-26: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 19
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Scale AI",
+          "contact": "Nate Herman",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-26: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 21
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "ClickHouse",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 13
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Samsara",
+          "contact": "Angelina E.",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 14
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Vanta",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 15
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Ramp",
+          "contact": "Ryan Delgado",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 18
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Wiz",
+          "contact": "Jonathan Costet",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 19
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Scale AI",
+          "contact": "Nate Herman",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 21
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "ClickHouse",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 13
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Samsara",
+          "contact": "Angelina E.",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 14
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Vanta",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 15
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Ramp",
+          "contact": "Ryan Delgado",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 18
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Wiz",
+          "contact": "Jonathan Costet",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 19
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Scale AI",
+          "contact": "Nate Herman",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-30: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 21
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "ClickHouse",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-31: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 13
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Samsara",
+          "contact": "Angelina E.",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-31: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 14
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Vanta",
+          "contact": "Contact TBD",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-31: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 15
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Ramp",
+          "contact": "Ryan Delgado",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-31: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 18
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Wiz",
+          "contact": "Jonathan Costet",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-31: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 19
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "overdue",
+          "company": "Scale AI",
+          "contact": "Nate Herman",
+          "action": "\u26a0\ufe0f OVERDUE from 2026-03-31: LinkedIn connection request \u2014 NO pitch, just connect",
+          "lead_id": 21
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "normal",
+          "company": "ClickHouse",
+          "contact": "Contact TBD",
+          "title": "",
+          "action": "LinkedIn connection request \u2014 NO pitch, just connect",
+          "email": "",
+          "phone": "",
+          "linkedin": "",
+          "step": 1,
+          "day": 1,
+          "lead_id": 13
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "normal",
+          "company": "Samsara",
+          "contact": "Angelina E.",
+          "title": "VP Marketing",
+          "action": "LinkedIn connection request \u2014 NO pitch, just connect",
+          "email": "",
+          "phone": "",
+          "linkedin": "",
+          "step": 1,
+          "day": 1,
+          "lead_id": 14
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "normal",
+          "company": "Vanta",
+          "contact": "Contact TBD",
+          "title": "",
+          "action": "LinkedIn connection request \u2014 NO pitch, just connect",
+          "email": "",
+          "phone": "",
+          "linkedin": "",
+          "step": 1,
+          "day": 1,
+          "lead_id": 15
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "normal",
+          "company": "Ramp",
+          "contact": "Ryan Delgado",
+          "title": "Dir Eng",
+          "action": "LinkedIn connection request \u2014 NO pitch, just connect",
+          "email": "ryan.delgado@ramp.com",
+          "phone": "",
+          "linkedin": "",
+          "step": 1,
+          "day": 1,
+          "lead_id": 18
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "normal",
+          "company": "Wiz",
+          "contact": "Jonathan Costet",
+          "title": "VP Digital Marketing",
+          "action": "LinkedIn connection request \u2014 NO pitch, just connect",
+          "email": "jonathan.costet@wiz.io",
+          "phone": "",
+          "linkedin": "",
+          "step": 1,
+          "day": 1,
+          "lead_id": 19
+        },
+        {
+          "type": "linkedin_connect",
+          "priority": "normal",
+          "company": "Scale AI",
+          "contact": "Nate Herman",
+          "title": "",
+          "action": "LinkedIn connection request \u2014 NO pitch, just connect",
+          "email": "nate.herman@scale.com",
+          "phone": "",
+          "linkedin": "",
+          "step": 1,
+          "day": 1,
+          "lead_id": 21
+        }
+      ],
+      "stats": {
+        "hot": 0,
+        "email": 0,
+        "linkedin": 6,
+        "phone": 0,
+        "overdue": 54,
+        "total": 60
+      }
+    },
+    "honey": {
+      "name": "Honey",
+      "role": "SDR",
+      "email": null,
+      "tasks": [],
+      "stats": {
+        "hot": 0,
+        "email": 0,
+        "linkedin": 0,
+        "phone": 0,
+        "overdue": 0,
+        "total": 0
+      }
+    }
+  },
+  "summary": {
+    "total_tasks": 179,
+    "total_hot": 0,
+    "active_leads": 18,
+    "bounced_leads": 5,
+    "hot_leads": 0,
+    "total_leads": 23
+  }
+}

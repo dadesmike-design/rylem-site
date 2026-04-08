@@ -1,0 +1,25 @@
+{
+  "version": "1.0",
+  "messages": {
+    "linkedin_connect": {
+      "default": "Hey [FIRST_NAME] — saw [COMPANY] is scaling fast right now. I run Rylem Staffing, been placing IT and engineering talent for 18 years. Would love to connect.",
+      "by_lead": {
+        "coreweave": "Hey [FIRST_NAME] — congrats on the IPO run-up. The engineering hiring pace at CoreWeave is something else. I place senior infrastructure and ML engineers nationally. Would love to be in your network.",
+        "temporal": "Hey [FIRST_NAME] — $300M Series D is a serious signal. Engineering teams at that growth stage usually need contractors fast. I place senior engineers nationally at Rylem. Worth connecting.",
+        "xbow": "Hey [FIRST_NAME] — $120M Series C in March is a massive signal. Teams at that inflection point hire fast. I run Rylem Staffing, we place senior engineers and security talent. Would love to connect.",
+        "menlosecurity": "Hey [FIRST_NAME] — Menlo's been on our radar. Zero-trust security is one of the hottest hiring categories right now. I run Rylem Staffing, been placing IT and security talent for 18 years. Worth connecting."
+      }
+    },
+    "email_step2": {
+      "default": {
+        "subject": "Quick intro — Rylem Staffing",
+        "body": "Hi [FIRST_NAME],\n\nFollowed up on LinkedIn — wanted to reach out directly too.\n\nRylem is a diversity-certified staffing firm. We place IT, engineering, finance, and ops professionals nationwide. 18 years, 100K+ candidates in our database.\n\nWe move faster than most — typical time-to-submit is under 48 hours for senior roles.\n\nWorth a 15-minute call to see if there's a fit?\n\nMike Dades\nCEO, Rylem Staffing\nmiked@rylem.com"
+      }
+    },
+    "call_step3": {
+      "default": {
+        "script": "OPENING:\n\"Hi [FIRST_NAME], this is Mike Dades from Rylem Staffing — did I catch you at a bad time?\"\n\nIF YES: \"No problem — when's a better time? I'll send a calendar invite.\"\n\nIF NO (2-3 minutes):\n\"Great. I'll be quick. Rylem is a diversity-certified staffing firm — we place IT, engineering, and finance talent nationally. 18 years in the business, we have 100K candidates in our database.\n\nI noticed [COMPANY] has been scaling fast / posted [X] roles recently / raised recently — I wanted to ask: are you the right person to talk to about contract or direct-hire needs, or should I be talking to someone else?\"\n\nOBJECTION — 'We use a VMS/MSP':\n\"Totally understand. Do you have a preferred suppliers list or a supplier diversity program? Rylem is certified — we qualify for a lot of those programs.\"\n\nCLOSE:\n\"Can I send you a quick intro email and schedule 15 minutes?\""
+      }
+    }
+  }
+}

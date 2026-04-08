@@ -1,0 +1,42 @@
+{
+  "lastUpdated": "2026-04-08T13:29:00Z",
+  "highlight": "Honey Mae on fire: 230 dials, 2 meetings + 2 callbacks set (4/7)",
+  "scores": [
+    {
+      "name": "Honey Mae",
+      "points": 3155,
+      "tier": "Closer",
+      "streak": 2,
+      "badges": ["dialer", "on_fire", "cold_caller", "first_blood"],
+      "dailyActivity": "230 dials, 2 meetings, 2 callbacks"
+    },
+    {
+      "name": "Mike",
+      "points": 762,
+      "tier": "Hunter",
+      "streak": 14,
+      "badges": ["pipeline_full", "on_fire", "email_machine", "first_blood"]
+    },
+    {
+      "name": "Sheila",
+      "points": 641,
+      "tier": "Hunter",
+      "streak": 12,
+      "badges": ["on_fire", "first_blood"]
+    },
+    {
+      "name": "Julia",
+      "points": 611,
+      "tier": "Hunter",
+      "streak": 12,
+      "badges": ["on_fire", "first_blood"]
+    },
+    {
+      "name": "April",
+      "points": 611,
+      "tier": "Hunter",
+      "streak": 12,
+      "badges": ["on_fire", "first_blood"]
+    }
+  ]
+}

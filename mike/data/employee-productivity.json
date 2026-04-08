@@ -1,0 +1,2280 @@
+{
+  "generated": "2026-04-08T07:02:13.927893",
+  "period_days": 7,
+  "employees": [
+    {
+      "name": "Mike Dades",
+      "role": "CEO/Sales",
+      "total_emails": 222,
+      "total_meetings": 3,
+      "companies": {
+        "Comcast": {
+          "emails": 43,
+          "meetings": 0,
+          "contacts": [
+            "lynnjohnson57@comcast.net",
+            "rdlgolfer@comcast.net",
+            "mmacgill@comcast.net",
+            "m.meucci@comcast.net",
+            "mizpahdoc@comcast.net",
+            "bkendrex@comcast.net",
+            "jwelchsr@comcast.net",
+            "gusosterback@comcast.net",
+            "leitzinger@comcast.net",
+            "tstorhoff@comcast.net",
+            "davhil@comcast.net",
+            "brettthomas@comcast.net",
+            "cgolfsalot@comcast.net",
+            "33mennella33@comcast.net",
+            "simmons-4@comcast.net",
+            "jeffthompson916@comcast.net",
+            "todd_henry@comcast.net",
+            "alkiview@comcast.net",
+            "tandnhogue@comcast.net",
+            "markemills@comcast.net",
+            "davesharpe@comcast.net",
+            "romalds@comcast.net",
+            "sthoagland@comcast.net",
+            "mainlines2chuck@comcast.net",
+            "schattdaddy@comcast.net",
+            "troyphelps@comcast.net",
+            "racarregui@comcast.net",
+            "garyjbennett1@comcast.net",
+            "ls714@comcast.net",
+            "tdhulingIII@comcast.net",
+            "curtknox@comcast.net",
+            "thegards@comcast.net",
+            "dwaingrow@comcast.net",
+            "dscottblair@comcast.net",
+            "mattcampbell3@comcast.net",
+            "erikmoldstad@comcast.net",
+            "bwhite1245@comcast.net",
+            "tedjones6@comcast.net",
+            "lbaush@comcast.net",
+            "bcleonetti@comcast.net",
+            "davidmarndt@comcast.net",
+            "shaverstock@comcast.net",
+            "wtcodd@comcast.net"
+          ]
+        },
+        "Msn": {
+          "emails": 15,
+          "meetings": 0,
+          "contacts": [
+            "bobo54621@msn.com",
+            "jandasummers@msn.com",
+            "stilev15@msn.com",
+            "gregamarks@msn.com",
+            "jrochex@msn.com",
+            "mccaslin402@msn.com",
+            "KMGoon@msn.com",
+            "craigarntz@msn.com",
+            "lynnwoswald@msn.com",
+            "hrtinker@msn.com",
+            "tmcelmeel@msn.com",
+            "richroberge1@msn.com",
+            "jake4par@msn.com",
+            "nebert123@msn.com",
+            "casmcm@msn.com"
+          ]
+        },
+        "Talentfoot": {
+          "emails": 12,
+          "meetings": 0,
+          "contacts": [
+            "bmurphy@talentfoot.com",
+            "cfetter@talentfoot.com",
+            "lroberts@talentfoot.com"
+          ]
+        },
+        "Solveworks": {
+          "emails": 8,
+          "meetings": 0,
+          "contacts": [
+            "dwayne@solveworks.io",
+            "brody@solveworks.io"
+          ]
+        },
+        "Corsource": {
+          "emails": 6,
+          "meetings": 1,
+          "contacts": [
+            "ahermann@corsource.com",
+            "AHermann@corsource.com"
+          ]
+        },
+        "Themortonway": {
+          "emails": 6,
+          "meetings": 1,
+          "contacts": [
+            "mark@themortonway.com",
+            "Mark@themortonway.com"
+          ]
+        },
+        "Atechplacement": {
+          "emails": 6,
+          "meetings": 0,
+          "contacts": [
+            "gdenyer@atechplacement.com",
+            "mwiggins@atechplacement.com"
+          ]
+        },
+        "Larsongross": {
+          "emails": 6,
+          "meetings": 0,
+          "contacts": [
+            "kevin.deyoung@larsongross.com",
+            "KevinD@larsongross.com",
+            "kyle.vanderplaats@larsongross.com"
+          ]
+        },
+        "Rscapital": {
+          "emails": 3,
+          "meetings": 1,
+          "contacts": [
+            "eric.kiel@rscapital.com",
+            "david.westbrook@rscapital.com"
+          ]
+        },
+        "Goringo": {
+          "emails": 3,
+          "meetings": 1,
+          "contacts": [
+            "keith@goringo.com"
+          ]
+        },
+        "Jobtracks": {
+          "emails": 3,
+          "meetings": 1,
+          "contacts": [
+            "matt.johnston@jobtracks.com"
+          ]
+        },
+        "Tnunnconsulting": {
+          "emails": 3,
+          "meetings": 0,
+          "contacts": [
+            "tom@tnunnconsulting.com"
+          ]
+        },
+        "Mojotrek": {
+          "emails": 3,
+          "meetings": 0,
+          "contacts": [
+            "mperla@mojotrek.com"
+          ]
+        },
+        "Bmarkits": {
+          "emails": 3,
+          "meetings": 0,
+          "contacts": [
+            "jbemis@bmarkits.com"
+          ]
+        },
+        "Mccannpartners": {
+          "emails": 3,
+          "meetings": 0,
+          "contacts": [
+            "mmccann@mccannpartners.com"
+          ]
+        },
+        "Psi92": {
+          "emails": 3,
+          "meetings": 0,
+          "contacts": [
+            "mragland@psi92.com"
+          ]
+        },
+        "Daleworkforce": {
+          "emails": 3,
+          "meetings": 0,
+          "contacts": [
+            "sarah.martin@daleworkforce.com"
+          ]
+        },
+        "Mavericktechpartners": {
+          "emails": 3,
+          "meetings": 0,
+          "contacts": [
+            "tadams@mavericktechpartners.com"
+          ]
+        },
+        "Cedarcountylandscaping": {
+          "emails": 3,
+          "meetings": 0,
+          "contacts": [
+            "office@cedarcountylandscaping.com"
+          ]
+        },
+        "Stone-Pros": {
+          "emails": 2,
+          "meetings": 0,
+          "contacts": [
+            "estimating@stone-pros.com"
+          ]
+        },
+        "Me": {
+          "emails": 2,
+          "meetings": 0,
+          "contacts": [
+            "dougfap@me.com",
+            "daviddicks@me.com"
+          ]
+        },
+        "Golf-Events": {
+          "emails": 2,
+          "meetings": 0,
+          "contacts": [
+            "cg@golf-events.com",
+            "kk@golf-events.com"
+          ]
+        },
+        "Windermere": {
+          "emails": 2,
+          "meetings": 0,
+          "contacts": [
+            "jkliman@windermere.com",
+            "ajensen@windermere.com"
+          ]
+        },
+        "Mac": {
+          "emails": 2,
+          "meetings": 0,
+          "contacts": [
+            "dkully@mac.com",
+            "jbschack@mac.com"
+          ]
+        },
+        "Machinistsinc": {
+          "emails": 2,
+          "meetings": 0,
+          "contacts": [
+            "jerrym@machinistsinc.com",
+            "hugh@machinistsinc.com"
+          ]
+        },
+        "Thegearworks": {
+          "emails": 2,
+          "meetings": 0,
+          "contacts": [
+            "sramberg@thegearworks.com",
+            "rramberg@thegearworks.com"
+          ]
+        },
+        "Live": {
+          "emails": 2,
+          "meetings": 0,
+          "contacts": [
+            "Flee2@live.com",
+            "brianjsmith@live.com"
+          ]
+        },
+        "Nri-Inc": {
+          "emails": 2,
+          "meetings": 0,
+          "contacts": [
+            "bsibert@nri-inc.com"
+          ]
+        },
+        "Centurylink": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "pastimes@centurylink.net"
+          ]
+        },
+        "Coterraengineering": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "peter@coterraengineering.com"
+          ]
+        },
+        "Hiroshiarai": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "me@hiroshiarai.co"
+          ]
+        },
+        "Wkpointe": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "matt@wkpointe.com"
+          ]
+        },
+        "Beffa": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "linda@beffa.us"
+          ]
+        },
+        "Bellan": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "michael@bellan.com"
+          ]
+        },
+        "Industryspaceseattle": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "johnny@industryspaceseattle.com"
+          ]
+        },
+        "Olypress": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "glenn@olypress.com"
+          ]
+        },
+        "Burgessdesign": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "jimb@burgessdesign.net"
+          ]
+        },
+        "Performanceradiator": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "mikec@performanceradiator.com"
+          ]
+        },
+        "Metroroof": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "invoice@metroroof.com"
+          ]
+        },
+        "Geneseeheat": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "steve@geneseeheat.com"
+          ]
+        },
+        "Coluccio-Law": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "kc@coluccio-law.com"
+          ]
+        },
+        "Totemaritime": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "bcrawford@totemaritime.com"
+          ]
+        },
+        "Daleyclan": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "steve@daleyclan.com"
+          ]
+        },
+        "Suyamapetersondeguchi": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "Jay@suyamapetersondeguchi.com"
+          ]
+        },
+        "Seafirstfinancial": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "delaney@seafirstfinancial.com"
+          ]
+        },
+        "Dimarinc": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "greg@dimarinc.com"
+          ]
+        },
+        "Lsrproperties": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "jim@lsrproperties.net"
+          ]
+        },
+        "Juno": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "russ.patricia@juno.com"
+          ]
+        },
+        "Sdajnw": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "ad@sdajnw.com"
+          ]
+        },
+        "49Ermarketing": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "mike@49ermarketing.com"
+          ]
+        },
+        "Frans": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "mark@frans.com"
+          ]
+        },
+        "Ubs": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "gregory.george@ubs.com"
+          ]
+        },
+        "Pacwestern": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "ryan@pacwestern.com"
+          ]
+        },
+        "Mossadams": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "marke.greene@mossadams.com"
+          ]
+        },
+        "Eandlflooring": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "shahn@eandlflooring.com"
+          ]
+        },
+        "Deloitte": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "dheisler@deloitte.com"
+          ]
+        },
+        "Baclink": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "thill@baclink.com"
+          ]
+        },
+        "Blakeirving": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "blake@blakeirving.com"
+          ]
+        },
+        "Chasejarvis": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "chase@chasejarvis.com"
+          ]
+        },
+        "Pcijp": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "yohji@pcijp.com"
+          ]
+        },
+        "Pppcorp": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "peter.klein@pppcorp.net"
+          ]
+        },
+        "Millvines": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "scott.krueger@millvines.com"
+          ]
+        },
+        "Infoblox": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "cmaples@infoblox.com"
+          ]
+        },
+        "Mwladvisory": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "ron@mwladvisory.com"
+          ]
+        },
+        "Luckymail": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "fpilot@luckymail.com"
+          ]
+        },
+        "Gmccinc": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "garymerlino@gmccinc.com"
+          ]
+        },
+        "Cbbain": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "jasonmoon@cbbain.com"
+          ]
+        },
+        "Mork": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "steve@mork.com"
+          ]
+        },
+        "Fountventures": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "csn@fountventures.com"
+          ]
+        },
+        "Nicholsondev": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "brent@nicholsondev.com"
+          ]
+        },
+        "Cwomedia": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "chris@cwomedia.com"
+          ]
+        },
+        "Claddconstruction": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "roger@claddconstruction.com"
+          ]
+        },
+        "Amgllc": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "soliver@amgllc.com"
+          ]
+        },
+        "Otterson": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "martin@otterson.com"
+          ]
+        },
+        "Auburnmechanical": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "johnpayne@auburnmechanical.com"
+          ]
+        },
+        "Cnw": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "steve@cnw.com"
+          ]
+        },
+        "Nwlabel": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "mike@nwlabel.com"
+          ]
+        },
+        "Compass": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "mark.petrak@compass.com"
+          ]
+        },
+        "Seanet": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "sharpe@seanet.com"
+          ]
+        },
+        "Attglobal": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "toolking@attglobal.net"
+          ]
+        },
+        "Horizonra": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "tsmith@horizonra.com"
+          ]
+        },
+        "Dulcedesign": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "tyler@dulcedesign.com"
+          ]
+        },
+        "Wallingfordmtg": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "jeff@wallingfordmtg.com"
+          ]
+        },
+        "Domconstruction": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "vacek@domconstruction.com"
+          ]
+        },
+        "Eftravers": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "eftravers@eftravers.com"
+          ]
+        },
+        "Millernash": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "dino.vasquez@millernash.com"
+          ]
+        },
+        "Vandelayinc": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "todd@vandelayinc.com"
+          ]
+        },
+        "Poulsborv": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "ken.wakazuru@poulsborv.com"
+          ]
+        },
+        "Windsor-Tile": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "simon@windsor-tile.com"
+          ]
+        },
+        "Netscape": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "swbob333@netscape.com"
+          ]
+        },
+        "Thewrightgroupnw": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "jim@thewrightgroupnw.com"
+          ]
+        },
+        "Hubspot": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "ipishev@hubspot.com"
+          ]
+        },
+        "Indorsialabsai": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "l.sophie@indorsialabsai.info"
+          ]
+        },
+        "Swayyemadreports": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "mattmsheally@swayyemadreports.info"
+          ]
+        },
+        "Realresidential": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "albert@realresidential.com"
+          ]
+        },
+        "Heritage1904": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "missy@heritage1904.com"
+          ]
+        },
+        "Prime8Consulting": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "kendallj@prime8consulting.com"
+          ]
+        },
+        "Vort-ex": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "mario.aguero@vort-ex.com",
+            "diego.varela@vort-ex.com"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Joelle Davis",
+      "role": "Recruiter",
+      "total_emails": 197,
+      "total_meetings": 0,
+      "companies": {
+        "Wizards": {
+          "emails": 47,
+          "meetings": 0,
+          "contacts": [
+            "shikha.jain@wizards.com",
+            "jeff.wilkson@wizards.com",
+            "michelle.brunes@wizards.com",
+            "emily.bright@wizards.com",
+            "nathaniel.rosario@wizards.com",
+            "monica.perez-castillo@wizards.com",
+            "david.stevens@wizards.com",
+            "lilli.vesala@wizards.com",
+            "amanda.litchkowski@wizards.com",
+            "demitrios.feredinos@wizards.com",
+            "laura.thompson@wizards.com",
+            "mary.outcalt@wizards.com",
+            "liz.lambert@wizards.com",
+            "chris.kelly@wizards.com",
+            "heidi.page@wizards.com",
+            "isaac.dovalina@wizards.com",
+            "guy.stables@wizards.com",
+            "josh.herman@wizards.com",
+            "lindsey.conway@wizards.com",
+            "ian.adams@wizards.com",
+            "barbara.simeona@wizards.com",
+            "isabella.seeburger@wizards.com",
+            "chris.tulach@wizards.com",
+            "patrick.dorion@wizards.com",
+            "penny.vigil@wizards.com",
+            "sara.nelson@wizards.com",
+            "samantha.abernathey@wizards.com",
+            "michael.ibarra@wizards.com",
+            "scott.larabee@wizards.com",
+            "anna.dearybury@wizards.com",
+            "heather.gearreald@wizards.com",
+            "jonathan.browning@wizards.com",
+            "lillian.ai@wizards.com",
+            "cooper.springfield@wizards.com",
+            "lisa.trott@wizards.com",
+            "kevin.warner@wizards.com",
+            "lee.sharpe@wizards.com",
+            "chris.russell@wizards.com",
+            "gwen.bassett@wizards.com",
+            "matthew.ferring@wizards.com",
+            "james.mcginley@wizards.com",
+            "maximilian.kaufmann@wizards.com",
+            "jen.lim@wizards.com",
+            "chuck.arnett@wizards.com",
+            "christina.wiley@wizards.com",
+            "chris.ward@wizards.com",
+            "ryan.mccarthy@wizards.com"
+          ]
+        },
+        "Okta": {
+          "emails": 28,
+          "meetings": 0,
+          "contacts": [
+            "eeriksen@okta.com",
+            "sam.miller@okta.com",
+            "wyoung@okta.com",
+            "lisa.vo@okta.com",
+            "hdunning@okta.com",
+            "jpaner@okta.com",
+            "dani.johnson@okta.com",
+            "isabella.duras@okta.com",
+            "ikorde@okta.com",
+            "beorse.araya@okta.com",
+            "rachel.madison@okta.com",
+            "pradeep.gupta@okta.com",
+            "anna.luo@okta.com",
+            "abby.grotz@okta.com",
+            "dwood@okta.com",
+            "amanda.walters@okta.com",
+            "katrina.kershner@okta.com",
+            "fahmed@okta.com",
+            "dineshkumar.jayaraman@okta.com",
+            "roossien.david@okta.com",
+            "astha.notani@okta.com",
+            "patrick.s@okta.com",
+            "mike.ihlenfeldt@okta.com",
+            "nathan.petersen@okta.com",
+            "lauren.sooudi@okta.com",
+            "drew.lorenc@okta.com",
+            "geoffrey.abel@okta.com",
+            "angela.devlin@okta.com"
+          ]
+        },
+        "Gatesfoundation": {
+          "emails": 27,
+          "meetings": 0,
+          "contacts": [
+            "jessica.chung@gatesfoundation.org",
+            "jesse.foster@gatesfoundation.org",
+            "kris.engstrom@gatesfoundation.org",
+            "kryssi.abbassi@gatesfoundation.org",
+            "jonathan.hill@gatesfoundation.org",
+            "lindsey.baker@gatesfoundation.org",
+            "maria.llano@gatesfoundation.org",
+            "rob.west@gatesfoundation.org",
+            "carly.williams@gatesfoundation.org",
+            "tara.withrow@gatesfoundation.org",
+            "jennifer.simeon@gatesfoundation.org",
+            "stephanie.grow@gatesfoundation.org",
+            "david.nelson@gatesfoundation.org",
+            "avinash.gupta@gatesfoundation.org",
+            "juanita.diaz@gatesfoundation.org",
+            "peter.barrett@gatesfoundation.org",
+            "claire.rogers@gatesfoundation.org",
+            "kylee.durant@gatesfoundation.org",
+            "britta.tsang@gatesfoundation.org",
+            "seng.thor@gatesfoundation.org",
+            "paul.saxman@gatesfoundation.org",
+            "blaire.horner@gatesfoundation.org",
+            "rob.owens@gatesfoundation.org",
+            "julee.denney@gatesfoundation.org",
+            "cheryl.gregory@gatesfoundation.org",
+            "brenda.harwood@gatesfoundation.org",
+            "lure.sese@gatesfoundation.org"
+          ]
+        },
+        "Kenvue": {
+          "emails": 26,
+          "meetings": 0,
+          "contacts": [
+            "uarif@kenvue.com",
+            "mcadwell@kenvue.com",
+            "rkohli@kenvue.com",
+            "crichards@kenvue.com",
+            "dsawaya@kenvue.com",
+            "mkelly@kenvue.com",
+            "rbarnhart@kenvue.com",
+            "bcarr11@kenvue.com",
+            "aablai01@kenvue.com",
+            "tgreene7@kenvue.com",
+            "jdaniel@kenvue.com",
+            "rwiszo01@kenvue.com",
+            "sthakur@kenvue.com",
+            "ekodua@kenvue.com",
+            "jrivera@kenvue.com",
+            "anoone@kenvue.com",
+            "wlee46@kenvue.com",
+            "skemisetti@kenvue.com",
+            "rbullock@kenvue.com",
+            "nclemen2@kenvue.com",
+            "dbruno@kenvue.com",
+            "scampb46@kenvue.com",
+            "ksiuchew@kenvue.com",
+            "csmith@kenvue.com",
+            "swoshn01@kenvue.com",
+            "lyingl01@kenvue.com"
+          ]
+        },
+        "Bungie": {
+          "emails": 19,
+          "meetings": 0,
+          "contacts": [
+            "rwagoner@bungie.com",
+            "jsim@bungie.com",
+            "ysalsbury@bungie.com",
+            "cnelson@bungie.com",
+            "sglynn@bungie.com",
+            "dgafner@bungie.com",
+            "cascencio@bungie.com",
+            "cmcbride@bungie.com",
+            "shodder@bungie.com",
+            "bekberg@bungie.net",
+            "ojohnson@bungie.com",
+            "beakes@bungie.com",
+            "jmyers@bungie.com",
+            "rstanton@bungie.com",
+            "arsmith@bungie.com",
+            "jfox@bungie.com",
+            "elpage@bungie.com",
+            "mschubert@bungie.com",
+            "awarthen@bungie.com"
+          ]
+        },
+        "Mossadams": {
+          "emails": 12,
+          "meetings": 0,
+          "contacts": [
+            "jason.mitchel@mossadams.com",
+            "susan.micham@mossadams.com",
+            "glen.meharg@mossadams.com",
+            "tom.obranovich@mossadams.com",
+            "ben.lingo@mossadams.com",
+            "lynda.blake@mossadams.com",
+            "sally.candler@mossadams.com",
+            "bing.zaballa@mossadams.com",
+            "jacqueline.hunt@mossadams.com",
+            "alicia.n@mossadams.com",
+            "samantha.coates@mossadams.com",
+            "kelly.liu@mossadams.com"
+          ]
+        },
+        "Bdainc": {
+          "emails": 10,
+          "meetings": 0,
+          "contacts": [
+            "ihartstack@bdainc.com",
+            "mchava@bdainc.com",
+            "bsmith@bdainc.com",
+            "cdraper@bdainc.com",
+            "nschildt@bdainc.com",
+            "jojow@bdainc.com",
+            "rrae@bdainc.com",
+            "wmaclaren@bdainc.com",
+            "wbrownlow@bdainc.com",
+            "emaglaqui@bdainc.com"
+          ]
+        },
+        "Bakertilly": {
+          "emails": 8,
+          "meetings": 0,
+          "contacts": [
+            "emily.bright@bakertilly.com",
+            "jessica.justice@bakertilly.com",
+            "noah.gottula@bakertilly.com",
+            "alla.keidanska@bakertilly.com",
+            "christian.kingery@bakertilly.com",
+            "teresa.herderson@bakertilly.com",
+            "jeanne.mcfarland@bakertilly.com",
+            "bryan.haeussler@bakertilly.com"
+          ]
+        },
+        "Newengen": {
+          "emails": 7,
+          "meetings": 0,
+          "contacts": [
+            "emalone@newengen.com",
+            "cindy@newengen.com",
+            "cmartinsen@newengen.com",
+            "lbehrens@newengen.com",
+            "pliu@newengen.com",
+            "wblaker@newengen.com",
+            "awall@newengen.com"
+          ]
+        },
+        "Bigfishgames": {
+          "emails": 5,
+          "meetings": 0,
+          "contacts": [
+            "j.kim@bigfishgames.com",
+            "eli.huntington@bigfishgames.com",
+            "lina.nguyen@bigfishgames.com",
+            "keith.souhrada@bigfishgames.com",
+            "alfredo.lugtu@bigfishgames.com"
+          ]
+        },
+        "Verily": {
+          "emails": 3,
+          "meetings": 0,
+          "contacts": [
+            "chrisbrowne@verily.com",
+            "cbrowne@verily.com"
+          ]
+        },
+        "Connectwise": {
+          "emails": 3,
+          "meetings": 0,
+          "contacts": [
+            "michael.tanimoto@connectwise.com",
+            "cmead@connectwise.com",
+            "pluetkemeyer@connectwise.com"
+          ]
+        },
+        "C": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "khang.thai@c.wizards.com"
+          ]
+        },
+        "Insperity": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "dylan.malone@insperity.com"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Liza Valencia",
+      "role": "Director of Recruiting Strategy",
+      "total_emails": 53,
+      "total_meetings": 4,
+      "companies": {
+        "Reliablegroup": {
+          "emails": 18,
+          "meetings": 0,
+          "contacts": [
+            "adarooka@reliablegroup.com",
+            "vlakhani@reliablegroup.com",
+            "nileshg@reliablegroup.com",
+            "sheetalb@reliablegroup.com",
+            "rahuls@reliablegroup.com",
+            "bdhulia@reliablegroup.com"
+          ]
+        },
+        "Zillowgroup": {
+          "emails": 17,
+          "meetings": 0,
+          "contacts": [
+            "v-milliew@zillowgroup.com",
+            "v-darag@zillowgroup.com",
+            "contingentworkforce@zillowgroup.com"
+          ]
+        },
+        "Uline": {
+          "emails": 10,
+          "meetings": 1,
+          "contacts": [
+            "jo.guadalupe@uline.com",
+            "Anna.Torres@uline.com",
+            "Ron.Dove@uline.com",
+            "Harjot.Sandhu@uline.com",
+            "mike.tinholt@uline.com",
+            "Jo.Guadalupe@uline.com",
+            "Mike.Tinholt@uline.com",
+            "ron.dove@uline.com",
+            "rreed@uline.com"
+          ]
+        },
+        "Thesmartsource": {
+          "emails": 5,
+          "meetings": 0,
+          "contacts": [
+            "mespada@thesmartsource.com",
+            "tmuilenburg@thesmartsource.com",
+            "rylemsupport@thesmartsource.com"
+          ]
+        },
+        "Amazon": {
+          "emails": 2,
+          "meetings": 2,
+          "contacts": [
+            "awolform@amazon.com",
+            "amrithaf@amazon.com",
+            "mollower@amazon.com",
+            "norojoan@amazon.com",
+            "apandrey@amazon.ph",
+            "kjoe@amazon.com",
+            "khachata@amazon.com",
+            "chonizic@amazon.com",
+            "chochon@amazon.com",
+            "chowmegh@amazon.com",
+            "pajestin@amazon.ph",
+            "mkristwe@amazon.com",
+            "ltrawalt@amazon.com",
+            "nirwatts@amazon.com",
+            "thkellum@amazon.com",
+            "phoover@amazon.com",
+            "anelaamb@amazon.com",
+            "igarream@amazon.com"
+          ]
+        },
+        "Allegisglobalsolutions": {
+          "emails": 0,
+          "meetings": 2,
+          "contacts": [
+            "kelluthomas@allegisglobalsolutions.com",
+            "trwalter@allegisglobalsolutions.com",
+            "Christopher.Hizola@allegisglobalsolutions.com",
+            "ausrice@allegisglobalsolutions.com",
+            "druppert@allegisglobalsolutions.com",
+            "JestineKae.Payas@allegisglobalsolutions.com",
+            "molowery@allegisglobalsolutions.com",
+            "pdetolve@allegisglobalsolutions.com",
+            "KarenAnn.Mier@allegisglobalsolutions.com",
+            "krwebster@allegisglobalsolutions.com",
+            "Valerie.Bucayan@AllegisGlobalSolutions.com",
+            "satkinsbroggi@allegisglobalsolutions.com",
+            "aambapas@allegisglobalsolutions.com",
+            "amgarrett@allegisglobalsolutions.com",
+            "eflaherty@allegisglobalsolutions.com",
+            "DarrellJay.Maon@allegisglobalsolutions.com",
+            "FilAzekiel.Cristobal@allegisglobalsolutions.com",
+            "AndreaMari.Apostol@allegisglobalsolutions.com"
+          ]
+        },
+        "Tapfin": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "lisa.hill@tapfin.com"
+          ]
+        },
+        "Agilepremier": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "falipusan@agilepremier.com"
+          ]
+        },
+        "Namprd18": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "IMCEAEX-_o=ExchangeLabs_ou=Exchange+20Administrative+20Group+20+28FYDIBOHF23SPDLT+29_cn=Recipients_cn=0ef9164b3c5f4c39a44c967d20d7a1b2-fb5b60e7-f2@namprd18.prod.outlook.com",
+            "IMCEAEX-_o=ExchangeLabs_ou=Exchange+20Administrative+20Group+20+28FYDIBOHF23SPDLT+29_cn=Recipients_cn=ec3959f9c40d42f297dc33ec60897d03-e20cef60-a1@namprd18.prod.outlook.com",
+            "IMCEAEX-_o=ExchangeLabs_ou=Exchange+20Administrative+20Group+20+28FYDIBOHF23SPDLT+29_cn=Recipients_cn=23901d2c2bef4147b7fbd53fec2719fb-b90a9d0b-76@namprd18.prod.outlook.com"
+          ]
+        },
+        "Actalentservices": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "jbilling@actalentservices.com",
+            "mschager@actalentservices.com",
+            "dpearso@actalentservices.com"
+          ]
+        },
+        "Collabera": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "sheetal.jadeja@collabera.com",
+            "anna.nassinovskaia@collabera.com",
+            "grace.lewis@collabera.com"
+          ]
+        },
+        "Teksystems": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "cdelsing@teksystems.com"
+          ]
+        },
+        "Protiviti": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "noah.kessler@protiviti.com",
+            "allie.delao@protiviti.com"
+          ]
+        },
+        "Slalom": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "laura.parker@slalom.com",
+            "matt.winegardner@slalom.com",
+            "sophia.bailly@slalom.com"
+          ]
+        },
+        "24Seveninc": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "brianm@24seveninc.com"
+          ]
+        },
+        "Accenture": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "Laura.lundbeck@accenture.com",
+            "matthew.c.gracey@accenture.com"
+          ]
+        },
+        "Aditiconsulting": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "porusv@aditiconsulting.com",
+            "amazonsow@aditiconsulting.com",
+            "anilsb@aditiconsulting.com",
+            "joe.christensen@aditiconsulting.com",
+            "johnrr@aditiconsulting.com",
+            "carissa.edstrom@aditiconsulting.com",
+            "matt.stallings@aditiconsulting.com",
+            "leah.moore@aditiconsulting.com",
+            "vishwa.arora@aditiconsulting.com",
+            "archanam@aditiconsulting.com",
+            "harrison.johnson@aditiconsulting.com"
+          ]
+        },
+        "Inspyrsolutions": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "dmartini@inspyrsolutions.com"
+          ]
+        },
+        "Anthesisgroup": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "jason.gooden@anthesisgroup.com"
+          ]
+        },
+        "Apexsystems": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "sdefrancesco@apexsystems.com"
+          ]
+        },
+        "Aquent": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "lnorthcutt@aquent.com",
+            "ccox@aquent.com"
+          ]
+        },
+        "Ascendion": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "Rheaann.Rivera@Ascendion.com",
+            "victoria.braun@ascendion.com"
+          ]
+        },
+        "Beaconengineers": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "alex@beaconengineers.com"
+          ]
+        },
+        "Blinkux": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "lauren@blinkux.com"
+          ]
+        },
+        "Selectgroup": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "mfikse@selectgroup.com",
+            "mgarcia@selectgroup.com",
+            "lromano@selectgroup.com"
+          ]
+        },
+        "Capgemini": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "suneet.singh@capgemini.com"
+          ]
+        },
+        "Clearsulting": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "John.Tilow@clearsulting.com"
+          ]
+        },
+        "Cognizant": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "anurags@cognizant.com",
+            "ritu.mahey@cognizant.com"
+          ]
+        },
+        "Creativecircle": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "khenson@creativecircle.com",
+            "slara@creativecircle.com",
+            "MEMorris@creativecircle.com"
+          ]
+        },
+        "Cumming-Group": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "csmith@cumming-group.com"
+          ]
+        },
+        "Deloitte": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "mosaraf@deloitte.com"
+          ]
+        },
+        "Derflan": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "shanaz@derflan.com"
+          ]
+        },
+        "Deviget": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "megan@deviget.com"
+          ]
+        },
+        "Brooksource": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "mlochen@brooksource.com",
+            "hgarrison@brooksource.com"
+          ]
+        },
+        "Ensemble": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "calvinl@ensemble.com",
+            "alexandra@ensemble.com",
+            "dannyy@ensemble.com"
+          ]
+        },
+        "Eosits": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "Amy.Parks@eosits.com",
+            "Bobby.hampton@eosits.com"
+          ]
+        },
+        "Epam": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "alex_khachaturan@epam.com"
+          ]
+        },
+        "Manpowergroup": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "nina.martis@manpowergroup.com"
+          ]
+        },
+        "Futuralis": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "apamula@futuralis.com"
+          ]
+        },
+        "Game7Staffing": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "keely@game7staffing.com"
+          ]
+        },
+        "Globallogic": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "ram.venkat@globallogic.com"
+          ]
+        },
+        "H10Capital": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "sadie@h10capital.com",
+            "bob@h10capital.com"
+          ]
+        },
+        "Infoanalytica": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "Ramandeep.singh@infoanalytica.com",
+            "Megha.C@infoanalytica.com"
+          ]
+        },
+        "Infosys": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "ragunandan.r@infosys.com"
+          ]
+        },
+        "Insight-Experience": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "krista@insight-experience.com"
+          ]
+        },
+        "Insightglobal": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "emma.rasmussen@insightglobal.com",
+            "Regina.Emmanuel@InsightGlobal.com"
+          ]
+        },
+        "Kascope": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "ggraver@kascope.com",
+            "cclapp@kascope.com",
+            "mderickson@kascope.com",
+            "dbirkenheuer@kascope.com",
+            "jlauderman@kascope.com"
+          ]
+        },
+        "Keywordsstudios": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "hlackmeyer@keywordsstudios.com",
+            "CBarbosa@keywordsstudios.com",
+            "mcarr@keywordsstudios.com"
+          ]
+        },
+        "Kforce": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "BMaxwell@kforce.com",
+            "HKradenpoth@kforce.com",
+            "TBrown@kforce.com"
+          ]
+        },
+        "Lenorasystems": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "amazon@lenorasystems.com",
+            "aneeradh@lenorasystems.com",
+            "vamshi@lenorasystems.com"
+          ]
+        },
+        "Mss": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "maria.delre@mss.ca"
+          ]
+        },
+        "Monks": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "chelsea.bosley@monks.com"
+          ]
+        },
+        "Multiplayer": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "tara@multiplayer.studio",
+            "nikki@multiplayer.studio"
+          ]
+        },
+        "Peopletech": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "mohammed.fazal@peopletech.com",
+            "sankeerthana.chowdary@peopletech.com",
+            "vandana.ganjikunta@peopletech.com",
+            "manasa.kandhibanda@peopletech.com",
+            "ajay.dohray@peopletech.com"
+          ]
+        },
+        "Pointb": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "sbaron@PointB.com",
+            "ctan@pointb.com"
+          ]
+        },
+        "Persistent": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "hemkiran_daryanani@persistent.com",
+            "vikram_joshi@persistent.com"
+          ]
+        },
+        "Pwc": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "jennifer.shafizadeh@pwc.com",
+            "sydney.devyak@pwc.com",
+            "tomas.alejandro.viadas@pwc.com",
+            "bebe.lach@pwc.com"
+          ]
+        },
+        "Qvest": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "jkatchen@qvest.com"
+          ]
+        },
+        "Runstudios": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "dmohr@runstudios.com",
+            "suppliercommamzn@runstudios.com",
+            "asciabica@runstudios.com",
+            "krobert@runstudios.com",
+            "jcaldwell@runstudios.com",
+            "bhartmann@runstudios.com"
+          ]
+        },
+        "Salesforce": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "jgralla@salesforce.com"
+          ]
+        },
+        "Sidgs": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "rajeevs@sidgs.com",
+            "sreedevik@sidgs.com"
+          ]
+        },
+        "Simplicityci": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "SarahG@simplicityci.com",
+            "ac@simplicityci.com"
+          ]
+        },
+        "Testdevlab": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "aleksejs.levenciks@testdevlab.com"
+          ]
+        },
+        "Tcs": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "Avinash.Punjabi@tcs.com",
+            "priyadarshini.subramani@tcs.com"
+          ]
+        },
+        "Siegfriedgroup": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "speterlin@siegfriedgroup.com"
+          ]
+        },
+        "Tripleco": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "hdicello@tripleco.com",
+            "Matt.logan@tripleco.com"
+          ]
+        },
+        "Unifyconsulting": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "jason.young@unifyconsulting.com",
+            "alan.kim@unifyconsulting.com"
+          ]
+        },
+        "Waivaero": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "wjohnson@waivaero.com"
+          ]
+        },
+        "Wipro": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "Yukti.khanna@wipro.com"
+          ]
+        },
+        "Experis": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "celine.waldrop@experis.com"
+          ]
+        },
+        "Calculatedhire": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "brueschenberg@calculatedhire.com"
+          ]
+        },
+        "Pinnacle1": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "aj1563@pinnacle1.com",
+            "karthikeyan.kandasamy@pinnacle1.com",
+            "jyoti.bastola@pinnacle1.com"
+          ]
+        },
+        "Fiduciarytech": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "joe@fiduciarytech.com"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Lanni Aguilan",
+      "role": "Operations",
+      "total_emails": 45,
+      "total_meetings": 0,
+      "companies": {
+        "Harborglobal": {
+          "emails": 6,
+          "meetings": 0,
+          "contacts": [
+            "dani.ramos@harborglobal.com",
+            "monarose.llenarisas@harborglobal.com",
+            "janine.arma@harborglobal.com"
+          ]
+        },
+        "Accordant Investments": {
+          "emails": 6,
+          "meetings": 0,
+          "contacts": [
+            "venz.salvador@accordantinvestments.com",
+            "mark.macabacyao@accordantinvestments.com",
+            "john.mojica@accordantinvestments.com"
+          ]
+        },
+        "Nri-Inc": {
+          "emails": 6,
+          "meetings": 0,
+          "contacts": [
+            "jarcilla@nri-inc.com",
+            "dbanag@nri-inc.com",
+            "kpiring@nri-inc.com"
+          ]
+        },
+        "Payrollvault": {
+          "emails": 6,
+          "meetings": 0,
+          "contacts": [
+            "elsie.nash@payrollvault.com",
+            "kevin.nash@payrollvault.com"
+          ]
+        },
+        "Seattlecommercialcleaners": {
+          "emails": 5,
+          "meetings": 0,
+          "contacts": [
+            "meanne@seattlecommercialcleaners.com",
+            "ryan@seattlecommercialcleaners.com"
+          ]
+        },
+        "Alum": {
+          "emails": 4,
+          "meetings": 0,
+          "contacts": [
+            "dbramos1@alum.up.edu.ph"
+          ]
+        },
+        "Delillecellars": {
+          "emails": 4,
+          "meetings": 0,
+          "contacts": [
+            "Nuraina@delillecellars.com"
+          ]
+        },
+        "Careerbuilder": {
+          "emails": 2,
+          "meetings": 0,
+          "contacts": [
+            "accounts.receivable@careerbuilder.com",
+            "Donald.Gore@careerbuilder.com"
+          ]
+        },
+        "Uptopcorp": {
+          "emails": 2,
+          "meetings": 0,
+          "contacts": [
+            "cnishizaki@uptopcorp.com"
+          ]
+        },
+        "Isupportworldwide": {
+          "emails": 2,
+          "meetings": 0,
+          "contacts": [
+            "jmalabanan@isupportworldwide.com",
+            "employeerelations@isupportworldwide.com"
+          ]
+        },
+        "Techservealliance": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "Rohrbaugh@techservealliance.org"
+          ]
+        },
+        "Shinypennyfinance": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "lindsay@shinypennyfinance.com"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Julia Dusseau",
+      "role": "BDM",
+      "total_emails": 28,
+      "total_meetings": 6,
+      "companies": {
+        "Harborglobal": {
+          "emails": 7,
+          "meetings": 0,
+          "contacts": [
+            "Amy.Napolitano@harborglobal.com",
+            "brad.rogers@harborglobal.com",
+            "laura.ikens@harborglobal.com",
+            "Stephanie.DeClue@harborglobal.com"
+          ]
+        },
+        "Northstar": {
+          "emails": 2,
+          "meetings": 4,
+          "contacts": [
+            "RLackner@NorthStar.com",
+            "rlackner@northstar.com",
+            "VLee@NorthStar.com"
+          ]
+        },
+        "Accordant Investments": {
+          "emails": 6,
+          "meetings": 0,
+          "contacts": [
+            "cindyk@accordantinvestments.com",
+            "stephen.nelson@accordantinvestments.com"
+          ]
+        },
+        "Uline": {
+          "emails": 4,
+          "meetings": 0,
+          "contacts": [
+            "jo.guadalupe@uline.com",
+            "mike.tinholt@uline.com"
+          ]
+        },
+        "Aravo": {
+          "emails": 2,
+          "meetings": 1,
+          "contacts": [
+            "jgrieve@aravo.com"
+          ]
+        },
+        "PACCAR": {
+          "emails": 2,
+          "meetings": 0,
+          "contacts": [
+            "Naaznine.Chandiwala@PACCAR.com",
+            "Dylan.Holden@paccar.com"
+          ]
+        },
+        "Anchorpointmg": {
+          "emails": 2,
+          "meetings": 0,
+          "contacts": [
+            "svemireddy@anchorpointmg.com"
+          ]
+        },
+        "Russell Investments": {
+          "emails": 1,
+          "meetings": 1,
+          "contacts": [
+            "shryan@russellinvestments.com",
+            "mheck@russellinvestments.com",
+            "jmezel@russellinvestments.com",
+            "Interview1HR@russellinvestments.com"
+          ]
+        },
+        "Highspot": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "barrett.mattison@highspot.com"
+          ]
+        },
+        "Maestrolabs": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "Emilio@maestrolabs.com"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Sheila Alarte",
+      "role": "Screening Lead",
+      "total_emails": 23,
+      "total_meetings": 6,
+      "companies": {
+        "Uline": {
+          "emails": 10,
+          "meetings": 1,
+          "contacts": [
+            "Ron.Dove@uline.com",
+            "Harjot.Sandhu@uline.com",
+            "Jo.Guadalupe@uline.com",
+            "Mike.Tinholt@uline.com",
+            "rreed@uline.com"
+          ]
+        },
+        "Northstar": {
+          "emails": 6,
+          "meetings": 4,
+          "contacts": [
+            "RLackner@NorthStar.com",
+            "rlackner@northstar.com",
+            "VLee@NorthStar.com"
+          ]
+        },
+        "Harborglobal": {
+          "emails": 5,
+          "meetings": 0,
+          "contacts": [
+            "Stephanie.DeClue@harborglobal.com",
+            "Colleen.Cable@harborglobal.com"
+          ]
+        },
+        "Russell Investments": {
+          "emails": 2,
+          "meetings": 1,
+          "contacts": [
+            "shryan@russellinvestments.com",
+            "mheck@russellinvestments.com",
+            "jmezel@russellinvestments.com",
+            "Interview1HR@russellinvestments.com"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Tet Hernandez",
+      "role": "Recruiter",
+      "total_emails": 20,
+      "total_meetings": 4,
+      "companies": {
+        "Myworkmails": {
+          "emails": 9,
+          "meetings": 0,
+          "contacts": [
+            "pranaygarg@myworkmails.com"
+          ]
+        },
+        "Northstar": {
+          "emails": 6,
+          "meetings": 3,
+          "contacts": [
+            "vlee@northstar.com",
+            "VLee@NorthStar.com",
+            "rlackner@northstar.com",
+            "RLackner@NorthStar.com"
+          ]
+        },
+        "Russell Investments": {
+          "emails": 4,
+          "meetings": 0,
+          "contacts": [
+            "shryan@russellinvestments.com",
+            "apickeri@russellinvestments.com"
+          ]
+        },
+        "Harborglobal": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "Stephanie.DeClue@harborglobal.com"
+          ]
+        },
+        "Uline": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "Ron.Dove@uline.com",
+            "Harjot.Sandhu@uline.com",
+            "Jo.Guadalupe@uline.com",
+            "Mike.Tinholt@uline.com",
+            "rreed@uline.com"
+          ]
+        }
+      }
+    },
+    {
+      "name": "April Melton",
+      "role": "BDM",
+      "total_emails": 11,
+      "total_meetings": 1,
+      "companies": {
+        "Phoenixfashioninc": {
+          "emails": 4,
+          "meetings": 1,
+          "contacts": [
+            "sophie@phoenixfashioninc.com"
+          ]
+        },
+        "Verizon": {
+          "emails": 2,
+          "meetings": 0,
+          "contacts": [
+            "sophie_morgan@verizon.net"
+          ]
+        },
+        "Prg-Usa": {
+          "emails": 2,
+          "meetings": 0,
+          "contacts": [
+            "mmayhew@prg-usa.com"
+          ]
+        },
+        "Sabre": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "david.augustine@sabre.com"
+          ]
+        },
+        "Westwoodgroup": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "dkurtz@westwoodgroup.com"
+          ]
+        },
+        "Corticare": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "kristad@corticare.com"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Rey",
+      "role": "Recruiter",
+      "total_emails": 10,
+      "total_meetings": 1,
+      "companies": {
+        "Amazon": {
+          "emails": 6,
+          "meetings": 0,
+          "contacts": [
+            "rwaljona@amazon.com"
+          ]
+        },
+        "Thesmartsource": {
+          "emails": 4,
+          "meetings": 0,
+          "contacts": [
+            "rylemsupport@thesmartsource.com"
+          ]
+        },
+        "Uline": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "Ron.Dove@uline.com",
+            "Harjot.Sandhu@uline.com",
+            "Jo.Guadalupe@uline.com",
+            "Mike.Tinholt@uline.com",
+            "rreed@uline.com"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Honey Cabatingan",
+      "role": "SDR",
+      "total_emails": 9,
+      "total_meetings": 1,
+      "companies": {
+        "Freemanco": {
+          "emails": 1,
+          "meetings": 1,
+          "contacts": [
+            "brandi.young@freemanco.com"
+          ]
+        },
+        "Tealium": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "rhonda.nichols@tealium.com"
+          ]
+        },
+        "Wilsonart": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "kimberly.hudson@wilsonart.com"
+          ]
+        },
+        "Blackbox": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "christopher.brunetti@blackbox.com"
+          ]
+        },
+        "Nfsmith": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "cbirkhoff@nfsmith.com"
+          ]
+        },
+        "Priceeasy": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "alexander.gershkovich@priceeasy.com"
+          ]
+        },
+        "Cbts": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "vinay.biradar@cbts.com"
+          ]
+        },
+        "Appliedsystems": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "devya.pillai@appliedsystems.com"
+          ]
+        },
+        "Hardrockdigital": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "denise.nethery@hardrockdigital.com"
+          ]
+        },
+        "Freeman": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "Brandi.Brown@freeman.com"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Isaac Reyes",
+      "role": "Recruiter",
+      "total_emails": 2,
+      "total_meetings": 2,
+      "companies": {
+        "Amazon": {
+          "emails": 1,
+          "meetings": 1,
+          "contacts": [
+            "apandrey@amazon.ph",
+            "mkristwe@amazon.com"
+          ]
+        },
+        "T-Mobile": {
+          "emails": 1,
+          "meetings": 0,
+          "contacts": [
+            "Matthew.Harding21@T-Mobile.com"
+          ]
+        },
+        "Allegisglobalsolutions": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "krwebster@allegisglobalsolutions.com"
+          ]
+        },
+        "Agilepremier": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "falipusan@agilepremier.com"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Chino Matura",
+      "role": "Recruiter",
+      "total_emails": 4,
+      "total_meetings": 0,
+      "companies": {
+        "Zillowgroup": {
+          "emails": 4,
+          "meetings": 0,
+          "contacts": [
+            "v-darag@zillowgroup.com",
+            "v-milliew@zillowgroup.com",
+            "contingentworkforce@zillowgroup.com"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Lisa Flores",
+      "role": "Operations",
+      "total_emails": 0,
+      "total_meetings": 2,
+      "companies": {
+        "Isupportworldwide": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "jmalabanan@isupportworldwide.com",
+            "employeerelations@isupportworldwide.com"
+          ]
+        },
+        "Shinypennyfinance": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "lindsay@shinypennyfinance.com"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Jon Bobillo",
+      "role": "Operations",
+      "total_emails": 0,
+      "total_meetings": 1,
+      "companies": {
+        "Coordinator": {
+          "emails": 0,
+          "meetings": 1,
+          "contacts": [
+            "linkedin-corporation@coordinator.gong.io"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Jean Michelle Tayco",
+      "role": "Support/SDR",
+      "total_emails": 0,
+      "total_meetings": 0,
+      "companies": {}
+    },
+    {
+      "name": "Dee",
+      "role": "Support/SDR",
+      "total_emails": 0,
+      "total_meetings": 0,
+      "companies": {}
+    },
+    {
+      "name": "Dave Carzon",
+      "role": "Recruiter",
+      "total_emails": 0,
+      "total_meetings": 0,
+      "companies": {}
+    },
+    {
+      "name": "Joel",
+      "role": "Sourcing",
+      "total_emails": 0,
+      "total_meetings": 0,
+      "companies": {}
+    },
+    {
+      "name": "Angel",
+      "role": "Sourcing",
+      "total_emails": 0,
+      "total_meetings": 0,
+      "companies": {}
+    },
+    {
+      "name": "Aya Delos Santos",
+      "role": "Operations",
+      "total_emails": 0,
+      "total_meetings": 0,
+      "companies": {}
+    }
+  ]
+}

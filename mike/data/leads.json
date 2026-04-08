@@ -1,0 +1,591 @@
+{
+  "boards": [
+    {
+      "name": "Rylem Pipeline",
+      "cards": [
+        {
+          "id": "lead-wave-broadband",
+          "company": "Wave Broadband",
+          "contact": "HR / Recruiting",
+          "value": 80000,
+          "signal": "666 employees, Kirkland WA (Seattle area). 23+ open jobs hiring now \u2014 strong staffing need signal.",
+          "column": "New Leads",
+          "source": "Website Visitor Tracking",
+          "date": "2026-04-07",
+          "tags": [
+            "IT",
+            "Admin"
+          ]
+        },
+        {
+          "id": "lead-fis",
+          "company": "FIS (Fidelity National)",
+          "contact": "Supplier Diversity / Procurement",
+          "value": 150000,
+          "signal": "Actively hiring Supplier Diversity Program Lead \u2014 building diverse vendor program NOW",
+          "column": "New Leads",
+          "source": "AI Research",
+          "date": "2026-03-09",
+          "tags": [
+            "IT",
+            "Finance"
+          ]
+        },
+        {
+          "id": "lead-tenet",
+          "company": "Tenet Healthcare",
+          "contact": "Corporate Procurement / Supplier Diversity",
+          "value": 120000,
+          "signal": "100K+ employees, massive corporate back-office: IT, finance, HR, admin staffing needs",
+          "column": "New Leads",
+          "source": "AI Research",
+          "date": "2026-03-09",
+          "tags": [
+            "IT",
+            "Finance",
+            "Admin",
+            "HR"
+          ]
+        },
+        {
+          "id": "lead-morningstar",
+          "company": "Morningstar",
+          "contact": "Procurement / Supplier Diversity",
+          "value": 100000,
+          "signal": "10K employees, Chicago HQ. Finance + IT + marketing. Active diversity supplier program",
+          "column": "New Leads",
+          "source": "AI Research",
+          "date": "2026-03-09",
+          "tags": [
+            "Finance",
+            "IT",
+            "Marketing"
+          ]
+        },
+        {
+          "id": "lead-hubspot",
+          "company": "HubSpot",
+          "contact": "Procurement / TA Leadership",
+          "value": 90000,
+          "signal": "7K employees, remote-friendly, strong DEI. Needs engineers, marketing, HR, admin",
+          "column": "New Leads",
+          "source": "AI Research",
+          "date": "2026-03-09",
+          "tags": [
+            "IT",
+            "Marketing",
+            "HR",
+            "Admin"
+          ]
+        },
+        {
+          "id": "lead-onetrust",
+          "company": "OneTrust",
+          "contact": "VP of People / Talent Acquisition",
+          "value": 80000,
+          "signal": "Atlanta compliance tech, 2K+ employees scaling fast. IT, marketing, HR, admin needs",
+          "column": "New Leads",
+          "source": "AI Research",
+          "date": "2026-03-09",
+          "tags": [
+            "IT",
+            "Marketing",
+            "HR"
+          ]
+        },
+        {
+          "id": "lead-chewy",
+          "company": "Chewy",
+          "contact": "Supplier Diversity Portal",
+          "value": 75000,
+          "signal": "20K employees, FL HQ + multi-city. Formal supplier diversity program. Admin, IT, marketing",
+          "column": "New Leads",
+          "source": "AI Research",
+          "date": "2026-03-09",
+          "tags": [
+            "Admin",
+            "IT",
+            "Marketing"
+          ]
+        },
+        {
+          "id": "lead-coreweave",
+          "company": "CoreWeave",
+          "contact": "VP of People / TA Lead",
+          "value": 75000,
+          "signal": "NYC/Seattle cloud AI company scaling fast \u2014 SOX accounting + engineering roles",
+          "column": "New Leads",
+          "source": "AI Research",
+          "date": "2026-03-09",
+          "tags": [
+            "IT",
+            "Finance"
+          ]
+        },
+        {
+          "id": "lead-wayfair",
+          "company": "Wayfair",
+          "contact": "Procurement / TA Team",
+          "value": 70000,
+          "signal": "Boston eCommerce, 12K employees, post-layoff rebuilding with contract preference",
+          "column": "New Leads",
+          "source": "AI Research",
+          "date": "2026-03-09",
+          "tags": [
+            "IT",
+            "Marketing",
+            "Finance"
+          ]
+        },
+        {
+          "id": "lead-expedia",
+          "company": "Expedia Group",
+          "contact": "Staffing/MSP Vendor Team",
+          "value": 100000,
+          "signal": "17K employees Seattle. Engineers + finance + marketing post-layoffs. Supplier diversity.",
+          "column": "New Leads",
+          "source": "AI Research",
+          "date": "2026-03-09",
+          "tags": [
+            "IT",
+            "Finance",
+            "Marketing"
+          ]
+        },
+        {
+          "id": "lead-matchgroup",
+          "company": "Match Group",
+          "contact": "Head of TA / VP People",
+          "value": 65000,
+          "signal": "Dallas tech co, 2.5K employees. Engineers, data, marketing, creative designers",
+          "column": "New Leads",
+          "source": "AI Research",
+          "date": "2026-03-09",
+          "tags": [
+            "IT",
+            "Creative",
+            "Marketing"
+          ]
+        },
+        {
+          "id": "lead-guild",
+          "company": "Guild Education",
+          "contact": "People Team",
+          "value": 60000,
+          "signal": "Denver EdTech, 1K+ employees growing. All six Rylem verticals apply. Mission-aligned",
+          "column": "New Leads",
+          "source": "AI Research",
+          "date": "2026-03-09",
+          "tags": [
+            "IT",
+            "Marketing",
+            "HR",
+            "Admin"
+          ]
+        },
+        {
+          "id": "lead-childrens",
+          "company": "Seattle Children's Hospital",
+          "contact": "Supplier Diversity Program",
+          "value": 60000,
+          "signal": "9K employees, explicit supplier diversity program. IT, accounting, admin needs",
+          "column": "New Leads",
+          "source": "AI Research",
+          "date": "2026-03-09",
+          "tags": [
+            "IT",
+            "Admin",
+            "Finance"
+          ]
+        },
+        {
+          "id": "lead-relativity",
+          "company": "Relativity",
+          "contact": "People Team / LinkedIn",
+          "value": 55000,
+          "signal": "Chicago legal tech, 1.5K employees. Engineers, UX/UI, PMs, marketing, finance",
+          "column": "New Leads",
+          "source": "AI Research",
+          "date": "2026-03-09",
+          "tags": [
+            "IT",
+            "Creative",
+            "Finance"
+          ]
+        },
+        {
+          "id": "lead-ibotta",
+          "company": "Ibotta",
+          "contact": "CFO Office / Head of People",
+          "value": 50000,
+          "signal": "Denver fintech, recently IPO'd. Scaling ops post-IPO, needs structured staffing",
+          "column": "New Leads",
+          "source": "AI Research",
+          "date": "2026-03-09",
+          "tags": [
+            "IT",
+            "Finance",
+            "Marketing"
+          ]
+        },
+        {
+          "id": "lead-lumenalta",
+          "company": "Lumenalta",
+          "contact": "Operations / Procurement",
+          "value": 50000,
+          "signal": "NYC remote-first consultancy, 500-1K employees. Subcontracts heavily, diversity partner fit",
+          "column": "New Leads",
+          "source": "AI Research",
+          "date": "2026-03-09",
+          "tags": [
+            "IT",
+            "Creative"
+          ]
+        },
+        {
+          "id": "lead-finquery",
+          "company": "FinQuery",
+          "contact": "Head of People",
+          "value": 45000,
+          "signal": "Atlanta fintech, 300-500 employees. Engineers, accountants, marketing. Mid-market sweet spot",
+          "column": "New Leads",
+          "source": "AI Research",
+          "date": "2026-03-09",
+          "tags": [
+            "IT",
+            "Finance",
+            "Marketing"
+          ]
+        },
+        {
+          "id": "lead-solomonpage",
+          "company": "Solomon Page",
+          "contact": "Business Development / Partnerships",
+          "value": 40000,
+          "signal": "NYC staffing firm \u2014 PARTNER model. They need diverse subcontractors for client mandates",
+          "column": "New Leads",
+          "source": "AI Research",
+          "date": "2026-03-09",
+          "tags": [
+            "IT",
+            "Finance",
+            "Admin"
+          ]
+        },
+        {
+          "id": "lead-kforce",
+          "company": "Kforce",
+          "contact": "Business Development / Partnerships",
+          "value": 40000,
+          "signal": "Tampa staffing firm, 6K employees. Needs diverse agency partners for client requirements",
+          "column": "New Leads",
+          "source": "AI Research",
+          "date": "2026-03-09",
+          "tags": [
+            "IT",
+            "Finance"
+          ]
+        },
+        {
+          "id": "lead-port",
+          "company": "Port of Seattle",
+          "contact": "WMBE Procurement",
+          "value": 45000,
+          "signal": "Government with formal diversity contracting. IT, admin, finance \u2014 steady recurring revenue",
+          "column": "New Leads",
+          "source": "AI Research",
+          "date": "2026-03-09",
+          "tags": [
+            "IT",
+            "Admin"
+          ]
+        },
+        {
+          "id": "lead-telus",
+          "company": "TELUS International",
+          "contact": "US Procurement / Vendor Management",
+          "value": 60000,
+          "signal": "#1 on FlexJobs 2026 remote hiring list. 75K employees, massive remote workforce needs",
+          "column": "New Leads",
+          "source": "AI Research",
+          "date": "2026-03-09",
+          "tags": [
+            "IT",
+            "Admin"
+          ]
+        },
+        {
+          "id": "lead-gitlab",
+          "company": "GitLab",
+          "contact": "Head of People / Procurement",
+          "value": 45000,
+          "signal": "Fully remote, 2K employees. All verticals, progressive vendor policies, no geo limits",
+          "column": "New Leads",
+          "source": "AI Research",
+          "date": "2026-03-09",
+          "tags": [
+            "IT",
+            "Marketing",
+            "HR"
+          ]
+        },
+        {
+          "id": "lead-boeing-div",
+          "company": "Boeing",
+          "contact": "David Mai (david.mai3@boeing.com)",
+          "value": 200000,
+          "signal": "Diversity supplier program \u2014 massive IT/eng staffing needs",
+          "column": "Contacted",
+          "source": "Diversity Outreach",
+          "date": "2026-03-18",
+          "tags": [
+            "IT"
+          ]
+        },
+        {
+          "id": "lead-amazon-div",
+          "company": "Amazon",
+          "contact": "Melissa Adams (adamsm@amazon.com)",
+          "value": 250000,
+          "signal": "Diversity supplier program \u2014 rebuilding contractor base after cuts",
+          "column": "Contacted",
+          "source": "Diversity Outreach",
+          "date": "2026-03-18",
+          "tags": [
+            "IT"
+          ]
+        },
+        {
+          "id": "lead-google-div",
+          "company": "Google",
+          "contact": "Xayla Wilson (xayla@google.com)",
+          "value": 200000,
+          "signal": "Diversity supplier onboarding \u2014 IT/creative/marketing staffing",
+          "column": "Contacted",
+          "source": "Diversity Outreach",
+          "date": "2026-03-18",
+          "tags": [
+            "IT",
+            "Creative"
+          ]
+        },
+        {
+          "id": "lead-fortive-div",
+          "company": "Fortive",
+          "contact": "Supplier Diversity (supplierdiversity@fortive.com)",
+          "value": 100000,
+          "signal": "Industrial tech conglomerate \u2014 finance/IT roles across subsidiaries",
+          "column": "Contacted",
+          "source": "Diversity Outreach",
+          "date": "2026-03-18",
+          "tags": [
+            "IT",
+            "Finance"
+          ]
+        },
+        {
+          "id": "lead-omwbe",
+          "company": "WA State OMWBE",
+          "contact": "supplierdiversity@omwbe.wa.gov",
+          "value": 75000,
+          "signal": "State diversity certification portal \u2014 government contract gateway",
+          "column": "Contacted",
+          "source": "Diversity Outreach",
+          "date": "2026-03-18",
+          "tags": [
+            "Admin",
+            "HR"
+          ]
+        },
+        {
+          "id": "lead-starbucks-div",
+          "company": "Starbucks",
+          "contact": "supplier.diversity@starbucks.com",
+          "value": 150000,
+          "signal": "HQ Seattle \u2014 IT/finance/marketing staffing, diversity-first procurement",
+          "column": "Contacted",
+          "source": "Diversity Outreach",
+          "date": "2026-03-18",
+          "tags": [
+            "IT",
+            "Finance",
+            "Marketing"
+          ]
+        },
+        {
+          "id": "lead-alaska-div",
+          "company": "Alaska Airlines",
+          "contact": "supplier.diversity@alaskaair.com",
+          "value": 100000,
+          "signal": "\u274c EMAIL BOUNCED \u2014 need correct contact",
+          "column": "New Leads",
+          "source": "Diversity Outreach",
+          "date": "2026-03-18",
+          "tags": [
+            "IT",
+            "Finance",
+            "Admin"
+          ]
+        },
+        {
+          "id": "lead-boeing-assess",
+          "company": "Boeing (Assessment)",
+          "contact": "boeingassessment@boeing.com",
+          "value": 200000,
+          "signal": "Separate Boeing supplier assessment intake \u2014 second contact path",
+          "column": "Contacted",
+          "source": "Diversity Outreach",
+          "date": "2026-03-18",
+          "tags": [
+            "IT"
+          ]
+        },
+        {
+          "id": "lead-salesforce-div",
+          "company": "Salesforce",
+          "contact": "Hala Hashim (hhashim@salesforce.com)",
+          "value": 150000,
+          "signal": "\ud83d\udd25 LinkedIn connection accepted \u2014 warm lead. Follow up TODAY",
+          "column": "Contacted",
+          "source": "Diversity Outreach",
+          "date": "2026-03-18",
+          "tags": [
+            "IT",
+            "Marketing"
+          ]
+        },
+        {
+          "id": "lead-avalara-div",
+          "company": "Avalara",
+          "contact": "Ee Lyn Khoo (eelyn.khoo@avalara.com)",
+          "value": 80000,
+          "signal": "CPO \u2014 Seattle tech company, IT/finance staffing needs",
+          "column": "Contacted",
+          "source": "Diversity Outreach",
+          "date": "2026-03-18",
+          "tags": [
+            "IT",
+            "Finance"
+          ]
+        },
+        {
+          "id": "lead-okta-div",
+          "company": "Okta",
+          "contact": "Jenna Newbrey (jenna.newbrey@okta.com)",
+          "value": 100000,
+          "signal": "Sourcing & Category Manager \u2014 cybersecurity/IT staffing",
+          "column": "Contacted",
+          "source": "Diversity Outreach",
+          "date": "2026-03-18",
+          "tags": [
+            "IT"
+          ]
+        },
+        {
+          "id": "lead-highspot-div",
+          "company": "Highspot",
+          "contact": "Julia Braun (julia.braun@highspot.com)",
+          "value": 75000,
+          "signal": "Global Procurement Leader \u2014 Seattle SaaS, IT/marketing roles",
+          "column": "Contacted",
+          "source": "Diversity Outreach",
+          "date": "2026-03-18",
+          "tags": [
+            "IT",
+            "Marketing"
+          ]
+        },
+        {
+          "id": "lead-highspot-dei",
+          "company": "Highspot (DEI)",
+          "contact": "Jyl Feliciano (jyl.feliciano@highspot.com)",
+          "value": 75000,
+          "signal": "VP DEI&B \u2014 second contact path at Highspot",
+          "column": "Contacted",
+          "source": "Diversity Outreach",
+          "date": "2026-03-18",
+          "tags": [
+            "IT",
+            "HR"
+          ]
+        },
+        {
+          "id": "lead-redfin-div",
+          "company": "Redfin",
+          "contact": "Toai Nguyen (toai.nguyen@redfin.com)",
+          "value": 80000,
+          "signal": "Head of Procurement \u2014 Seattle HQ, IT/finance staffing",
+          "column": "Contacted",
+          "source": "Diversity Outreach",
+          "date": "2026-03-18",
+          "tags": [
+            "IT",
+            "Finance"
+          ]
+        },
+        {
+          "id": "lead-docusign-div",
+          "company": "DocuSign",
+          "contact": "Doug Seward (doug.seward@docusign.com)",
+          "value": 100000,
+          "signal": "Dir Vendor Management \u2014 IT/finance staffing needs",
+          "column": "Contacted",
+          "source": "Diversity Outreach",
+          "date": "2026-03-18",
+          "tags": [
+            "IT",
+            "Finance"
+          ]
+        },
+        {
+          "id": "lead-docusign-cpo",
+          "company": "DocuSign (CPO)",
+          "contact": "Isabella Versiani (isabella.versiani@docusign.com)",
+          "value": 100000,
+          "signal": "CPO \u2014 second contact at DocuSign",
+          "column": "Contacted",
+          "source": "Diversity Outreach",
+          "date": "2026-03-18",
+          "tags": [
+            "IT",
+            "Finance"
+          ]
+        },
+        {
+          "id": "lead-temporal",
+          "company": "Temporal Technologies",
+          "contact": "VP of People / Talent Acquisition",
+          "value": 120000,
+          "signal": "Raised $300M Series D at $5B valuation (Feb 2026). Hiring heavily in Seattle/Bellevue \u2014 31+ open roles including engineers, finance, admin. Remote-first but scaling Seattle headcount aggressively. AI infrastructure company riding agentic AI wave.",
+          "column": "New Leads",
+          "source": "Intent Radar - GeekWire/PSBJ - 2026-03-23",
+          "date": "2026-03-23",
+          "tags": [
+            "IT",
+            "Finance",
+            "Admin"
+          ],
+          "score": 11,
+          "website": "temporal.io"
+        },
+        {
+          "id": "lead-echodyne",
+          "company": "Echodyne",
+          "contact": "Maria Mattson, VP HR",
+          "value": 90000,
+          "signal": "$40M investment in new 86K sqft WA manufacturing facility. Hiring 200+ employees, production starting summer 2026. Kirkland-based defense radar company. Backed by Bill Gates, Madrona, NEA. Active talent acquisition team (Brandie Reed, Principal Recruiter).",
+          "column": "New Leads",
+          "source": "Intent Radar - GeekWire/PSBJ - 2026-03-23",
+          "date": "2026-03-23",
+          "tags": [
+            "IT",
+            "Admin",
+            "HR"
+          ],
+          "score": 12,
+          "website": "echodyne.com"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — Rylem Pulse</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0e17;
+  --surface:#0f1623;
+  --surface2:#141e2e;
+  --border:#1c2a3a;
+  --border-hover:#253848;
+  --text:#e2e8f0;
+  --text2:#7a8fa6;
+  --accent:#00d4ff;
+  --accent-dim:rgba(0,212,255,.12);
+  --accent-border:rgba(0,212,255,.25);
+  --red:#f04060;
+  --radius-sm:8px;
+}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+.login-wrap{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 30%, #0d1f35 0%, #0a0e17 70%);
+}
+.login-card{
+  background:rgba(15,22,35,.9);border:1px solid var(--border-hover);border-radius:20px;
+  padding:48px 40px;width:340px;text-align:center;
+  box-shadow:0 40px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(0,212,255,.05);
+}
+.login-logo{
+  width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#0d2040,#1a3a5c);
+  border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;
+  font-size:22px;margin:0 auto 20px;box-shadow:0 0 24px rgba(0,212,255,.15)
+}
+.login-title{font-size:18px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px}
+.login-sub{font-size:13px;color:var(--text2);margin-bottom:28px}
+.login-input{
+  width:100%;padding:12px 16px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius-sm);color:var(--text);font-size:14px;outline:none;transition:all .2s;
+  margin-bottom:14px;
+}
+.login-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,212,255,.1)}
+.login-btn{
+  width:100%;padding:12px;border:none;border-radius:var(--radius-sm);
+  background:linear-gradient(135deg,#0d3a5a,#0a2a45);color:var(--accent);
+  font-size:14px;font-weight:600;cursor:pointer;letter-spacing:.5px;
+  border:1px solid var(--accent-border);transition:all .2s
+}
+.login-btn:hover{background:linear-gradient(135deg,#114a70,#0d3a5a);box-shadow:0 0 16px rgba(0,212,255,.15)}
+.login-btn:disabled{opacity:.5;cursor:not-allowed}
+.login-err{color:#ff2d55;font-size:12px;margin-top:10px;min-height:18px}
+</style>
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">🎯</div>
+    <div class="login-title">Pulse</div>
+    <div class="login-sub">Rylem Staffing</div>
+    <input class="login-input" type="email" id="email-input" placeholder="Email" autocomplete="email">
+    <input class="login-input" type="password" id="pw-input" placeholder="Password" autocomplete="current-password"
+      onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" id="login-btn" onclick="doLogin()">Sign In →</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const db = window.supabase.createClient(
+  'https://ilbfbbcaaonxejvnkffi.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsYmZiYmNhYW9ueGVqdm5rZmZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNjI3MDQsImV4cCI6MjA5MDczODcwNH0.JeL849o9ehf9Dekh6n-sYa8qtgjcpOLGdBVQPL3fDgw'
+);
+
+// If already logged in, redirect
+db.auth.getSession().then(({data:{session}}) => {
+  if (session) window.location.replace('bdm.html');
+});
+
+async function doLogin() {
+  const email = document.getElementById('email-input').value.trim();
+  const pw = document.getElementById('pw-input').value;
+  const errEl = document.getElementById('login-err');
+  const btn = document.getElementById('login-btn');
+  errEl.textContent = '';
+
+  if (!email || !pw) { errEl.textContent = 'Enter email and password.'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+
+  const { error } = await db.auth.signInWithPassword({ email, password: pw });
+
+  if (error) {
+    errEl.textContent = 'Invalid email or password';
+    btn.disabled = false;
+    btn.textContent = 'Sign In →';
+    return;
+  }
+
+  // Clear old hardcoded auth
+  localStorage.removeItem('bdm_auth_v1');
+  window.location.replace('bdm.html');
+}
+
+document.addEventListener('DOMContentLoaded', () => document.getElementById('email-input').focus());
+</script>
+</body>
+</html>

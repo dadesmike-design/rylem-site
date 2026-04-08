@@ -1,0 +1,329 @@
+{
+  "version": "1.0",
+  "accounts": {
+    "coreweave": {
+      "company": "CoreWeave",
+      "industry": "Cloud Infrastructure / AI",
+      "signal": "Pre-IPO, Kirkland WA, massive engineering hiring",
+      "sequence_step": 1,
+      "days_since_touch": 0,
+      "contacts": [
+        {
+          "id": "coreweave-elaine",
+          "name": "Elaine Lu",
+          "first_name": "Elaine",
+          "title": "VP Engineering Operations",
+          "email": "elu@coreweave.com",
+          "phone": "",
+          "linkedin": "https://linkedin.com/in/lu-elaine",
+          "role": "champion",
+          "sequence_step": 1,
+          "status": "active"
+        },
+        {
+          "id": "coreweave-nitin",
+          "name": "Nitin Bahadur",
+          "first_name": "Nitin",
+          "title": "Sr Director of Engineering",
+          "email": "nbahadur@coreweave.com",
+          "phone": "",
+          "linkedin": "https://linkedin.com/in/nitin-bahadur",
+          "role": "champion",
+          "sequence_step": 1,
+          "status": "active"
+        },
+        {
+          "id": "coreweave-parik",
+          "name": "Parik Pol",
+          "first_name": "Parik",
+          "title": "Director of Engineering",
+          "email": "ppol@coreweave.com",
+          "phone": "",
+          "linkedin": "https://linkedin.com/in/parik-pol",
+          "role": "peer",
+          "sequence_step": 1,
+          "status": "pending"
+        }
+      ]
+    },
+    "temporal": {
+      "company": "Temporal Technologies",
+      "industry": "Developer Infrastructure",
+      "signal": "$300M Series D, engineering leadership target",
+      "sequence_step": 1,
+      "days_since_touch": 0,
+      "contacts": [
+        {
+          "id": "temporal-rohit",
+          "name": "Rohit Gupta",
+          "first_name": "Rohit",
+          "title": "Sr Director of Engineering",
+          "email": "rohit@temporal.io",
+          "phone": "",
+          "linkedin": "https://linkedin.com/in/rohitbhushan",
+          "role": "champion",
+          "sequence_step": 1,
+          "status": "active"
+        },
+        {
+          "id": "temporal-maxim",
+          "name": "Maxim Fateev",
+          "first_name": "Maxim",
+          "title": "Co-Founder & CTO",
+          "email": "maxim.fateev@temporal.io",
+          "phone": "",
+          "linkedin": "https://www.linkedin.com/in/fateev/",
+          "role": "champion",
+          "sequence_step": 1,
+          "status": "active"
+        }
+      ]
+    },
+    "xbow": {
+      "company": "XBow",
+      "industry": "AI Security",
+      "signal": "$120M Series C, 2 weeks ago",
+      "sequence_step": 1,
+      "days_since_touch": 0,
+      "contacts": [
+        {
+          "id": "xbow-oege",
+          "name": "Oege de Moor",
+          "first_name": "Oege",
+          "title": "CEO & Founder",
+          "email": "oege@xbow.com",
+          "phone": "",
+          "linkedin": "https://linkedin.com/in/oegedemoor/",
+          "role": "champion",
+          "sequence_step": 1,
+          "status": "active"
+        }
+      ]
+    },
+    "menlosecurity": {
+      "company": "Menlo Security",
+      "industry": "Cybersecurity",
+      "signal": "Zero-trust leader, active IT/security hiring",
+      "sequence_step": 1,
+      "days_since_touch": 0,
+      "contacts": [
+        {
+          "id": "menlo-tim",
+          "name": "Tim Olson",
+          "first_name": "Tim",
+          "title": "VP of Engineering",
+          "email": "tolson@menlosecurity.com",
+          "phone": "",
+          "linkedin": "https://www.linkedin.com/in/timolson4/",
+          "role": "champion",
+          "sequence_step": 1,
+          "status": "active"
+        }
+      ]
+    },
+    "carta": {
+      "company": "Carta",
+      "industry": "FinTech",
+      "signal": "IPO-track fintech, scaling engineering",
+      "sequence_step": 1,
+      "days_since_touch": 0,
+      "contacts": [
+        {
+          "id": "carta-javier",
+          "name": "Javier Lopez",
+          "first_name": "Javier",
+          "title": "VP Engineering",
+          "email": "javier.lopez@carta.com",
+          "phone": "",
+          "linkedin": "https://www.linkedin.com/in/cupto/",
+          "role": "champion",
+          "sequence_step": 1,
+          "status": "active"
+        }
+      ]
+    },
+    "doordash": {
+      "company": "DoorDash",
+      "industry": "Marketplace / Tech",
+      "signal": "Continued engineering expansion post-IPO",
+      "sequence_step": 1,
+      "days_since_touch": 0,
+      "contacts": [
+        {
+          "id": "doordash-liangxiao",
+          "name": "Liangxiao Zhu",
+          "first_name": "Liangxiao",
+          "title": "VP Engineering",
+          "email": "liangxiao.zhu@doordash.com",
+          "phone": "",
+          "linkedin": "https://www.linkedin.com/in/liangxiaozhu/",
+          "role": "champion",
+          "sequence_step": 1,
+          "status": "active"
+        }
+      ]
+    },
+    "openai": {
+      "company": "OpenAI",
+      "industry": "AI",
+      "signal": "Explosive growth, massive engineering hiring",
+      "sequence_step": 1,
+      "days_since_touch": 0,
+      "contacts": [
+        {
+          "id": "openai-srinivas",
+          "name": "Srinivas Narayanan",
+          "first_name": "Srinivas",
+          "title": "VP Engineering",
+          "email": "srinivas.narayanan@openai.com",
+          "phone": "",
+          "linkedin": "https://www.linkedin.com/in/srinivasnarayanan/",
+          "role": "champion",
+          "sequence_step": 1,
+          "status": "active"
+        }
+      ]
+    },
+    "anthropic": {
+      "company": "Anthropic",
+      "industry": "AI",
+      "signal": "Series E, scaling fast, AI safety leader",
+      "sequence_step": 1,
+      "days_since_touch": 0,
+      "contacts": [
+        {
+          "id": "anthropic-rahul",
+          "name": "Rahul Patil",
+          "first_name": "Rahul",
+          "title": "CTO",
+          "email": "rahul@anthropic.com",
+          "phone": "",
+          "linkedin": "",
+          "role": "champion",
+          "sequence_step": 1,
+          "status": "active"
+        }
+      ]
+    },
+    "clickhouse": {
+      "company": "ClickHouse",
+      "industry": "Data Infrastructure",
+      "signal": "Hyper-growth data company, Series B funded",
+      "sequence_step": 1,
+      "days_since_touch": 0,
+      "contacts": [
+        {
+          "id": "clickhouse-yury",
+          "name": "Yury Izrailevsky",
+          "first_name": "Yury",
+          "title": "VP Engineering",
+          "email": "yury@clickhouse.com",
+          "phone": "",
+          "linkedin": "https://www.linkedin.com/in/yury-izrailevsky/",
+          "role": "champion",
+          "sequence_step": 1,
+          "status": "active"
+        }
+      ]
+    },
+    "samsara": {
+      "company": "Samsara",
+      "industry": "IoT / Fleet Tech",
+      "signal": "NYSE-listed, scaling GTM and engineering",
+      "sequence_step": 1,
+      "days_since_touch": 0,
+      "contacts": [
+        {
+          "id": "samsara-meagen",
+          "name": "Meagen Eisenberg",
+          "first_name": "Meagen",
+          "title": "Chief Marketing Officer",
+          "email": "meagen@samsara.com",
+          "phone": "",
+          "linkedin": "https://www.linkedin.com/in/meageneisenberg/",
+          "role": "champion",
+          "sequence_step": 1,
+          "status": "active"
+        }
+      ]
+    },
+    "vanta": {
+      "company": "Vanta",
+      "industry": "Security Compliance",
+      "signal": "$150M Series C, compliance automation hypergrowth",
+      "sequence_step": 1,
+      "days_since_touch": 0,
+      "contacts": [
+        {
+          "id": "vanta-christina",
+          "name": "Christina Cacioppo",
+          "first_name": "Christina",
+          "title": "CEO & Co-Founder",
+          "email": "christina@vanta.com",
+          "phone": "",
+          "linkedin": "https://www.linkedin.com/in/ccacioppo/",
+          "role": "champion",
+          "sequence_step": 1,
+          "status": "active"
+        }
+      ]
+    },
+    "ramp": {
+      "company": "Ramp",
+      "industry": "FinTech / Corporate Cards",
+      "signal": "$13B valuation, rapid headcount growth",
+      "sequence_step": 1,
+      "days_since_touch": 0,
+      "contacts": [
+        {
+          "id": "ramp-ryan",
+          "name": "Ryan Delgado",
+          "first_name": "Ryan",
+          "title": "VP Engineering",
+          "email": "ryan.delgado@ramp.com",
+          "phone": "",
+          "linkedin": "https://www.linkedin.com/in/ryan-delgado-eng/",
+          "role": "champion",
+          "sequence_step": 1,
+          "status": "active"
+        }
+      ]
+    },
+    "scaleai": {
+      "company": "Scale AI",
+      "industry": "AI Data",
+      "signal": "$14B valuation, massive AI hiring push",
+      "sequence_step": 1,
+      "days_since_touch": 0,
+      "contacts": [
+        {
+          "id": "scaleai-nate",
+          "name": "Nate Herman",
+          "first_name": "Nate",
+          "title": "VP Engineering",
+          "email": "nate.herman@scale.com",
+          "phone": "",
+          "linkedin": "https://www.linkedin.com/in/nate-herman/",
+          "role": "champion",
+          "sequence_step": 1,
+          "status": "active"
+        }
+      ]
+    }
+  },
+  "sequence_steps": [
+    {"step": 1, "name": "LinkedIn Connect", "type": "linkedin", "day": 1},
+    {"step": 2, "name": "LinkedIn Message", "type": "linkedin", "day": 3},
+    {"step": 3, "name": "Email #1", "type": "email", "day": 5},
+    {"step": 4, "name": "LinkedIn Follow", "type": "linkedin", "day": 7},
+    {"step": 5, "name": "Email #2", "type": "email", "day": 10},
+    {"step": 6, "name": "Call #1", "type": "call", "day": 12},
+    {"step": 7, "name": "Email #3", "type": "email", "day": 15},
+    {"step": 8, "name": "LinkedIn Engage", "type": "linkedin", "day": 18},
+    {"step": 9, "name": "Email #4", "type": "email", "day": 21},
+    {"step": 10, "name": "Call #2", "type": "call", "day": 24},
+    {"step": 11, "name": "Email #5", "type": "email", "day": 28},
+    {"step": 12, "name": "LinkedIn DM", "type": "linkedin", "day": 32},
+    {"step": 13, "name": "Final Attempt", "type": "email", "day": 36}
+  ]
+}

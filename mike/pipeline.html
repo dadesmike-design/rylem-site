@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BDM Pipeline Tracker — Rylem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#070d14;--surface:#0c1520;--surface2:#111d2b;--surface3:#172536;
+  --border:#1e2d3d;--border-hover:#2a3d52;--text:#e4e4e8;--text2:#8898aa;
+  --accent:#0A1628;--accent-light:#1a3050;
+  --yellow:#f0c040;--green:#40c080;--blue:#4080f0;--red:#f04060;--purple:#a060f0;--cyan:#40c8e0;--orange:#f08040;
+  --radius:10px;
+}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;position:relative}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+a{color:var(--blue);text-decoration:none}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:3px}
+
+/* Login */
+#login{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:100;background:linear-gradient(-45deg,#0a0a0f,#0d1520,#0a1628,#0f0a1a);background-size:400% 400%;animation:loginGrad 15s ease infinite}
+#login.hidden{display:none}
+@keyframes loginGrad{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.login-box{background:rgba(18,18,26,.7);backdrop-filter:blur(24px);border:1px solid rgba(42,42,58,.6);border-radius:16px;padding:48px;width:360px;text-align:center;animation:boxIn .6s ease}
+@keyframes boxIn{from{opacity:0;transform:translateY(20px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.login-box h1{font-size:20px;margin-bottom:4px;font-weight:800;letter-spacing:-.02em}
+.login-box .login-sub{color:var(--text2);font-size:13px;margin-bottom:24px}
+.login-box input{width:100%;padding:12px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:all .3s}
+.login-box input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(64,128,240,.15)}
+.login-box button{width:100%;padding:12px;margin-top:12px;background:var(--accent-light);border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.login-box button:hover{background:#2a4060}
+.login-error{color:var(--red);font-size:12px;margin-top:8px;display:none}
+
+/* Sidebar */
+.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;height:100vh;position:sticky;top:0;z-index:2;overflow-y:auto}
+.sidebar-logo{padding:20px;font-size:14px;font-weight:700;letter-spacing:1px;color:var(--text2);border-bottom:1px solid var(--border)}
+.sidebar-logo span{color:var(--text)}
+.sidebar-logo .sub{display:block;font-size:10px;font-weight:500;letter-spacing:2px;color:var(--text2);margin-top:4px;text-transform:uppercase}
+.nav{flex:1;padding:12px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;color:var(--text2);font-size:13px;font-weight:500;transition:all .2s;position:relative;text-decoration:none}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:var(--accent-light);color:#fff}
+.nav-item.active::before{content:'';position:absolute;left:-12px;top:50%;transform:translateY(-50%);width:3px;height:20px;background:var(--blue);border-radius:0 3px 3px 0}
+.nav-item svg{width:18px;height:18px;opacity:.6}
+.nav-item.active svg{opacity:1}
+.nav-divider{padding:12px 14px 6px;font-size:10px;font-weight:700;letter-spacing:2px;color:var(--text2);text-transform:uppercase;opacity:.5;margin-top:4px}
+.sidebar-footer{padding:16px;border-top:1px solid var(--border)}
+
+/* Main */
+.main{flex:1;overflow-y:auto;padding:32px 36px 60px;position:relative;z-index:1}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes cardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* Stats */
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:12px}
+.page-title{font-size:24px;font-weight:800;letter-spacing:-.02em}
+.page-sub{color:var(--text2);font-size:14px;margin-bottom:24px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:28px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;position:relative;overflow:hidden;transition:all .25s;opacity:0;animation:cardIn .5s ease forwards}
+.stat-card:nth-child(1){animation-delay:.05s}.stat-card:nth-child(2){animation-delay:.1s}.stat-card:nth-child(3){animation-delay:.15s}.stat-card:nth-child(4){animation-delay:.2s}.stat-card:nth-child(5){animation-delay:.25s}
+.stat-card:hover{border-color:var(--border-hover)}
+.stat-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px}
+.stat-card.c-green::before{background:var(--green)}.stat-card.c-blue::before{background:var(--blue)}.stat-card.c-yellow::before{background:var(--yellow)}.stat-card.c-red::before{background:var(--red)}.stat-card.c-purple::before{background:var(--purple)}
+.stat-card .s-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-weight:500}
+.stat-card .s-value{font-size:28px;font-weight:800;letter-spacing:-.02em}
+.stat-card .s-value.green{color:var(--green)}.stat-card .s-value.blue{color:var(--blue)}.stat-card .s-value.yellow{color:var(--yellow)}.stat-card .s-value.red{color:var(--red)}.stat-card .s-value.purple{color:var(--purple)}
+.stat-card .s-sub{font-size:12px;color:var(--text2);margin-top:4px}
+
+/* Filters */
+.filter-bar{display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.filter-btn{padding:7px 16px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
+.filter-btn:hover{border-color:var(--border-hover);color:var(--text)}
+.filter-btn.active{background:var(--accent-light);border-color:rgba(64,128,240,.4);color:#fff}
+.filter-label{font-size:12px;color:var(--text2);font-weight:600;margin-right:4px}
+
+/* Section headers */
+.section-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;margin-top:28px}
+.section-head:first-of-type{margin-top:0}
+.section-title{font-size:15px;font-weight:700;color:var(--text)}
+.section-badge{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 7px;border-radius:11px;font-size:11px;font-weight:700}
+.badge-red{background:rgba(240,64,96,.15);color:var(--red);border:1px solid rgba(240,64,96,.25)}
+.badge-blue{background:rgba(64,128,240,.15);color:var(--blue);border:1px solid rgba(64,128,240,.25)}
+.badge-green{background:rgba(64,192,128,.15);color:var(--green);border:1px solid rgba(64,192,128,.25)}
+.badge-yellow{background:rgba(240,192,64,.15);color:var(--yellow);border:1px solid rgba(240,192,64,.25)}
+.badge-purple{background:rgba(160,96,240,.15);color:var(--purple);border:1px solid rgba(160,96,240,.25)}
+
+/* Daily Tasks Card */
+.rep-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden}
+.rep-block-header{padding:14px 18px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.rep-avatar{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;color:#fff}
+.av-mike{background:linear-gradient(135deg,#4080f0,#2060d0)}
+.av-julia{background:linear-gradient(135deg,#a060f0,#8040d0)}
+.av-april{background:linear-gradient(135deg,#40c080,#20a060)}
+.av-honey{background:linear-gradient(135deg,#f08040,#d06020)}
+.rep-block-name{font-size:14px;font-weight:700;flex:1}
+.rep-block-meta{font-size:12px;color:var(--text2)}
+.rep-block-counts{display:flex;gap:8px}
+.task-list{padding:0}
+.task-row{display:grid;grid-template-columns:36px 1fr 200px 120px auto;gap:12px;align-items:center;padding:11px 18px;border-bottom:1px solid var(--border);transition:background .15s}
+.task-row:last-child{border-bottom:none}
+.task-row:hover{background:var(--surface2)}
+.task-row.overdue{background:rgba(240,64,96,.04)}
+.task-type-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.type-email{background:rgba(64,128,240,.12)}
+.type-linkedin{background:rgba(160,96,240,.12)}
+.type-call{background:rgba(64,192,128,.12)}
+.task-company{font-size:13px;font-weight:700;margin-bottom:1px}
+.task-contact{font-size:11px;color:var(--text2)}
+.task-action{font-size:12px;color:var(--text2);line-height:1.4}
+.task-action .overdue-flag{color:var(--red);font-weight:600}
+.task-priority{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:10px;font-size:11px;font-weight:700}
+.pri-overdue{background:rgba(240,64,96,.12);color:var(--red);border:1px solid rgba(240,64,96,.2)}
+.pri-today{background:rgba(64,192,128,.12);color:var(--green);border:1px solid rgba(64,192,128,.2)}
+.pri-normal{background:rgba(64,128,240,.10);color:var(--blue);border:1px solid rgba(64,128,240,.2)}
+.pri-upcoming{background:rgba(240,192,64,.10);color:var(--yellow);border:1px solid rgba(240,192,64,.2)}
+
+/* Sequence table */
+.seq-table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px}
+.seq-table{width:100%;border-collapse:collapse;font-size:13px}
+.seq-table th{text-align:left;padding:10px 14px;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text2);border-bottom:1px solid var(--border);white-space:nowrap;background:var(--surface2)}
+.seq-table td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+.seq-table tr:last-child td{border-bottom:none}
+.seq-table tr:hover td{background:rgba(255,255,255,.015)}
+.seq-table tr.row-overdue td{background:rgba(240,64,96,.04)}
+.seq-company{font-size:13px;font-weight:700;margin-bottom:2px}
+.seq-contact{font-size:11px;color:var(--text2)}
+.step-badge{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;font-size:13px;font-weight:800;flex-shrink:0}
+.step-1,.step-2{background:rgba(64,128,240,.15);color:var(--blue)}
+.step-3,.step-4{background:rgba(160,96,240,.15);color:var(--purple)}
+.step-5,.step-6{background:rgba(240,192,64,.15);color:var(--yellow)}
+.step-7,.step-8{background:rgba(64,192,128,.15);color:var(--green)}
+.step-9,.step-10{background:rgba(240,128,64,.15);color:var(--orange)}
+.step-11,.step-12,.step-13{background:rgba(240,64,96,.15);color:var(--red)}
+.status-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:10px;font-size:11px;font-weight:600}
+.status-active{background:rgba(64,192,128,.12);color:var(--green);border:1px solid rgba(64,192,128,.2)}
+.status-overdue{background:rgba(240,64,96,.12);color:var(--red);border:1px solid rgba(240,64,96,.2)}
+.status-replied{background:rgba(64,128,240,.12);color:var(--blue);border:1px solid rgba(64,128,240,.2)}
+.status-meeting{background:rgba(240,192,64,.12);color:var(--yellow);border:1px solid rgba(240,192,64,.2)}
+.status-new{background:rgba(64,200,224,.12);color:var(--cyan);border:1px solid rgba(64,200,224,.2)}
+.rep-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.rep-mike{background:rgba(64,128,240,.15);color:var(--blue)}
+.rep-julia{background:rgba(160,96,240,.15);color:var(--purple)}
+.rep-april{background:rgba(64,192,128,.15);color:var(--green)}
+.rep-honey{background:rgba(240,128,64,.15);color:var(--orange)}
+
+/* Action buttons */
+.task-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.act-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all .15s;text-decoration:none;white-space:nowrap}
+.act-btn:hover{filter:brightness(1.2);transform:translateY(-1px)}
+.act-linkedin{background:rgba(10,102,194,.2);color:#5bb5f0;border:1px solid rgba(10,102,194,.3)}
+.act-email{background:rgba(64,128,240,.15);color:var(--blue);border:1px solid rgba(64,128,240,.25)}
+.act-call{background:rgba(64,192,128,.15);color:var(--green);border:1px solid rgba(64,192,128,.25)}
+.act-copy{background:rgba(240,192,64,.12);color:var(--yellow);border:1px solid rgba(240,192,64,.2)}
+.act-done{background:rgba(64,192,128,.08);color:var(--text2);border:1px solid var(--border);padding:6px 10px}
+.act-done:hover{color:var(--green);border-color:var(--green)}
+
+/* Message modal */
+.msg-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s ease}
+.msg-modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;width:560px;max-width:92vw;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;animation:cardIn .3s ease}
+.msg-modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.msg-modal-head h3{font-size:15px;font-weight:700;margin:0}
+.msg-modal-close{background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:4px 8px}
+.msg-modal-close:hover{color:var(--text)}
+.msg-modal-body{padding:20px;overflow-y:auto;flex:1}
+.msg-modal-body textarea{width:100%;min-height:140px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;padding:12px;resize:vertical;line-height:1.5;outline:none}
+.msg-modal-body textarea:focus{border-color:var(--blue)}
+.msg-modal-body .msg-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:6px}
+.msg-modal-body .msg-label:not(:first-child){margin-top:14px}
+.msg-modal-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+.msg-modal-foot .act-btn{padding:8px 20px;font-size:12px}
+.copied-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--green);color:#000;padding:10px 24px;border-radius:8px;font-size:13px;font-weight:700;z-index:300;animation:fadeIn .2s ease}
+
+/* Tags */
+.tag-chip{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;background:var(--surface3);color:var(--text2);margin-right:3px}
+.date-cell{font-size:12px;color:var(--text2);white-space:nowrap}
+.date-cell.overdue{color:var(--red);font-weight:600}
+
+/* Action buttons */
+.action-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;border:1px solid;transition:all .2s;white-space:nowrap;font-family:inherit}
+.action-btn:hover{transform:translateY(-1px);filter:brightness(1.2)}
+.btn-linkedin{background:rgba(10,102,194,.15);color:#0a66c2;border-color:rgba(10,102,194,.3)}
+.btn-linkedin:hover{background:rgba(10,102,194,.25)}
+.btn-email{background:rgba(64,128,240,.12);color:var(--blue);border-color:rgba(64,128,240,.25)}
+.btn-email:hover{background:rgba(64,128,240,.22)}
+.btn-call{background:rgba(64,192,128,.12);color:var(--green);border-color:rgba(64,192,128,.25)}
+.btn-call:hover{background:rgba(64,192,128,.22)}
+.btn-done{background:rgba(255,255,255,.05);color:var(--text2);border-color:var(--border);padding:6px 10px}
+.btn-done:hover{background:rgba(64,192,128,.15);color:var(--green);border-color:rgba(64,192,128,.3)}
+.btn-done.completed{background:rgba(64,192,128,.15);color:var(--green);border-color:rgba(64,192,128,.3);pointer-events:none}
+.btn-msg{background:rgba(240,192,64,.12);color:var(--yellow);border-color:rgba(240,192,64,.25)}
+.btn-msg:hover{background:rgba(240,192,64,.22)}
+.task-actions{display:flex;gap:6px;align-items:center}
+
+/* Add Lead Modal */
+.add-lead-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s ease}
+.add-lead-modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;width:480px;max-width:92vw;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;animation:cardIn .3s ease}
+.add-lead-modal .modal-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.add-lead-modal .modal-head h3{font-size:16px;font-weight:700;margin:0}
+.add-lead-modal .modal-close{background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:4px 8px}
+.add-lead-modal .modal-close:hover{color:var(--text)}
+.add-lead-modal .modal-body{padding:22px;overflow-y:auto;flex:1}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:6px}
+.form-group input,.form-group select{width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;outline:none;transition:all .3s}
+.form-group input:focus,.form-group select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(64,128,240,.15)}
+.form-group input::placeholder{color:var(--text2);opacity:.6}
+.form-group .form-hint{font-size:11px;color:var(--text2);margin-top:4px;opacity:.7}
+.form-group.required label::after{content:' *';color:var(--red)}
+.add-lead-modal .modal-foot{padding:16px 22px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+.btn-submit-lead{padding:10px 24px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all .15s;background:var(--blue);color:#fff}
+.btn-submit-lead:hover{filter:brightness(1.2);transform:translateY(-1px)}
+.btn-cancel{padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:inherit;transition:all .15s}
+.btn-cancel:hover{border-color:var(--border-hover);color:var(--text)}
+.btn-add-lead{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid rgba(64,128,240,.3);background:rgba(64,128,240,.12);color:var(--blue);font-family:inherit;transition:all .15s}
+.btn-add-lead:hover{background:rgba(64,128,240,.22);transform:translateY(-1px)}
+.btn-remove{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid rgba(240,64,64,.2);background:rgba(240,64,64,.08);color:var(--red);font-family:inherit;transition:all .15s}
+.btn-remove:hover{background:rgba(240,64,64,.2);transform:translateY(-1px)}
+.remove-confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:300;display:flex;align-items:center;justify-content:center}
+.remove-confirm{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;max-width:400px;text-align:center}
+.remove-confirm h3{margin:0 0 12px;font-size:16px}
+.remove-confirm p{color:var(--text2);font-size:13px;margin:0 0 20px}
+.remove-confirm .btn-row{display:flex;gap:10px;justify-content:center}
+.remove-confirm .btn-confirm-remove{padding:10px 24px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:var(--red);color:#fff}
+.remove-confirm .btn-confirm-remove:hover{filter:brightness(1.2)}
+.lead-queue-banner{background:rgba(64,200,224,.08);border:1px solid rgba(64,200,224,.25);border-radius:var(--radius);padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px}
+.lead-queue-banner .lqb-icon{font-size:20px}
+.lead-queue-banner .lqb-text{font-size:13px;color:var(--cyan);flex:1}
+.lead-queue-banner .lqb-count{font-size:22px;font-weight:800;color:var(--cyan)}
+
+/* Empty state */
+.empty{padding:32px;text-align:center;color:var(--text2);font-size:13px}
+.empty-icon{font-size:28px;margin-bottom:8px}
+
+/* Loading */
+.loader{display:flex;align-items:center;justify-content:center;padding:60px;color:var(--text2);gap:12px;font-size:14px}
+.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Collapsible */
+.rep-block-header{cursor:pointer;user-select:none}
+.toggle-arrow{font-size:12px;color:var(--text2);transition:transform .2s;margin-left:auto}
+.toggle-arrow.open{transform:rotate(90deg)}
+.rep-block-body{display:none}
+.rep-block-body.open{display:block}
+
+/* Tabs */
+.view-tabs{display:flex;gap:4px;margin-bottom:24px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:4px;width:fit-content}
+.view-tab{padding:7px 18px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;color:var(--text2);transition:all .2s;border:none;background:transparent;font-family:inherit}
+.view-tab:hover{color:var(--text)}
+.view-tab.active{background:var(--accent-light);color:#fff}
+
+/* Value */
+.value-text{font-size:12px;font-weight:600;color:var(--green)}
+
+@media(max-width:900px){
+  .sidebar{display:none}
+  .main{padding:20px 16px 60px}
+  .task-row{grid-template-columns:32px 1fr auto}
+  .task-row .task-action{display:none}
+  .task-row .task-priority{display:none}
+  .seq-table .hide-mobile{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN GATE -->
+<div id="login">
+  <div class="login-box">
+    <h1>Rylem Pipeline</h1>
+    <div class="login-sub">BDM Daily Tasks & Sequence Tracker</div>
+    <input type="password" id="pw-input" placeholder="Enter password" onkeydown="if(event.key==='Enter')checkLogin()">
+    <button onclick="checkLogin()">Enter</button>
+    <div class="login-error" id="pw-error">Incorrect password</div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <span>MISSION CONTROL</span>
+    <span class="sub">Recruiting Operations</span>
+  </div>
+  <div class="nav">
+    <a href="index.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Overview
+    </a>
+    <a href="pipeline.html" class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      BDM Pipeline
+    </a>
+    <a href="team.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Team View
+    </a>
+  </div>
+  <div class="sidebar-footer" style="font-size:12px;color:var(--text2);text-align:center">
+    <span id="last-updated-footer">—</span>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main" id="app">
+  <div class="loader"><div class="spinner"></div>Loading pipeline data…</div>
+</main>
+
+<script>
+// ─── AUTH ─────────────────────────────────────────────
+function checkLogin() {
+  const pw = document.getElementById('pw-input').value;
+  if (pw === 'rylem2026' || pw === 'Rylem2026' || localStorage.getItem('mc_auth_mike')) {
+    localStorage.setItem('mc_auth_mike', '1');
+    document.getElementById('login').classList.add('hidden');
+    initApp();
+  } else {
+    document.getElementById('pw-error').style.display = 'block';
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  if (localStorage.getItem('mc_auth_mike')) {
+    document.getElementById('login').classList.add('hidden');
+    initApp();
+  }
+});
+
+// ─── STATE ────────────────────────────────────────────
+let tasksData = null;
+let leadsData = [];
+let leadEnrich = {}; // company -> {linkedin_url, email, phone}
+let leadMessages = {}; // company -> {linkedin_connect, email_1_body, etc.}
+let activeRep = 'all';
+let activeView = 'tasks'; // 'tasks' | 'sequences'
+
+// ─── DATA LOAD ────────────────────────────────────────
+async function initApp() {
+  try {
+    const [tasksRes, leadsRes, enrichRes, msgRes] = await Promise.allSettled([
+      fetch('data/daily-tasks.json?' + Date.now()),
+      fetch('data/leads.json?' + Date.now()),
+      fetch('data/lead-contacts.json?' + Date.now()),
+      fetch('data/messages.json?' + Date.now())
+    ]);
+
+    if (tasksRes.status === 'fulfilled' && tasksRes.value.ok) {
+      tasksData = await tasksRes.value.json();
+    }
+    if (leadsRes.status === 'fulfilled' && leadsRes.value.ok) {
+      const ld = await leadsRes.value.json();
+      leadsData = ld.boards?.[0]?.cards || [];
+    }
+    if (enrichRes.status === 'fulfilled' && enrichRes.value.ok) {
+      const enr = await enrichRes.value.json();
+      (enr.contacts || []).forEach(c => {
+        const key = (c.company || '').toLowerCase().trim();
+        if (key) leadEnrich[key] = c;
+      });
+    }
+    if (msgRes.status === 'fulfilled' && msgRes.value.ok) {
+      const mg = await msgRes.value.json();
+      leadMessages = mg.messages || {};
+    }
+
+    render();
+  } catch (e) {
+    console.error(e);
+    document.getElementById('app').innerHTML = '<div class="loader" style="color:var(--red)">⚠ Failed to load data</div>';
+  }
+}
+
+// ─── HELPERS ──────────────────────────────────────────
+function fmt(v) {
+  if (!v) return '';
+  if (v >= 1000000) return '$' + (v/1000000).toFixed(1) + 'M';
+  if (v >= 1000) return '$' + Math.round(v/1000) + 'K';
+  return '$' + v;
+}
+
+function relDate(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
+  const now = new Date();
+  d.setHours(0,0,0,0); now.setHours(0,0,0,0);
+  const diff = Math.floor((now - d) / 86400000);
+  if (diff === 0) return 'Today';
+  if (diff === 1) return '1d ago';
+  if (diff < 0) return 'in ' + Math.abs(diff) + 'd';
+  return diff + 'd ago';
+}
+
+function isOverdue(action) {
+  return action && action.includes('OVERDUE');
+}
+
+function getRepColor(repKey) {
+  const map = { mike: 'av-mike', julia: 'av-julia', april: 'av-april', honey: 'av-honey' };
+  return map[repKey] || 'av-mike';
+}
+
+function getRepInitials(name) {
+  return name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+}
+
+function taskTypeIcon(type) {
+  if (type === 'email') return { icon: '✉️', cls: 'type-email' };
+  if (type === 'linkedin_connect' || type === 'linkedin') return { icon: '🔗', cls: 'type-linkedin' };
+  if (type === 'call') return { icon: '📞', cls: 'type-call' };
+  return { icon: '📋', cls: 'type-email' };
+}
+
+function getLeadById(id) {
+  return leadsData.find(l => l.id === id || l.id === 'lead-' + id || String(l.id) === String(id)) || null;
+}
+
+function getColumnStatus(col) {
+  if (!col) return 'status-new';
+  if (col === 'Meeting Booked') return 'status-meeting';
+  if (col === 'Contacted') return 'status-active';
+  if (col === 'New Leads') return 'status-new';
+  if (col === 'Replied') return 'status-replied';
+  return 'status-active';
+}
+
+function getColumnLabel(col) {
+  if (!col) return 'New';
+  if (col === 'Meeting Booked') return '📅 Meeting';
+  if (col === 'Contacted') return '📧 Contacted';
+  if (col === 'New Leads') return '🆕 New Lead';
+  if (col === 'Replied') return '💬 Replied';
+  return col;
+}
+
+// ─── STATS ────────────────────────────────────────────
+function computeStats() {
+  if (!tasksData) return { total: 0, overdue: 0, emails: 0, linkedin: 0, calls: 0, replies: 0, meetings: 0 };
+  const reps = tasksData.reps || {};
+  let total = 0, overdue = 0, emails = 0, linkedin = 0, calls = 0;
+
+  Object.entries(reps).forEach(([key, rep]) => {
+    if (activeRep !== 'all' && key !== activeRep) return;
+    const tasks = rep.tasks || [];
+    tasks.forEach(t => {
+      total++;
+      if (isOverdue(t.action)) overdue++;
+      if (t.type === 'email') emails++;
+      else if (t.type === 'linkedin_connect' || t.type === 'linkedin') linkedin++;
+      else if (t.type === 'call') calls++;
+    });
+  });
+
+  // replies/meetings from leads
+  const replies = leadsData.filter(l => l.column === 'Replied' || l.column === 'Meeting Booked').length;
+  const meetings = leadsData.filter(l => l.column === 'Meeting Booked').length;
+
+  return { total, overdue, emails, linkedin, calls, replies, meetings, prospects: leadsData.length };
+}
+
+// ─── RENDER ───────────────────────────────────────────
+function render() {
+  const stats = computeStats();
+  const genAt = tasksData?.generatedAt || tasksData?.date || '';
+  const dateStr = genAt ? new Date(genAt).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) : 'Today';
+
+  document.getElementById('last-updated-footer').textContent = 'Updated ' + dateStr;
+
+  const html = `
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">BDM Pipeline Tracker</h1>
+        <p class="page-sub">Daily tasks, outreach sequences, and prospect status — ${dateStr}</p>
+      </div>
+      <button class="btn-add-lead" onclick="openAddLead()">＋ Add Lead</button>
+    </div>
+
+    ${renderLeadQueue()}
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card c-blue">
+        <div class="s-label">Total Tasks</div>
+        <div class="s-value blue">${stats.total}</div>
+        <div class="s-sub">${stats.emails} email · ${stats.linkedin} LinkedIn</div>
+      </div>
+      <div class="stat-card c-red">
+        <div class="s-label">Overdue</div>
+        <div class="s-value red">${stats.overdue}</div>
+        <div class="s-sub">Need immediate action</div>
+      </div>
+      <div class="stat-card c-green">
+        <div class="s-label">Prospects</div>
+        <div class="s-value green">${stats.prospects}</div>
+        <div class="s-sub">In pipeline</div>
+      </div>
+      <div class="stat-card c-yellow">
+        <div class="s-label">Replies</div>
+        <div class="s-value yellow">${stats.replies}</div>
+        <div class="s-sub">Engaged prospects</div>
+      </div>
+      <div class="stat-card c-purple">
+        <div class="s-label">Meetings</div>
+        <div class="s-value purple">${stats.meetings}</div>
+        <div class="s-sub">Booked this period</div>
+      </div>
+    </div>
+
+    <!-- REP FILTERS -->
+    <div class="filter-bar">
+      <span class="filter-label">Rep:</span>
+      <button class="filter-btn ${activeRep==='all'?'active':''}" onclick="setRep('all',this)">All</button>
+      <button class="filter-btn ${activeRep==='mike'?'active':''}" onclick="setRep('mike',this)">Mike</button>
+      <button class="filter-btn ${activeRep==='julia'?'active':''}" onclick="setRep('julia',this)">Julia</button>
+      <button class="filter-btn ${activeRep==='april'?'active':''}" onclick="setRep('april',this)">April</button>
+      <button class="filter-btn ${activeRep==='honey'?'active':''}" onclick="setRep('honey',this)">Honey</button>
+    </div>
+
+    <!-- VIEW TABS -->
+    <div class="view-tabs">
+      <button class="view-tab ${activeView==='tasks'?'active':''}" onclick="setView('tasks')">📋 Daily Tasks</button>
+      <button class="view-tab ${activeView==='sequences'?'active':''}" onclick="setView('sequences')">📊 All Prospects</button>
+    </div>
+
+    <!-- CONTENT -->
+    <div id="view-content">
+      ${activeView === 'tasks' ? renderTasksView() : renderSequencesView()}
+    </div>
+  `;
+
+  document.getElementById('app').innerHTML = html;
+}
+
+// ─── TASKS VIEW ───────────────────────────────────────
+function renderTasksView() {
+  if (!tasksData) return '<div class="empty"><div class="empty-icon">📭</div>No task data available</div>';
+
+  const reps = tasksData.reps || {};
+  const entries = Object.entries(reps).filter(([key]) => activeRep === 'all' || key === activeRep);
+
+  if (entries.length === 0) return '<div class="empty"><div class="empty-icon">✅</div>No tasks for selected rep</div>';
+
+  return entries.map(([key, rep]) => renderRepBlock(key, rep)).join('');
+}
+
+function renderRepBlock(key, rep) {
+  const tasks = (rep.tasks || []);
+  if (tasks.length === 0) {
+    return `<div class="rep-block">
+      <div class="rep-block-header" onclick="toggleBlock(this)">
+        <div class="rep-avatar ${getRepColor(key)}">${getRepInitials(rep.name || key)}</div>
+        <div class="rep-block-name">${rep.name || key}</div>
+        <div class="rep-block-meta">No tasks today</div>
+        <span class="toggle-arrow open">▶</span>
+      </div>
+    </div>`;
+  }
+
+  const overdueCount = tasks.filter(t => isOverdue(t.action)).length;
+  const emailCount = tasks.filter(t => t.type === 'email').length;
+  const liCount = tasks.filter(t => t.type === 'linkedin_connect' || t.type === 'linkedin').length;
+
+  // Filter removed leads and deduplicate
+  const seen = new Set();
+  const uniqueTasks = tasks.filter(t => {
+    if (isRemoved(t.company)) return false;
+    const key2 = `${t.type}__${t.company}__${t.contact}`;
+    if (seen.has(key2)) return false;
+    seen.add(key2);
+    return true;
+  });
+
+  const rows = uniqueTasks.map(t => renderTaskRow(t)).join('');
+
+  return `
+    <div class="rep-block">
+      <div class="rep-block-header" onclick="toggleBlock(this)">
+        <div class="rep-avatar ${getRepColor(key)}">${getRepInitials(rep.name || key)}</div>
+        <div class="rep-block-name">${rep.name || key}</div>
+        <div class="rep-block-meta">${uniqueTasks.length} tasks${overdueCount > 0 ? ` · <span style="color:var(--red)">${overdueCount} overdue</span>` : ''}</div>
+        <div class="rep-block-counts">
+          ${emailCount > 0 ? `<span class="section-badge badge-blue">✉ ${emailCount}</span>` : ''}
+          ${liCount > 0 ? `<span class="section-badge badge-purple">🔗 ${liCount}</span>` : ''}
+          ${overdueCount > 0 ? `<span class="section-badge badge-red">⚠ ${overdueCount}</span>` : ''}
+        </div>
+        <span class="toggle-arrow open">▶</span>
+      </div>
+      <div class="rep-block-body open">
+        <div class="task-list">${rows}</div>
+      </div>
+    </div>
+  `;
+}
+
+function getActionButton(task) {
+  const companyKey = (task.company || '').toLowerCase().trim();
+  const enriched = leadEnrich[companyKey] || {};
+  const contactName = task.contact || '';
+  const email = enriched.email || '';
+  const linkedinUrl = enriched.linkedin_url || '';
+  const phone = enriched.phone || '';
+  const taskId = (task.type + '_' + companyKey + '_' + contactName).replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+  const doneKey = 'task_done_' + taskId;
+  const isDone = localStorage.getItem(doneKey);
+
+  let actionHtml = '';
+
+  if (task.type === 'linkedin_connect' || task.type === 'linkedin' || task.type === 'linkedin_message') {
+    const url = linkedinUrl
+      ? (linkedinUrl.startsWith('http') ? linkedinUrl : 'https://' + linkedinUrl)
+      : 'https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent(contactName + ' ' + task.company);
+    actionHtml = '<a href="' + url + '" target="_blank" class="action-btn btn-linkedin" onclick="event.stopPropagation()">🔗 Open</a>'
+      + ' <button class="action-btn btn-msg" onclick="showMessage(\'' + companyKey.replace(/'/g,"\\'") + '\',\'' + task.type + '\');event.stopPropagation()">💬 Message</button>';
+  } else if (task.type === 'email') {
+    actionHtml = '<button class="action-btn btn-msg" onclick="showMessage(\'' + companyKey.replace(/'/g,"\\'") + '\',\'email\');event.stopPropagation()">✉️ Draft</button>';
+  } else if (task.type === 'call' || task.type === 'phone_call') {
+    actionHtml = '<button class="action-btn btn-msg" onclick="showMessage(\'' + companyKey.replace(/'/g,"\\'") + '\',\'call\');event.stopPropagation()">📞 Script</button>';
+  }
+
+  const doneBtn = '<button class="action-btn btn-done ' + (isDone ? 'completed' : '') + '" onclick="markDone(\'' + doneKey + '\',this);event.stopPropagation()">' + (isDone ? '✅' : '☐') + '</button>';
+  const removeBtn = '<button class="btn-remove" onclick="confirmRemoveLead(\'' + companyKey.replace(/'/g,"\\'") + '\',\'' + (contactName||'').replace(/'/g,"\\'") + '\');event.stopPropagation()">✕ Remove</button>';
+
+  return '<div class="task-actions">' + actionHtml + doneBtn + removeBtn + '</div>';
+}
+
+function markDone(key, el) {
+  const row = el.closest('.task-row') || el.closest('tr');
+  if (localStorage.getItem(key)) {
+    // Undo
+    localStorage.removeItem(key);
+    el.textContent = '☐';
+    el.classList.remove('completed');
+    if (row) {
+      row.style.opacity = '1';
+      row.style.textDecoration = 'none';
+      row.style.order = '0';
+    }
+    showToast('↩️ Marked incomplete');
+  } else {
+    // Complete
+    localStorage.setItem(key, Date.now());
+    el.textContent = '✅';
+    el.classList.add('completed');
+    if (row) {
+      row.style.opacity = '0.4';
+      row.style.textDecoration = 'line-through';
+      row.style.order = '999';
+    }
+    showToast('✅ Done! Click again to undo.');
+  }
+}
+
+function showMessage(companyKey, taskType) {
+  const msgs = leadMessages[companyKey];
+  if (!msgs) {
+    showToast('No pre-written message for this lead yet');
+    return;
+  }
+
+  let title = '', content = '', subjectLine = '';
+  const enriched = leadEnrich[companyKey] || {};
+  const email = enriched.email || '';
+
+  if (taskType === 'linkedin_connect') {
+    title = '🔗 LinkedIn Connection Note — ' + msgs.company;
+    content = msgs.linkedin_connect || '';
+  } else if (taskType === 'linkedin' || taskType === 'linkedin_message') {
+    title = '💬 LinkedIn Message — ' + msgs.company;
+    content = msgs.linkedin_opener || '';
+  } else if (taskType === 'email') {
+    title = '✉️ Email Draft — ' + msgs.company;
+    subjectLine = msgs.email_1_subject || '';
+    content = msgs.email_1_body || '';
+  } else if (taskType === 'call' || taskType === 'phone_call') {
+    title = '📞 Call Script — ' + msgs.company;
+    content = msgs.call_script || '';
+  }
+
+  // Build modal HTML
+  const overlay = document.createElement('div');
+  overlay.className = 'msg-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+  let modalHtml = '<div class="msg-modal">'
+    + '<div class="msg-modal-head"><h3>' + title + '</h3><button class="msg-modal-close" onclick="this.closest(\'.msg-overlay\').remove()">✕</button></div>'
+    + '<div class="msg-modal-body">';
+
+  if (subjectLine) {
+    modalHtml += '<div class="msg-label">Subject Line</div>'
+      + '<input type="text" value="' + subjectLine.replace(/"/g,'&quot;') + '" style="width:100%;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;margin-bottom:8px;outline:none" onclick="this.select()" readonly>';
+  }
+
+  modalHtml += '<div class="msg-label">Message' + (taskType === 'linkedin_connect' ? ' (300 char limit)' : '') + '</div>'
+    + '<textarea id="msg-textarea" onclick="this.select()" readonly>' + content.replace(/</g,'&lt;') + '</textarea>';
+
+  if (email && taskType === 'email') {
+    modalHtml += '<div style="margin-top:10px;font-size:12px;color:var(--text2)">To: <strong style="color:var(--text)">' + email + '</strong></div>';
+  }
+
+  modalHtml += '</div>'
+    + '<div class="msg-modal-foot">'
+    + '<button class="act-btn act-copy" onclick="copyMsg()">📋 Copy Message</button>';
+
+  if (email && taskType === 'email') {
+    const mailSubj = encodeURIComponent(subjectLine);
+    const mailBody = encodeURIComponent(content);
+    const outlookUrl = 'https://outlook.office.com/mail/deeplink/compose?to=' + email + '&subject=' + mailSubj + '&body=' + mailBody;
+    modalHtml += '<a href="' + outlookUrl + '" target="_blank" class="act-btn act-email" onclick="event.stopPropagation()">✉️ Open in Outlook</a>';
+  }
+
+  modalHtml += '</div></div>';
+
+  overlay.innerHTML = modalHtml;
+  document.body.appendChild(overlay);
+
+  // Auto-resize textarea
+  setTimeout(function() {
+    const ta = document.getElementById('msg-textarea');
+    if (ta) ta.style.height = Math.min(ta.scrollHeight + 4, 400) + 'px';
+  }, 50);
+}
+
+function copyMsg() {
+  const ta = document.getElementById('msg-textarea');
+  if (!ta) return;
+  navigator.clipboard.writeText(ta.value).then(function() {
+    showToast('✅ Copied to clipboard!');
+  }).catch(function() {
+    ta.select();
+    document.execCommand('copy');
+    showToast('✅ Copied!');
+  });
+}
+
+function showToast(text) {
+  const existing = document.querySelector('.copied-toast');
+  if (existing) existing.remove();
+  const toast = document.createElement('div');
+  toast.className = 'copied-toast';
+  toast.textContent = text;
+  document.body.appendChild(toast);
+  setTimeout(function() { toast.remove(); }, 2000);
+}
+
+function renderTaskRow(task) {
+  const overdue = isOverdue(task.action);
+  const typeInfo = taskTypeIcon(task.type);
+  const actionText = (task.action || '').replace('⚠️ ', '').replace(/OVERDUE from \d{4}-\d{2}-\d{2}: /,'');
+  const companyKey = (task.company || '').toLowerCase().trim();
+  const contactName = task.contact || '';
+  const taskId = (task.type + '_' + companyKey + '_' + contactName).replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+  const isDone = localStorage.getItem('task_done_' + taskId);
+  const doneStyle = isDone ? ' style="opacity:0.4;text-decoration:line-through;order:999"' : '';
+  const priBadge = overdue && !isDone
+    ? '<span class="task-priority pri-overdue">⚠ OVERDUE</span>'
+    : isDone
+      ? '<span class="task-priority" style="color:var(--green)">✅ Done</span>'
+      : task.priority === 'today'
+        ? '<span class="task-priority pri-today">✓ Today</span>'
+        : '<span class="task-priority pri-normal">Queued</span>';
+
+  return '<div class="task-row ' + (overdue && !isDone ? 'overdue' : '') + '"' + doneStyle + '>'
+    + '<div class="task-type-icon ' + typeInfo.cls + '">' + typeInfo.icon + '</div>'
+    + '<div>'
+    + '<div class="task-company">' + (task.company || '—') + '</div>'
+    + '<div class="task-contact">' + (task.contact || '') + '</div>'
+    + '</div>'
+    + '<div class="task-action">' + (overdue ? '<span class="overdue-flag">⚠</span> ' : '') + actionText + '</div>'
+    + '<div>' + priBadge + '</div>'
+    + getActionButton(task)
+    + '</div>';
+}
+
+// ─── SEQUENCES VIEW ───────────────────────────────────
+function renderSequencesView() {
+  // Build rows from leads.json + cross-reference task counts per company
+  const tasksByCompany = {};
+  if (tasksData) {
+    Object.entries(tasksData.reps || {}).forEach(([repKey, rep]) => {
+      if (activeRep !== 'all' && repKey !== activeRep) return;
+      (rep.tasks || []).forEach(t => {
+        if (!tasksByCompany[t.company]) tasksByCompany[t.company] = { count: 0, overdue: 0, rep: repKey };
+        tasksByCompany[t.company].count++;
+        if (isOverdue(t.action)) tasksByCompany[t.company].overdue++;
+      });
+    });
+  }
+
+  // Combine leads with task info, filter removed, infer sequence step
+  const rows = leadsData.filter(lead => !isRemoved(lead.company)).map((lead, i) => {
+    const taskInfo = tasksByCompany[lead.company] || null;
+    const daysSince = lead.date ? Math.floor((new Date() - new Date(lead.date)) / 86400000) : 0;
+    // Rough step estimation: 1 step every 2-3 days
+    const step = Math.min(13, Math.max(1, Math.round(daysSince / 2.5) + 1));
+    const overdue = taskInfo && taskInfo.overdue > 0;
+    const status = lead.column;
+
+    return { lead, step, overdue, taskInfo, daysSince, status };
+  });
+
+  // Sort: overdue first, then by step desc
+  rows.sort((a, b) => {
+    if (a.overdue && !b.overdue) return -1;
+    if (!a.overdue && b.overdue) return 1;
+    if (b.lead.column === 'Meeting Booked' && a.lead.column !== 'Meeting Booked') return -1;
+    if (a.lead.column === 'Meeting Booked' && b.lead.column !== 'Meeting Booked') return 1;
+    return b.step - a.step;
+  });
+
+  if (rows.length === 0) return '<div class="empty"><div class="empty-icon">📭</div>No prospects found</div>';
+
+  const tableRows = rows.map(r => renderSeqRow(r)).join('');
+
+  return `
+    <div class="seq-table-wrap">
+      <table class="seq-table">
+        <thead>
+          <tr>
+            <th>Step</th>
+            <th>Company</th>
+            <th class="hide-mobile">Contact</th>
+            <th>Status</th>
+            <th class="hide-mobile">In Pipeline</th>
+            <th class="hide-mobile">Tasks</th>
+            <th class="hide-mobile">Tags</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderSeqRow(r) {
+  const { lead, step, overdue, taskInfo, daysSince } = r;
+  const stepCls = `step-${step}`;
+  const statusCls = getColumnStatus(lead.column);
+  const statusLabel = getColumnLabel(lead.column);
+  const dateLabel = lead.date ? relDate(lead.date) : '—';
+  const tags = (lead.tags || []).map(t => `<span class="tag-chip">${t}</span>`).join('');
+
+  const taskBadge = taskInfo
+    ? `<span class="section-badge ${taskInfo.overdue > 0 ? 'badge-red' : 'badge-blue'}">${taskInfo.count} task${taskInfo.count !== 1 ? 's' : ''}${taskInfo.overdue > 0 ? ` · ${taskInfo.overdue} overdue` : ''}</span>`
+    : `<span style="color:var(--text2);font-size:12px">—</span>`;
+
+  const contact = lead.contact || '—';
+  const contactName = contact.replace(/\s*\(.*?\)\s*/g, '').trim();
+
+  return `
+    <tr class="${overdue ? 'row-overdue' : ''}">
+      <td><span class="step-badge ${stepCls}">${step}</span></td>
+      <td>
+        <div class="seq-company">${lead.company}</div>
+        ${lead.value ? `<div class="value-text">${fmt(lead.value)}</div>` : ''}
+      </td>
+      <td class="hide-mobile">
+        <div style="font-size:13px">${contactName}</div>
+      </td>
+      <td><span class="status-badge ${statusCls}">${statusLabel}</span></td>
+      <td class="hide-mobile"><span class="date-cell ${overdue ? 'overdue' : ''}">${dateLabel}</span></td>
+      <td class="hide-mobile">${taskBadge}</td>
+      <td class="hide-mobile">${tags}</td>
+      <td><button class="btn-remove" onclick="confirmRemoveLead('${lead.company.toLowerCase().trim().replace(/'/g,"\\'")}','${(contactName||'').replace(/'/g,"\\'")}')">✕</button></td>
+    </tr>
+  `;
+}
+
+// ─── CONTROLS ─────────────────────────────────────────
+function setRep(rep) {
+  activeRep = rep;
+  render();
+}
+
+function setView(view) {
+  activeView = view;
+  render();
+}
+
+function toggleBlock(header) {
+  const body = header.nextElementSibling;
+  const arrow = header.querySelector('.toggle-arrow');
+  if (body) {
+    body.classList.toggle('open');
+    if (arrow) arrow.classList.toggle('open');
+  }
+}
+
+// ─── REMOVE LEAD ──────────────────────────────────────
+function confirmRemoveLead(companyKey, contactName) {
+  const displayName = companyKey.charAt(0).toUpperCase() + companyKey.slice(1);
+  const overlay = document.createElement('div');
+  overlay.className = 'remove-confirm-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML = `<div class="remove-confirm">
+    <h3>Remove ${displayName}?</h3>
+    <p>This will remove all tasks for ${displayName}${contactName ? ' (' + contactName + ')' : ''} from your pipeline and notify AI to clean up the sequence.</p>
+    <div class="btn-row">
+      <button class="btn-cancel" onclick="this.closest('.remove-confirm-overlay').remove()">Cancel</button>
+      <button class="btn-confirm-remove" onclick="removeLead('${companyKey.replace(/'/g,"\\'")}','${(contactName||'').replace(/'/g,"\\'")}');this.closest('.remove-confirm-overlay').remove()">Remove</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+}
+
+function removeLead(companyKey, contactName) {
+  // Track removed leads in localStorage
+  const removed = JSON.parse(localStorage.getItem('removed_leads') || '[]');
+  removed.push({ company: companyKey, contact: contactName, removedAt: new Date().toISOString() });
+  localStorage.setItem('removed_leads', JSON.stringify(removed));
+
+  // Send email notification to AI to clean up DB
+  const displayName = companyKey.charAt(0).toUpperCase() + companyKey.slice(1);
+  const subject = encodeURIComponent('🗑️ Remove Lead: ' + displayName);
+  const body = encodeURIComponent(
+    'LEAD REMOVAL REQUEST\n'
+    + '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n'
+    + 'Company: ' + displayName + '\n'
+    + 'Contact: ' + (contactName || 'All contacts') + '\n'
+    + 'Removed by: ' + (activeRep !== 'all' ? activeRep : 'unknown') + '\n\n'
+    + '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+    + 'ACTION: Remove this lead from sequences.db, daily-tasks.json,\n'
+    + 'lead-contacts.json, and messages.json. Kill any active sequence crons.\n'
+  );
+  window.open('https://outlook.office.com/mail/deeplink/compose?to=miked@rylem.com&subject=' + subject + '&body=' + body, '_blank');
+
+  // Hide from current view immediately
+  render();
+  showToast('🗑️ ' + displayName + ' removed — sending cleanup request to AI');
+}
+
+// Filter removed leads from render
+function isRemoved(companyKey) {
+  const removed = JSON.parse(localStorage.getItem('removed_leads') || '[]');
+  return removed.some(r => r.company === companyKey.toLowerCase().trim());
+}
+
+// ─── ADD LEAD ─────────────────────────────────────────
+function getLeadQueue() {
+  try { return JSON.parse(localStorage.getItem('lead_queue') || '[]'); } catch(e) { return []; }
+}
+
+function saveLeadQueue(q) {
+  localStorage.setItem('lead_queue', JSON.stringify(q));
+}
+
+function renderLeadQueue() {
+  const q = getLeadQueue();
+  const pending = q.filter(l => l.status === 'pending');
+  if (pending.length === 0) return '';
+  return '<div class="lead-queue-banner">'
+    + '<span class="lqb-icon">🔄</span>'
+    + '<span class="lqb-text"><strong>' + pending.length + ' lead' + (pending.length > 1 ? 's' : '') + '</strong> queued — AI is researching trigger events and writing signal-based messages. They\'ll appear in your task list once ready.</span>'
+    + '</div>';
+}
+
+function openAddLead() {
+  const overlay = document.createElement('div');
+  overlay.className = 'add-lead-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+  overlay.innerHTML = `<div class="add-lead-modal">
+    <div class="modal-head">
+      <h3>＋ Add New Lead</h3>
+      <button class="modal-close" onclick="this.closest('.add-lead-overlay').remove()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group required">
+        <label>Company Name</label>
+        <input type="text" id="al-company" placeholder="e.g. Stripe, Snowflake, Figma">
+      </div>
+      <div class="form-group">
+        <label>Contact Name</label>
+        <input type="text" id="al-contact" placeholder="e.g. Jane Smith (optional — AI can find the right person)">
+        <div class="form-hint">Leave blank and AI will find the right hiring manager</div>
+      </div>
+      <div class="form-group">
+        <label>Contact Title</label>
+        <input type="text" id="al-title" placeholder="e.g. VP of Engineering, Director of Marketing">
+      </div>
+      <div class="form-group">
+        <label>Contact Email</label>
+        <input type="email" id="al-email" placeholder="e.g. jane@stripe.com">
+      </div>
+      <div class="form-group">
+        <label>LinkedIn URL</label>
+        <input type="url" id="al-linkedin" placeholder="e.g. https://linkedin.com/in/janesmith">
+      </div>
+      <div class="form-group">
+        <label>Assign To</label>
+        <select id="al-rep">
+          <option value="mike">Mike</option>
+          <option value="julia">Julia</option>
+          <option value="april">April</option>
+          <option value="honey">Honey</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <input type="text" id="al-notes" placeholder="Any context — why this company, how you found them">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="this.closest('.add-lead-overlay').remove()">Cancel</button>
+      <button class="btn-submit-lead" onclick="submitLead()">Submit Lead →</button>
+    </div>
+  </div>`;
+
+  document.body.appendChild(overlay);
+  setTimeout(() => document.getElementById('al-company').focus(), 100);
+}
+
+function submitLead() {
+  const company = (document.getElementById('al-company').value || '').trim();
+  if (!company) {
+    showToast('⚠️ Company name is required');
+    document.getElementById('al-company').focus();
+    return;
+  }
+
+  const lead = {
+    id: 'new_' + Date.now(),
+    company: company,
+    contact: (document.getElementById('al-contact').value || '').trim(),
+    title: (document.getElementById('al-title').value || '').trim(),
+    email: (document.getElementById('al-email').value || '').trim(),
+    linkedin: (document.getElementById('al-linkedin').value || '').trim(),
+    rep: document.getElementById('al-rep').value,
+    notes: (document.getElementById('al-notes').value || '').trim(),
+    submitted: new Date().toISOString(),
+    submittedBy: activeRep !== 'all' ? activeRep : 'unknown',
+    status: 'pending'
+  };
+
+  // Save to localStorage queue
+  const q = getLeadQueue();
+  q.push(lead);
+  saveLeadQueue(q);
+
+  // Save to a JSON file on the server via the new-leads endpoint
+  // Since this is static hosting, we save to localStorage and also
+  // create a mailto notification so the AI picks it up
+  const subject = encodeURIComponent('🆕 New Lead: ' + company);
+  const body = encodeURIComponent(
+    'NEW LEAD SUBMITTED VIA PIPELINE DASHBOARD\n'
+    + '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n'
+    + 'Company: ' + company + '\n'
+    + 'Contact: ' + (lead.contact || 'AI to find') + '\n'
+    + 'Title: ' + (lead.title || 'Not specified') + '\n'
+    + 'Email: ' + (lead.email || 'Not found') + '\n'
+    + 'LinkedIn: ' + (lead.linkedin || 'Not found') + '\n'
+    + 'Assigned To: ' + lead.rep + '\n'
+    + 'Notes: ' + (lead.notes || 'None') + '\n\n'
+    + '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+    + 'ACTION: Research this company for trigger events, find the right\n'
+    + 'hiring manager contact, write signal-based messages, and add to\n'
+    + 'the 13-step sequence.\n'
+  );
+
+  // Open Outlook compose with the lead info
+  const outlookUrl = 'https://outlook.office.com/mail/deeplink/compose?to=miked@rylem.com&subject=' + subject + '&body=' + body;
+  window.open(outlookUrl, '_blank');
+
+  // Close modal and refresh
+  const overlay = document.querySelector('.add-lead-overlay');
+  if (overlay) overlay.remove();
+
+  showToast('✅ Lead submitted! Sending to AI for research...');
+  render();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "lastUpdated": "2026-04-08T14:29:00Z",
+  "activities": [
+    {
+      "timestamp": "2026-04-08T14:29:00Z",
+      "event": "Daily intel brief",
+      "detail": "OpenAI 272K sq ft Bellevue (major Eastside expansion). CoreWeave 54 open roles Seattle. Pipeline frozen Day 15, 0 replies. Julia breakout week (28 emails, 6 meetings). Honey Mae: 230 dials, 2 mtgs, 2 callbacks."
+    },
+    {
+      "timestamp": "2026-04-08T13:29:00Z",
+      "event": "Morning briefing sent",
+      "detail": "TI meeting TODAY 2 PM PT. CoreWeave/XBow/Temporal cold emails 7 days in draft. Honey Mae meeting tomorrow 4/9. Julia needs RingCentral."
+    },
+    {
+      "timestamp": "2026-04-07T09:00:00Z",
+      "event": "Outreach Sequence Manager",
+      "detail": "XBow + Menlo LinkedIn connects completed 4/6. Cold emails pending approval."
+    },
+    {
+      "timestamp": "2026-04-07T03:38:00Z",
+      "event": "Meetings table deployed",
+      "detail": "Full meeting capture system live. Contact.html + manager.html updated."
+    },
+    {
+      "timestamp": "2026-04-06T19:08:00Z",
+      "event": "Supabase Auth complete",
+      "detail": "8 users created in Supabase Auth. Login at solveworks.io/mike/login.html"
+    }
+  ]
+}

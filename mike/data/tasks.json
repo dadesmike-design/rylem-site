@@ -1,0 +1,61 @@
+{
+  "lastUpdated": "2026-04-08T14:29:00Z",
+  "openTasks": [
+    {
+      "task": "TI meeting (Cecilia)",
+      "status": "in_progress",
+      "detail": "TODAY 2 PM PT / 5 PM ET. 250+ open roles. Lead with talent scarcity + Rylem's diversity procurement advantage.",
+      "priority": "CRITICAL",
+      "owner": "Mike Dades",
+      "dueDate": "2026-04-08T21:00:00Z"
+    },
+    {
+      "task": "Approve CoreWeave/XBow/Temporal cold emails",
+      "status": "pending_approval",
+      "detail": "7 days overdue. Funding windows closing ($23B IPO, $120M Series C 3 weeks old, $300M Series D 7 weeks old). Say SEND ALL or individual.",
+      "priority": "CRITICAL",
+      "owner": "Mike Dades",
+      "dueDate": "today"
+    },
+    {
+      "task": "Skip LinkedIn decision",
+      "status": "blocked",
+      "detail": "13 original leads 15 days overdue on LinkedIn Step 0. Say SKIP LI to bypass and send cold emails immediately across all 35 active leads.",
+      "priority": "high",
+      "owner": "Mike Dades",
+      "dueDate": "today"
+    },
+    {
+      "task": "Schedule Honey Mae meeting",
+      "status": "pending",
+      "detail": "Tomorrow 4/9 (time TBD). She had 230 dials, 2 meetings, 2 callbacks on 4/7.",
+      "priority": "high",
+      "owner": "Mike Dades",
+      "dueDate": "2026-04-09"
+    },
+    {
+      "task": "Get RingCentral access for Julia",
+      "status": "blocked",
+      "detail": "Julia can't log calls without it. She had 28 emails, 6 meetings this week — needs to track activity.",
+      "priority": "high",
+      "owner": "system",
+      "dueDate": "today"
+    },
+    {
+      "task": "Check Chino + Dave activity",
+      "status": "pending",
+      "detail": "Chino tanked from 10→4 emails. Dave still ghost. Both worth checking in on.",
+      "priority": "medium",
+      "owner": "system",
+      "dueDate": "today"
+    },
+    {
+      "task": "Menlo Day 21 breakup",
+      "status": "scheduled",
+      "detail": "Fires April 13 (5 days). Tim Olson, 7 touches zero response. Confirm Day 14 call status if completed.",
+      "priority": "medium",
+      "owner": "system",
+      "dueDate": "2026-04-13"
+    }
+  ]
+}

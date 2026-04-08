@@ -1,0 +1,17 @@
+{
+  "lastUpdated": "2026-04-07T13:00:00Z",
+  "status": "healthy",
+  "gatewayStatus": "running",
+  "diskSpace": {
+    "free": "28 GB",
+    "total": "228 GB",
+    "percentFree": 12.3
+  },
+  "services": {
+    "openclaw": "operational",
+    "supabase": "connected",
+    "cloudflare-worker": "deployed",
+    "microsoft-graph": "operational",
+    "heartbeat": "running (hourly 6AM-10PM PT)"
+  }
+}

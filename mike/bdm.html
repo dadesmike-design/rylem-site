@@ -1497,6 +1497,7 @@ function buildAccountCard(acc) {
     <div class="contact-rows" id="cr_${acc.id}"><div style="padding:12px;color:var(--text-dim)">Loading contacts…</div></div>
     <button class="btn btn-add-contact" onclick="event.stopPropagation(); openAddLead('${escAttr(acc.company)}', '${acc.id}')">＋ Add Contact</button>`;
   detail.dataset.loaded = 'false';
+  detail.onclick = e => e.stopPropagation();
   card.appendChild(detail);
 
   return card;
@@ -1537,7 +1538,7 @@ function buildContactRow(c, accountId, acctStatus) {
   }
   return `
     <div class="contact-row" data-contact-id="${c.id || ''}" data-account-id="${accountId || ''}">
-      <input type="checkbox" class="contact-cb" data-contact-id="${c.id || ''}" data-account-id="${accountId || ''}" data-contact-name="${escAttr(c.name)}" onchange="bulkSelectionChanged()">
+      <input type="checkbox" class="contact-cb" data-contact-id="${c.id || ''}" data-account-id="${accountId || ''}" data-contact-name="${escAttr(c.name)}" onchange="bulkSelectionChanged()" onclick="event.stopPropagation()">
       <div class="contact-name">${esc(c.name)}${bdmPill}${workerPill}</div>
       ${landExpand}
       <div class="contact-title">${esc(c.title)}</div>

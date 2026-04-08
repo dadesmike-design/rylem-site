@@ -649,121 +649,7 @@ button,input,select{font-family:inherit}
 <!-- TOAST -->
 <div id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js">
-// ─── BUSINESS DAY UTILITY ────────────────────────────────────
-function nextBusinessDay(date) {
-  const holidays = _usHolidays();
-  const d = new Date(date);
-  d.setDate(d.getDate() + 1);
-  while (true) {
-    const dow = d.getDay();
-    if (dow === 0) { d.setDate(d.getDate() + 1); continue; } // Sunday → Monday
-    if (dow === 6) { d.setDate(d.getDate() + 2); continue; } // Saturday → Monday
-    const iso = d.toISOString().split('T')[0];
-    if (holidays.has(iso)) { d.setDate(d.getDate() + 1); continue; }
-    return iso;
-  }
-}
-
-function _usHolidays() {
-  const set = new Set();
-  for (const yr of [new Date().getFullYear(), new Date().getFullYear() + 1]) {
-    const obs = (m, day) => {
-      const d = new Date(yr, m, day);
-      const dow = d.getDay();
-      if (dow === 6) d.setDate(day - 1); // Sat → Fri
-      if (dow === 0) d.setDate(day + 1); // Sun → Mon
-      return d.toISOString().split('T')[0];
-    };
-    const nthDay = (m, n, dow) => { // nth weekday of month (1-based)
-      let d = new Date(yr, m, 1), count = 0;
-      while (true) { if (d.getDay() === dow) { count++; if (count === n) return d.toISOString().split('T')[0]; } d.setDate(d.getDate() + 1); }
-    };
-    const lastDay = (m, dow) => { // last weekday of month
-      let d = new Date(yr, m + 1, 0), last = null;
-      while (d.getMonth() === m) { if (d.getDay() === dow) { last = d.toISOString().split('T')[0]; break; } d.setDate(d.getDate() - 1); }
-      return last;
-    };
-    set.add(obs(0, 1));          // New Year's Day
-    set.add(nthDay(0, 3, 1));    // MLK Day
-    set.add(nthDay(1, 3, 1));    // Presidents Day
-    set.add(lastDay(4, 1));      // Memorial Day
-    set.add(obs(5, 19));         // Juneteenth
-    set.add(obs(6, 4));          // Independence Day
-    set.add(nthDay(8, 1, 1));    // Labor Day
-    set.add(nthDay(9, 2, 1));    // Columbus Day
-    set.add(obs(10, 11));        // Veterans Day
-    set.add(nthDay(10, 4, 4));   // Thanksgiving
-    set.add(obs(11, 25));        // Christmas
-  }
-  return set;
-}
-
-// ─── MANUAL STEP BUMP ────────────────────────────────────────
-async function bumpContactStep(contactId, accountId, currentStep, direction) {
-  // 1. Fetch active sequence
-  const { data: seqs } = await db.from('sequences')
-    .select('*').eq('contact_id', contactId).eq('status', 'active').limit(1);
-  const seq = seqs && seqs[0];
-  if (!seq) { showToast('No active sequence for this contact'); return; }
-
-  // 2. Get step count for this template
-  const { data: allSteps } = await db.from('sequence_steps')
-    .select('step_number').eq('template_id', seq.template_id).order('step_number');
-  const maxStep = allSteps ? allSteps.length : 13;
-  const newStep = Math.max(1, Math.min(maxStep, currentStep + direction));
-  if (newStep === currentStep) { showToast('Already at ' + (direction > 0 ? 'last' : 'first') + ' step'); return; }
-
-  // 3. Fetch target step template
-  const { data: stepTpl } = await db.from('sequence_steps')
-    .select('*').eq('template_id', seq.template_id).eq('step_number', newStep).single();
-
-  // 4. Log skipped steps (forward only)
-  if (direction > 0) {
-    const skipped = [];
-    for (let s = currentStep + 1; s < newStep; s++) {
-      skipped.push({ sequence_id: seq.id, contact_id: contactId, step_number: s,
-        status: 'skipped', skipped_at: new Date().toISOString(), reason: 'manual_bump' });
-    }
-    if (skipped.length) await db.from('sequence_step_log').insert(skipped);
-  }
-
-  // 5. Update sequence current_step (0-indexed)
-  await db.from('sequences').update({ current_step: newStep - 1 }).eq('id', seq.id);
-
-  // 6. Delete pending tasks, insert new task
-  await db.from('tasks').delete().eq('contact_id', contactId).eq('completed', false);
-  if (stepTpl) {
-    await db.from('tasks').insert({
-      sequence_id: seq.id, contact_id: contactId, account_id: accountId,
-      rep: state.rep, step_number: newStep,
-      channel: stepTpl.channel || 'linkedin',
-      action: stepTpl.instructions || ('Step ' + newStep),
-      due_date: nextBusinessDay(new Date()), completed: false
-    });
-  }
-
-  // 7. Log activity
-  await db.from('activity_log').insert({
-    event_type: 'sequence_bumped',
-    description: 'Step bumped from ' + currentStep + ' to ' + newStep + ' (manual)',
-    contact_id: contactId, account_id: accountId, rep: state.rep
-  });
-
-  // 8. Toast + re-render contact rows
-  showToast((direction > 0 ? '↪' : '↩') + ' Moved to Step ' + newStep, true);
-  const contacts = await loadAccountContacts(accountId);
-  const acctStatus = (document.getElementById('acd_' + accountId) || {}).dataset?.acctStatus || '';
-  const cr = document.getElementById('cr_' + accountId);
-  if (cr) {
-    cr.innerHTML = contacts.length
-      ? contacts.map(c => buildContactRow(c, accountId, acctStatus)).join('')
-      : '<div style="padding:12px;color:var(--text-dim)">No contacts yet</div>';
-    restoreBulkCheckboxes(cr);
-  }
-}
-
-</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="auth-check.js"></script>
 <script>
 const db = window.rylemDb;
@@ -2018,6 +1904,121 @@ async function bulkStartSequences() {
   state.supabaseAccounts = await fetchRepAccounts(state.rep);
   render();
 }
+
+// ─── BUSINESS DAY UTILITY ────────────────────────────────────
+function nextBusinessDay(date) {
+  const holidays = _usHolidays();
+  const d = new Date(date);
+  d.setDate(d.getDate() + 1);
+  while (true) {
+    const dow = d.getDay();
+    if (dow === 0) { d.setDate(d.getDate() + 1); continue; } // Sunday → Monday
+    if (dow === 6) { d.setDate(d.getDate() + 2); continue; } // Saturday → Monday
+    const iso = d.toISOString().split('T')[0];
+    if (holidays.has(iso)) { d.setDate(d.getDate() + 1); continue; }
+    return iso;
+  }
+}
+
+function _usHolidays() {
+  const set = new Set();
+  for (const yr of [new Date().getFullYear(), new Date().getFullYear() + 1]) {
+    const obs = (m, day) => {
+      const d = new Date(yr, m, day);
+      const dow = d.getDay();
+      if (dow === 6) d.setDate(day - 1); // Sat → Fri
+      if (dow === 0) d.setDate(day + 1); // Sun → Mon
+      return d.toISOString().split('T')[0];
+    };
+    const nthDay = (m, n, dow) => { // nth weekday of month (1-based)
+      let d = new Date(yr, m, 1), count = 0;
+      while (true) { if (d.getDay() === dow) { count++; if (count === n) return d.toISOString().split('T')[0]; } d.setDate(d.getDate() + 1); }
+    };
+    const lastDay = (m, dow) => { // last weekday of month
+      let d = new Date(yr, m + 1, 0), last = null;
+      while (d.getMonth() === m) { if (d.getDay() === dow) { last = d.toISOString().split('T')[0]; break; } d.setDate(d.getDate() - 1); }
+      return last;
+    };
+    set.add(obs(0, 1));          // New Year's Day
+    set.add(nthDay(0, 3, 1));    // MLK Day
+    set.add(nthDay(1, 3, 1));    // Presidents Day
+    set.add(lastDay(4, 1));      // Memorial Day
+    set.add(obs(5, 19));         // Juneteenth
+    set.add(obs(6, 4));          // Independence Day
+    set.add(nthDay(8, 1, 1));    // Labor Day
+    set.add(nthDay(9, 2, 1));    // Columbus Day
+    set.add(obs(10, 11));        // Veterans Day
+    set.add(nthDay(10, 4, 4));   // Thanksgiving
+    set.add(obs(11, 25));        // Christmas
+  }
+  return set;
+}
+
+// ─── MANUAL STEP BUMP ────────────────────────────────────────
+async function bumpContactStep(contactId, accountId, currentStep, direction) {
+  // 1. Fetch active sequence
+  const { data: seqs } = await db.from('sequences')
+    .select('*').eq('contact_id', contactId).eq('status', 'active').limit(1);
+  const seq = seqs && seqs[0];
+  if (!seq) { showToast('No active sequence for this contact'); return; }
+
+  // 2. Get step count for this template
+  const { data: allSteps } = await db.from('sequence_steps')
+    .select('step_number').eq('template_id', seq.template_id).order('step_number');
+  const maxStep = allSteps ? allSteps.length : 13;
+  const newStep = Math.max(1, Math.min(maxStep, currentStep + direction));
+  if (newStep === currentStep) { showToast('Already at ' + (direction > 0 ? 'last' : 'first') + ' step'); return; }
+
+  // 3. Fetch target step template
+  const { data: stepTpl } = await db.from('sequence_steps')
+    .select('*').eq('template_id', seq.template_id).eq('step_number', newStep).single();
+
+  // 4. Log skipped steps (forward only)
+  if (direction > 0) {
+    const skipped = [];
+    for (let s = currentStep + 1; s < newStep; s++) {
+      skipped.push({ sequence_id: seq.id, contact_id: contactId, step_number: s,
+        status: 'skipped', skipped_at: new Date().toISOString(), reason: 'manual_bump' });
+    }
+    if (skipped.length) await db.from('sequence_step_log').insert(skipped);
+  }
+
+  // 5. Update sequence current_step (0-indexed)
+  await db.from('sequences').update({ current_step: newStep - 1 }).eq('id', seq.id);
+
+  // 6. Delete pending tasks, insert new task
+  await db.from('tasks').delete().eq('contact_id', contactId).eq('completed', false);
+  if (stepTpl) {
+    await db.from('tasks').insert({
+      sequence_id: seq.id, contact_id: contactId, account_id: accountId,
+      rep: state.rep, step_number: newStep,
+      channel: stepTpl.channel || 'linkedin',
+      action: stepTpl.instructions || ('Step ' + newStep),
+      due_date: nextBusinessDay(new Date()), completed: false
+    });
+  }
+
+  // 7. Log activity
+  await db.from('activity_log').insert({
+    event_type: 'sequence_bumped',
+    description: 'Step bumped from ' + currentStep + ' to ' + newStep + ' (manual)',
+    contact_id: contactId, account_id: accountId, rep: state.rep
+  });
+
+  // 8. Toast + re-render contact rows
+  showToast((direction > 0 ? '↪' : '↩') + ' Moved to Step ' + newStep, true);
+  const contacts = await loadAccountContacts(accountId);
+  const acctStatus = (document.getElementById('acd_' + accountId) || {}).dataset?.acctStatus || '';
+  const cr = document.getElementById('cr_' + accountId);
+  if (cr) {
+    cr.innerHTML = contacts.length
+      ? contacts.map(c => buildContactRow(c, accountId, acctStatus)).join('')
+      : '<div style="padding:12px;color:var(--text-dim)">No contacts yet</div>';
+    restoreBulkCheckboxes(cr);
+  }
+}
+
+
 </script>
 </body>
 </html>

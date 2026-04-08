@@ -250,6 +250,8 @@ button,input,select{font-family:inherit}
         <option value="julia">Julia Dusseau</option>
         <option value="april">April Melton</option>
         <option value="liza">Liza Valencia</option>
+        <option value="jean">Jean</option>
+        <option value="dee">Dee</option>
       </select>
       <a href="bdm.html" class="btn-back">← BDM Dashboard</a>
       <button class="btn-logout" onclick="doLogout()">Sign Out</button>
@@ -354,31 +356,29 @@ button,input,select{font-family:inherit}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="auth-check.js"></script>
 <script>
-// ─── SUPABASE ───
-const SUPA_URL='https://ilbfbbcaaonxejvnkffi.supabase.co';
-const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsYmZiYmNhYW9ueGVqdm5rZmZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNjI3MDQsImV4cCI6MjA5MDczODcwNH0.JeL849o9ehf9Dekh6n-sYa8qtgjcpOLGdBVQPL3fDgw';
-const db=window.supabase.createClient(SUPA_URL,SUPA_KEY);
-// ─── PASSWORD GATE ───
-if(localStorage.getItem('bdm_auth_v2')!=='ok'){
-  const pw=prompt('Password:');
-  if(pw==='rylem2026'){localStorage.setItem('bdm_auth_v2','ok');}
-  else{document.body.innerHTML='<p style="color:#f04060;padding:40px;font-family:sans-serif">Incorrect password.</p>';throw new Error('auth');}
-}
-document.getElementById('app').style.display='';
-document.getElementById('app').classList.add('visible');
-init();
+const db = window.rylemDb;
 
 // ─── STATE ──────────────────────────────────────────────
 let currentRep = 'mike';
 
 // ─── INIT ────────────────────────────────────────────────
-async function init() {
+async function init(user) {
+  // Only admins can access manager.html
+  if (user.role !== 'admin') {
+    document.body.innerHTML = '<p style="color:#f04060;padding:40px;font-family:sans-serif">Access denied. Admin only.</p>';
+    return;
+  }
+  document.getElementById('app').style.display='';
+  document.getElementById('app').classList.add('visible');
   setDateLabel();
-  currentRep = localStorage.getItem('bdm_rep') || 'mike';
+  currentRep = user.rep_key || 'mike';
   document.getElementById('rep-select').value = currentRep;
   await loadAll();
 }
+
+window.rylemAuthReady.then(function(user) { init(user); });
 
 function setDateLabel() {
   const d = new Date();
@@ -392,8 +392,8 @@ async function switchRep(rep) {
   await loadAll();
 }
 
-const REP_FULL_NAMES={mike:'Mike Dades',julia:'Julia Dusseau',april:'April Melton',liza:'Liza Valencia'};
-const REP_ROLES={mike:'CEO / BDM',julia:'BDM',april:'BDM',liza:'Director of Recruiting Strategy'};
+const REP_FULL_NAMES={mike:'Mike Dades',julia:'Julia Dusseau',april:'April Melton',liza:'Liza Valencia',jean:'Jean',dee:'Dee'};
+const REP_ROLES={mike:'CEO / BDM',julia:'BDM',april:'BDM',liza:'Director of Recruiting Strategy',jean:'SDR',dee:'SDR'};
 
 async function loadAll() {
   await Promise.all([

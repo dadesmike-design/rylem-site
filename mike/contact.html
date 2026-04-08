@@ -454,18 +454,12 @@ button,input,select,textarea{font-family:inherit}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="auth-check.js"></script>
 <script>
-const SUPA_URL='https://ilbfbbcaaonxejvnkffi.supabase.co';
-const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsYmZiYmNhYW9ueGVqdm5rZmZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNjI3MDQsImV4cCI6MjA5MDczODcwNH0.JeL849o9ehf9Dekh6n-sYa8qtgjcpOLGdBVQPL3fDgw';
-const db=window.supabase.createClient(SUPA_URL,SUPA_KEY);
-if(localStorage.getItem('bdm_auth_v2')!=='ok'){
-  const pw=prompt('Password:');
-  if(pw==='rylem2026'){localStorage.setItem('bdm_auth_v2','ok');}
-  else{document.body.innerHTML='<p style="color:#f04060;padding:40px;font-family:sans-serif">Incorrect password.</p>';throw new Error('auth');}
-}
+const db = window.rylemDb;
 
-// Boot
-boot();
+// Boot via auth
+window.rylemAuthReady.then(function() { boot(); });
 
 let contact=null,account=null,sequence=null,stepInfo=null,task=null,activityList=[],seqList=[];
 

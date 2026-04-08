@@ -1518,7 +1518,10 @@ async function toggleAccount(id) {
     const contacts = await loadAccountContacts(id);
     const acctStatus = detail.dataset.acctStatus || '';
     const cr = document.getElementById('cr_' + id);
-    if (cr) cr.innerHTML = contacts.length ? contacts.map(c => buildContactRow(c, id, acctStatus)).join('') : '<div style="padding:12px;color:var(--text-dim)">No contacts yet</div>';
+    if (cr) {
+      cr.innerHTML = contacts.length ? contacts.map(c => buildContactRow(c, id, acctStatus)).join('') : '<div style="padding:12px;color:var(--text-dim)">No contacts yet</div>';
+      restoreBulkCheckboxes(cr);
+    }
   }
 }
 
@@ -1682,33 +1685,64 @@ document.addEventListener('click', e => {
 });
 
 // ─── BULK SEQUENCE START ─────────────────────────────────
+// Persistent selection state — survives re-renders when accounts expand
+const _bulkSel = new Map(); // contact_id → {contact_id, account_id, name}
+
 function getSelectedContacts() {
-  return Array.from(document.querySelectorAll('.contact-rows .contact-cb:checked')).map(cb => ({
-    contact_id: cb.dataset.contactId,
-    account_id: cb.dataset.accountId,
-    name: cb.dataset.contactName
-  }));
+  return Array.from(_bulkSel.values());
 }
 
 function bulkSelectionChanged() {
-  const sel = getSelectedContacts();
+  // Sync DOM checkboxes → _bulkSel
+  document.querySelectorAll('.contact-rows .contact-cb[data-contact-id]').forEach(cb => {
+    if (cb.checked) {
+      _bulkSel.set(cb.dataset.contactId, {
+        contact_id: cb.dataset.contactId,
+        account_id: cb.dataset.accountId,
+        name: cb.dataset.contactName
+      });
+    } else {
+      _bulkSel.delete(cb.dataset.contactId);
+    }
+  });
+  const count = _bulkSel.size;
   const bar = document.getElementById('bulk-bar');
-  if (sel.length > 0) {
-    document.getElementById('bulk-count').textContent = sel.length + ' contact' + (sel.length !== 1 ? 's' : '') + ' selected';
+  if (count > 0) {
+    document.getElementById('bulk-count').textContent = count + ' contact' + (count !== 1 ? 's' : '') + ' selected';
     bar.classList.add('visible');
   } else {
     bar.classList.remove('visible');
   }
 }
 
+function restoreBulkCheckboxes(container) {
+  // After re-rendering a contact list, re-check any previously selected contacts
+  if (!_bulkSel.size) return;
+  container.querySelectorAll('.contact-cb[data-contact-id]').forEach(cb => {
+    if (_bulkSel.has(cb.dataset.contactId)) cb.checked = true;
+  });
+}
+
 function toggleSelectAll(accountId, checked) {
   const cr = document.getElementById('cr_' + accountId);
   if (!cr) return;
-  cr.querySelectorAll('.contact-cb').forEach(cb => { cb.checked = checked; });
+  cr.querySelectorAll('.contact-cb[data-contact-id]').forEach(cb => {
+    cb.checked = checked;
+    if (checked) {
+      _bulkSel.set(cb.dataset.contactId, {
+        contact_id: cb.dataset.contactId,
+        account_id: cb.dataset.accountId,
+        name: cb.dataset.contactName
+      });
+    } else {
+      _bulkSel.delete(cb.dataset.contactId);
+    }
+  });
   bulkSelectionChanged();
 }
 
 function bulkDeselectAll() {
+  _bulkSel.clear();
   document.querySelectorAll('.contact-cb').forEach(cb => { cb.checked = false; });
   document.getElementById('bulk-bar').classList.remove('visible');
 }

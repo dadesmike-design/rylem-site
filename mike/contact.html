@@ -292,6 +292,24 @@ button,input,select,textarea{font-family:inherit}
 .dd-dot-mike{background:var(--neon-cyan)}
 .dd-dot-julia{background:var(--neon-purple)}
 .dd-dot-april{background:var(--neon-pink)}
+/* BDM PILL */
+.hdr-bdm-wrap{position:relative;display:inline-block}
+.hdr-bdm-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid;transition:filter .2s}
+.hdr-bdm-pill:hover{filter:brightness(1.3)}
+.hdr-bdm-pill .caret{font-size:9px;opacity:.6}
+.bdm-mike{background:rgba(0,212,255,.1);border-color:rgba(0,212,255,.3);color:var(--neon-cyan)}
+.bdm-julia{background:rgba(191,90,242,.1);border-color:rgba(191,90,242,.3);color:var(--neon-purple)}
+.bdm-april{background:rgba(255,45,120,.1);border-color:rgba(255,45,120,.3);color:var(--neon-pink)}
+.bdm-none{background:var(--surface2);border-color:var(--border);color:var(--text3)}
+.hdr-bdm-dd{position:absolute;top:calc(100% + 4px);left:0;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:4px 0;min-width:160px;z-index:100;display:none;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.hdr-bdm-dd.open{display:block}
+.hdr-bdm-dd .dd-opt{padding:8px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .15s}
+.hdr-bdm-dd .dd-opt:hover{background:var(--surface3)}
+.dd-dot-mike{background:var(--neon-cyan)}
+.dd-dot-julia{background:var(--neon-purple)}
+.dd-dot-april{background:var(--neon-pink)}
+/* WORKING REP LABEL */
+.hdr-working-rep{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:12px;font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--surface2);color:var(--text2)}
 .hdr-status-wrap{position:relative;display:inline-block}
 .hdr-status-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text2);transition:filter .2s}
 .hdr-status-badge:hover{filter:brightness(1.3)}
@@ -525,7 +543,10 @@ function renderHeader(){
   const loc=[c.city,c.state].filter(Boolean).join(', ');
   const roleLabels={champion:'⭐ Champion',budget_holder:'💰 Budget Holder',executive:'👔 Executive',end_user:'🎯 End User',other:'👤 Other'};
   const ownerName={mike:'Mike Dades',julia:'Julia Dusseau',april:'April Melton'};
+  const repNames={mike:'Mike',julia:'Julia',april:'April',jean:'Jean',dee:'Dee'};
   const ow=c.owner||'mike';
+  const bdm=c.assigned_bdm||'';
+  const wRep=c.working_rep||'';
   const statusLabel=(c.status||'new').replace(/_/g,' ');
   const allStatuses=['new','engaging','warm','meeting_set','won','lost','do_not_contact'];
   const allReps=['mike','julia','april'];
@@ -549,6 +570,15 @@ function renderHeader(){
           </div>`).join('')}
         </div>
       </div>
+      <div class="hdr-bdm-wrap">
+        <span class="hdr-bdm-pill ${bdm?'bdm-'+bdm:'bdm-none'}" onclick="toggleBdmDD(event)">${bdm?esc(ownerName[bdm]||bdm):'No BDM'} <span class="caret">▼</span></span>
+        <div class="hdr-bdm-dd" id="bdm-dd">
+          ${allReps.map(r=>`<div class="dd-opt" onclick="setBdm('${r}')">
+            <span class="dd-dot dd-dot-${r}" style="width:8px;height:8px;border-radius:50%;display:inline-block"></span>${esc(ownerName[r])}
+          </div>`).join('')}
+        </div>
+      </div>
+      ${wRep?`<span class="hdr-working-rep">Working: ${esc(repNames[wRep]||wRep)}</span>`:''}
       <div class="hdr-status-wrap">
         <span class="hdr-status-badge" onclick="toggleStatusDD(event)">${esc(statusLabel)} <span class="caret">▼</span></span>
         <div class="hdr-status-dd" id="status-dd">
@@ -570,11 +600,24 @@ function renderHeader(){
   `;
 }
 
-function closeAllDD(){['owner-dd','status-dd','role-dd'].forEach(id=>document.getElementById(id)?.classList.remove('open'));}
+function closeAllDD(){['owner-dd','status-dd','role-dd','bdm-dd'].forEach(id=>document.getElementById(id)?.classList.remove('open'));}
 function toggleOwnerDD(e){e.stopPropagation();closeAllDD();document.getElementById('owner-dd')?.classList.toggle('open');}
 function toggleStatusDD(e){e.stopPropagation();closeAllDD();document.getElementById('status-dd')?.classList.toggle('open');}
 function toggleRoleDD(e){e.stopPropagation();closeAllDD();document.getElementById('role-dd')?.classList.toggle('open');}
+function toggleBdmDD(e){e.stopPropagation();closeAllDD();document.getElementById('bdm-dd')?.classList.toggle('open');}
 document.addEventListener('click',closeAllDD);
+
+async function setBdm(val){
+  document.getElementById('bdm-dd')?.classList.remove('open');
+  const {error}=await db.from('contacts').update({assigned_bdm:val}).eq('id',contact.id);
+  if(error){showToast('Error: '+error.message);return;}
+  contact.assigned_bdm=val;
+  // Re-fetch to get the alias assigned by the trigger
+  const {data:updated}=await db.from('contacts').select('assigned_alias').eq('id',contact.id).single();
+  if(updated) contact.assigned_alias=updated.assigned_alias;
+  renderHeader();
+  showToast('BDM updated to '+val);
+}
 
 async function setOwner(val){
   document.getElementById('owner-dd')?.classList.remove('open');
@@ -674,7 +717,7 @@ async function submitMeeting(){
   const notes=document.getElementById('mtg-notes').value.trim()||null;
   const nextStep=document.getElementById('mtg-next-step').value.trim()||null;
   const nextDate=document.getElementById('mtg-next-date').value||null;
-  const rep=(window.currentUser&&window.currentUser.rep_name)||contact.owner||'system';
+  const rep=contact.working_rep||(window.currentUser&&window.currentUser.rep_name)||contact.owner||'system';
 
   // 1. Insert meeting record
   const {data:mtg,error:mtgErr}=await db.from('meetings').insert({
@@ -730,7 +773,7 @@ async function startPostMeetingFromPrompt(){
   const {data,error}=await db.rpc('start_sequence',{p_contact_id:contact.id,p_template_id:POST_MEETING_TEMPLATE_ID});
   if(data&&data.sequence_id){
     showToast('✅ Post-meeting sequence started');
-    const rep=(window.currentUser&&window.currentUser.rep_name)||contact.owner||'system';
+    const rep=contact.working_rep||(window.currentUser&&window.currentUser.rep_name)||contact.owner||'system';
     await db.from('activity_log').insert({
       contact_id:contact.id,account_id:contact.account_id,sequence_id:data.sequence_id,
       rep_id:rep,rep,event_type:'sequence_started',
@@ -811,7 +854,7 @@ async function logCallOutcome(outcome){
   if(_callTimer){clearTimeout(_callTimer);_callTimer=null;}
   const note=document.getElementById('call-note').value.trim();
   const labels={connected:'Connected',voicemail:'Left Voicemail',no_answer:'No Answer',wrong_number:'Wrong Number'};
-  const rep=contact.owner||account.assigned_rep||'system';
+  const rep=contact.working_rep||contact.owner||account.assigned_rep||'system';
   await db.from('activity_log').insert({
     contact_id:contact.id,account_id:contact.account_id,rep:rep,
     event_type:'call_completed',
@@ -828,7 +871,7 @@ async function dismissCallModal(){
   document.getElementById('call-modal').classList.remove('open');
   if(_callTimer){clearTimeout(_callTimer);_callTimer=null;}
   const note=document.getElementById('call-note').value.trim();
-  const rep=contact.owner||account.assigned_rep||'system';
+  const rep=contact.working_rep||contact.owner||account.assigned_rep||'system';
   await db.from('activity_log').insert({
     contact_id:contact.id,account_id:contact.account_id,rep:rep,
     event_type:'call_initiated',
@@ -863,7 +906,7 @@ async function toggleContactDNC(){
   renderHeader();
   renderDNCState();
   renderTask();
-  await db.from('activity_log').insert({contact_id:contact.id,account_id:contact.account_id,rep:contact.owner||'system',event_type:newStatus==='do_not_contact'?'contact_dnc_flagged':'contact_dnc_removed',description:contact.full_name+(newStatus==='do_not_contact'?' marked Do Not Contact':' DNC flag removed')});
+  await db.from('activity_log').insert({contact_id:contact.id,account_id:contact.account_id,rep:contact.working_rep||contact.owner||'system',event_type:newStatus==='do_not_contact'?'contact_dnc_flagged':'contact_dnc_removed',description:contact.full_name+(newStatus==='do_not_contact'?' marked Do Not Contact':' DNC flag removed')});
   showToast(newStatus==='do_not_contact'?'Marked DNC':'DNC removed');
 }
 
@@ -1107,7 +1150,7 @@ function copyMsg(){
     await db.from('activity_log').insert({
       contact_id:contact.id,account_id:contact.account_id,
       task_id:task?.id||null,sequence_id:task?.sequence_id||null,
-      rep:contact.owner||account?.assigned_rep||'system',
+      rep:contact.working_rep||contact.owner||account?.assigned_rep||'system',
       event_type:'message_generated',
       description:'AI message copied for '+contact.full_name+' ('+( task?.channel||'unknown')+' step '+(task?.step_number||'?')+')',
       metadata:{channel:task?.channel,step_number:task?.step_number,sequence_name:seq?.sequence_templates?.name||'unknown'}
@@ -1190,6 +1233,19 @@ function renderDetails(){
       <select class="detail-select" onchange="saveDetail('role_type',this.value)">
         ${roleOpts.map(r=>`<option value="${r}" ${c.role_type===r?'selected':''}>${r.replace('_',' ')}</option>`).join('')}
       </select>
+    </div>
+    <div class="detail-row">
+      <div class="detail-label">Assigned BDM</div>
+      <select class="detail-select" onchange="saveDetail('assigned_bdm',this.value);contact.assigned_bdm=this.value;renderHeader()">
+        <option value="" ${!c.assigned_bdm?'selected':''}>— None —</option>
+        <option value="mike" ${c.assigned_bdm==='mike'?'selected':''}>Mike Dades</option>
+        <option value="julia" ${c.assigned_bdm==='julia'?'selected':''}>Julia Dusseau</option>
+        <option value="april" ${c.assigned_bdm==='april'?'selected':''}>April Melton</option>
+      </select>
+    </div>
+    <div class="detail-row">
+      <div class="detail-label">Working Rep</div>
+      <input class="detail-input" value="${esc(c.working_rep||'')}" disabled style="opacity:.6;cursor:not-allowed">
     </div>
     <div class="detail-row" style="align-items:flex-start">
       <div class="detail-label" style="padding-top:12px">Notes</div>

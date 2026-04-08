@@ -449,6 +449,14 @@ button,input,select{font-family:inherit}
   font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;
   background:rgba(245,200,66,.1);color:#f5c842;border:1px solid rgba(245,200,66,.25)
 }
+/* ─── BDM PILL ─── */
+.bdm-pill{
+  font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;
+  display:inline-block;margin-left:6px;vertical-align:middle
+}
+.bdm-mike{background:rgba(0,212,255,.12);color:#00d4ff;border:1px solid rgba(0,212,255,.25)}
+.bdm-julia{background:rgba(168,85,247,.12);color:#a855f7;border:1px solid rgba(168,85,247,.25)}
+.bdm-april{background:rgba(255,45,120,.12);color:#ff2d78;border:1px solid rgba(255,45,120,.25)}
 </style>
 </head>
 <body>
@@ -566,6 +574,17 @@ button,input,select{font-family:inherit}
             <label>Contact Owner</label>
             <select id="al-owner">
               <option value="">(Inherit from Rep)</option>
+              <option value="mike">Mike Dades</option>
+              <option value="julia">Julia Dusseau</option>
+              <option value="april">April Melton</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Assign BDM *</label>
+            <select id="al-bdm" required>
+              <option value="">— Select —</option>
               <option value="mike">Mike Dades</option>
               <option value="julia">Julia Dusseau</option>
               <option value="april">April Melton</option>
@@ -1167,8 +1186,9 @@ function hideDupe() {
 function updateSubmitState() {
   const co = document.getElementById('al-company')?.value.trim();
   const cn = document.getElementById('al-contact')?.value.trim();
+  const bdm = document.getElementById('al-bdm')?.value;
   const blocked = !!_dupeContact || _dncBlocked;
-  document.getElementById('al-submit').disabled = !(co && cn && !blocked);
+  document.getElementById('al-submit').disabled = !(co && cn && bdm && !blocked);
 }
 
 // Enable/disable submit on any input
@@ -1194,6 +1214,7 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
     const rep = document.getElementById('al-rep').value;
     const role = document.getElementById('al-role').value;
     const ownerVal = document.getElementById('al-owner').value;
+    const bdmVal = document.getElementById('al-bdm').value;
     const notes = document.getElementById('al-notes').value.trim();
 
     let accountId;
@@ -1221,6 +1242,7 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
     }
 
     // Create contact
+    const workingRep = window._rylemProfile ? window._rylemProfile.rep_key : state.rep;
     const { data: con, error: conErr } = await db.from('contacts').insert({
       account_id: accountId,
       full_name: contact,
@@ -1230,7 +1252,9 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
       role_type: role,
       status: 'new',
       source: 'manual',
-      owner: ownerVal || null
+      owner: ownerVal || null,
+      assigned_bdm: bdmVal || null,
+      working_rep: workingRep
     }).select().single();
     if (conErr) throw conErr;
 
@@ -1344,7 +1368,8 @@ async function loadAccountContacts(accountId) {
       id: c.id, name: c.full_name, first_name: (c.full_name||'').split(' ')[0],
       title: c.title||'', email: c.email||'', phone: c.phone||'',
       linkedin: c.linkedin_url||'', role: c.role_type||'other',
-      sequence_step: cSeq ? cSeq.current_step + 1 : 0, status: c.status||'new'
+      sequence_step: cSeq ? cSeq.current_step + 1 : 0, status: c.status||'new',
+      assigned_bdm: c.assigned_bdm||''
     };
   });
 }
@@ -1414,6 +1439,8 @@ function buildContactRow(c, accountId, acctStatus) {
   const roleClass = c.role === 'champion' ? 'role-champion' : 'role-' + (c.role || 'other');
   const roleLabel = roleLabels[c.role] || '👤 Other';
   const landExpand = acctStatus === 'active' ? '<span class="badge-land-expand">🏆 Land &amp; Expand</span>' : '';
+  const bdmNames = {mike:'Mike',julia:'Julia',april:'April'};
+  const bdmPill = c.assigned_bdm ? `<span class="bdm-pill bdm-${c.assigned_bdm}">${esc(bdmNames[c.assigned_bdm]||c.assigned_bdm)}</span>` : '';
   let actionBtns = '';
   if (c.linkedin) {
     actionBtns += `<a class="cbtn" href="${esc(c.linkedin)}" target="_blank" rel="noopener">🔗</a>`;
@@ -1431,7 +1458,7 @@ function buildContactRow(c, accountId, acctStatus) {
   return `
     <div class="contact-row" data-contact-id="${c.id || ''}" data-account-id="${accountId || ''}">
       <input type="checkbox" class="contact-cb" data-contact-id="${c.id || ''}" data-account-id="${accountId || ''}" data-contact-name="${escAttr(c.name)}" onchange="bulkSelectionChanged()">
-      <div class="contact-name">${esc(c.name)}</div>
+      <div class="contact-name">${esc(c.name)}${bdmPill}</div>
       ${landExpand}
       <div class="contact-title">${esc(c.title)}</div>
       <span class="contact-role-badge ${roleClass}">${roleLabel}</span>
@@ -1687,6 +1714,20 @@ async function bulkStartSequences() {
       .eq('contact_id', c.contact_id).eq('status', 'active');
     if (existing && existing.length > 0) { skipped++; continue; }
 
+    // Fetch contact to get assigned_bdm for alias pool
+    const { data: ctRow } = await db.from('contacts').select('assigned_bdm, working_rep, assigned_alias').eq('id', c.contact_id).single();
+    const contactBdm = ctRow?.assigned_bdm || null;
+
+    // If contact has no working_rep yet, set it to the logged-in user
+    if (!ctRow?.working_rep) {
+      await db.from('contacts').update({ working_rep: rep }).eq('id', c.contact_id);
+    }
+
+    // If assigned_bdm is set but no alias yet, trigger alias assignment by touching assigned_bdm
+    if (contactBdm && !ctRow?.assigned_alias) {
+      await db.from('contacts').update({ assigned_bdm: contactBdm }).eq('id', c.contact_id);
+    }
+
     // Insert sequence
     const { data: seq, error: seqErr } = await db.from('sequences').insert({
       contact_id: c.contact_id,
@@ -1699,13 +1740,17 @@ async function bulkStartSequences() {
     }).select().single();
     if (seqErr) { console.error('Seq insert error:', seqErr); skipped++; continue; }
 
-    // Insert first task
+    // Re-fetch contact to get assigned_alias (may have been set by trigger)
+    const { data: ctUpdated } = await db.from('contacts').select('assigned_alias').eq('id', c.contact_id).single();
+
+    // Insert first task — rep = working_rep (SDR credit), sent_from = assigned_alias (BDM pool)
     if (step1) {
       await db.from('tasks').insert({
         sequence_id: seq.id,
         contact_id: c.contact_id,
         account_id: c.account_id,
         rep: rep,
+        sent_from: ctUpdated?.assigned_alias || null,
         step_number: 1,
         channel: step1.channel || 'linkedin',
         action: step1.instructions || 'Step 1',
@@ -1714,7 +1759,7 @@ async function bulkStartSequences() {
       });
     }
 
-    // Log activity
+    // Log activity — rep = working_rep (SDR gets credit)
     await db.from('activity_log').insert({
       event_type: 'sequence_started',
       description: 'Started ' + tplName + ' sequence',

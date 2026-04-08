@@ -2083,28 +2083,28 @@ async function openStatusModal(contactId, accountId) {
   const repNames = {mike:'Mike',julia:'Julia',april:'April',jean:'Jean',dee:'Dee'};
   if (c.meeting_completed_date) {
     mc.innerHTML = `<div class="meeting-info">
-      <div>📅 <strong>Meeting set:</strong> ${esc(c.meeting_set_date)} (${esc(c.meeting_type==='in_person'?'In Person':'Virtual')})</div>
+      <div>📅 <strong>Meeting set:</strong> ${esc(c.meeting_set_date)}</div>
       <div>👤 <strong>Set by:</strong> ${esc(repNames[c.meeting_set_by]||c.meeting_set_by||'—')}</div>
-      <div>✅ <strong>Completed:</strong> ${esc(c.meeting_completed_date)}</div>
+      <div>✅ <strong>Completed:</strong> ${esc(c.meeting_completed_date)} (${esc(c.meeting_type==='in_person'?'In Person':'Virtual')})</div>
       <div>👤 <strong>Completed by:</strong> ${esc(repNames[c.meeting_completed_by]||c.meeting_completed_by||'—')}</div>
     </div>`;
   } else if (c.meeting_set_date) {
     mc.innerHTML = `<div class="meeting-info">
-      <div>📅 <strong>Meeting:</strong> ${esc(c.meeting_set_date)} (${esc(c.meeting_type==='in_person'?'In Person':'Virtual')})</div>
+      <div>📅 <strong>Meeting:</strong> ${esc(c.meeting_set_date)}</div>
       <div>👤 <strong>Set by:</strong> ${esc(repNames[c.meeting_set_by]||c.meeting_set_by||'—')}</div>
     </div>
     <button class="btn btn-submit" style="margin-top:10px" onclick="showCompleteForm()">Mark Completed</button>
     <div class="meeting-form" id="csm-complete-form">
       <div class="form-group" style="margin-bottom:10px"><label>Completed Date</label><input type="date" id="csm-complete-date" value="${new Date().toISOString().split('T')[0]}"></div>
+      <div class="form-group" style="margin-bottom:10px"><label>Meeting Type</label>
+        <select id="csm-meeting-type"><option value="virtual">Virtual</option><option value="in_person">In Person</option></select>
+      </div>
       <button class="btn btn-submit" onclick="saveMeetingCompleted()">Confirm Completed</button>
     </div>`;
   } else {
     mc.innerHTML = `<button class="btn btn-submit" onclick="showSetMeetingForm()">Set Meeting</button>
     <div class="meeting-form" id="csm-set-form">
       <div class="form-group" style="margin-bottom:10px"><label>Meeting Date *</label><input type="date" id="csm-meeting-date" required></div>
-      <div class="form-group" style="margin-bottom:10px"><label>Meeting Type</label>
-        <select id="csm-meeting-type"><option value="virtual">Virtual</option><option value="in_person">In Person</option></select>
-      </div>
       <button class="btn btn-submit" onclick="saveMeetingSet()">Save Meeting</button>
     </div>`;
   }
@@ -2130,12 +2130,11 @@ function showCompleteForm() {
 
 async function saveMeetingSet() {
   const dt = document.getElementById('csm-meeting-date').value;
-  const tp = document.getElementById('csm-meeting-type').value;
   if (!dt) { showToast('Date is required'); return; }
-  await db.from('contacts').update({ meeting_set_date: dt, meeting_type: tp, meeting_set_by: state.rep }).eq('id', _csmContactId);
+  await db.from('contacts').update({ meeting_set_date: dt, meeting_set_by: state.rep }).eq('id', _csmContactId);
   await db.from('activity_log').insert({
     event_type: 'meeting_set',
-    description: `Meeting set for ${dt} (${tp === 'in_person' ? 'In Person' : 'Virtual'})`,
+    description: `Meeting set for ${dt}`,
     contact_id: _csmContactId, account_id: _csmAccountId, rep: state.rep
   });
   showToast('📅 Meeting set!', true);
@@ -2146,9 +2145,10 @@ async function saveMeetingSet() {
 async function saveMeetingCompleted() {
   const dt = document.getElementById('csm-complete-date').value;
   if (!dt) { showToast('Date is required'); return; }
-  // 1. Write completed fields
+  // 1. Write completed fields + meeting type
   // TODO: client.html should query contacts where meeting_completed_date IS NOT NULL for this account and display them in a "Meeting History" section so reps can see who has already been met before enrolling contacts in sequences.
-  await db.from('contacts').update({ meeting_completed_date: dt, meeting_completed_by: state.rep }).eq('id', _csmContactId);
+  const tp = document.getElementById('csm-meeting-type').value;
+  await db.from('contacts').update({ meeting_completed_date: dt, meeting_completed_by: state.rep, meeting_type: tp }).eq('id', _csmContactId);
   // 2. End active sequence
   await db.from('sequences').update({ status: 'completed' }).eq('contact_id', _csmContactId).eq('status', 'active');
   // 3. Start Meeting Follow-Up sequence
@@ -2172,7 +2172,7 @@ async function saveMeetingCompleted() {
   // 4. Log
   await db.from('activity_log').insert({
     event_type: 'meeting_completed',
-    description: `Meeting completed on ${dt}` + (followUp ? '. Follow-up sequence started.' : ''),
+    description: `Meeting completed on ${dt} (${tp === 'in_person' ? 'In Person' : 'Virtual'})` + (followUp ? '. Follow-up sequence started.' : ''),
     contact_id: _csmContactId, account_id: _csmAccountId, rep: state.rep
   });
   showToast('✅ Meeting completed!' + (followUp ? ' Follow-up sequence started.' : ''), true);

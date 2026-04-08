@@ -667,6 +667,9 @@ async function init(user) {
   document.getElementById('app').style.display = '';
   document.getElementById('app').classList.add('visible');
 
+  // Store profile globally so all functions can check role/rep_key
+  window._rylemProfile = user;
+
   // Set default rep from auth profile
   state.rep = user.rep_key || 'mike';
   localStorage.setItem('bdm_rep', state.rep);

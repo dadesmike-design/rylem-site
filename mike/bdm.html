@@ -776,6 +776,14 @@ function render() {
   document.getElementById('stat-total').textContent = tasks.length;
   document.getElementById('stat-accounts').textContent = activeAccounts;
 
+  // Remember which accounts are currently expanded + their loaded contact HTML
+  const _expandedState = {};
+  document.querySelectorAll('.account-detail.open').forEach(el => {
+    const id = el.id.replace('acd_', '');
+    const cr = document.getElementById('cr_' + id);
+    _expandedState[id] = cr ? cr.innerHTML : null;
+  });
+
   // Body
   const wrap = document.getElementById('body-wrap');
   wrap.innerHTML = '';
@@ -821,6 +829,20 @@ function render() {
     al.className = 'accounts-list';
     accounts.forEach(acc => al.appendChild(buildAccountCard(acc)));
     wrap.appendChild(al);
+
+    // Restore previously expanded accounts (keeps contacts visible across renders)
+    Object.keys(_expandedState).forEach(id => {
+      const detail = document.getElementById('acd_' + id);
+      const row = document.querySelector('#ac_' + id + ' .account-row');
+      const cr = document.getElementById('cr_' + id);
+      if (detail && cr) {
+        detail.dataset.loaded = 'true';
+        cr.innerHTML = _expandedState[id];
+        detail.classList.add('open');
+        if (row) row.classList.add('open');
+        restoreBulkCheckboxes(cr);
+      }
+    });
   }
 }
 

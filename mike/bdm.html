@@ -743,9 +743,7 @@ async function markDone(repId, taskId) {
   if (taskId && taskId.match(/^[0-9a-f]{8}-/)) {
     const { error } = await db.from('tasks').update({ completed: true }).eq('id', taskId);
     if (error) { console.error('Supabase markDone error:', error); return; }
-    // Reload accounts from Supabase to reflect advanced sequence
-    state.supabaseAccounts = await fetchRepAccounts(state.rep);
-    render();
+    // Don't render here — handleDone() calls renderTasksOnly() after this returns
   }
 }
 function isTaskSkipped(repId, taskId) {
@@ -765,6 +763,45 @@ function taskId(task, idx) {
 // ─── MESSAGES (removed — now uses tasks.message_body from Supabase) ───
 
 // ─── RENDER ──────────────────────────────────────────────
+// Render ONLY the tasks section — never touches the accounts/contacts DOM
+function renderTasksOnly() {
+  const rep = state.rep;
+  const tasks = (state.supabaseTasks || []).sort(sortTasks);
+  const doneCount = tasks.filter((t, i) => isTaskDone(rep, taskId(t, i))).length;
+  const activeAccounts = getRepAccounts(rep).length;
+  document.getElementById('stat-done').textContent = doneCount;
+  document.getElementById('stat-total').textContent = tasks.length;
+  document.getElementById('stat-accounts').textContent = activeAccounts;
+
+  const tasksWrap = document.getElementById('tasks-section-wrap');
+  if (!tasksWrap) { render(); return; } // fallback: full render if not yet built
+
+  tasksWrap.innerHTML = '';
+  const tasksSec = makeSectionHeader('Today\'s Tasks', tasks.length, tasks.length === doneCount && tasks.length > 0 ? 'green' : 'accent');
+  tasksWrap.appendChild(tasksSec);
+
+  if (tasks.length === 0) {
+    const es = document.createElement('div');
+    es.className = 'empty-state';
+    es.innerHTML = '<div class="es-icon">📭</div><p>No tasks assigned for today.</p>';
+    tasksWrap.appendChild(es);
+  } else if (doneCount === tasks.length) {
+    const banner = document.createElement('div');
+    banner.className = 'all-done-banner';
+    banner.innerHTML = '<h3>🎉 All done for today!</h3><p>Every task is complete. Nice work — check back tomorrow.</p>';
+    tasksWrap.appendChild(banner);
+  } else {
+    const list = document.createElement('div');
+    list.className = 'tasks-list';
+    list.id = 'tasks-list';
+    tasks.forEach((task, idx) => {
+      const tid = taskId(task, idx);
+      list.appendChild(buildTaskCard(task, idx, tid, rep));
+    });
+    tasksWrap.appendChild(list);
+  }
+}
+
 function render() {
   const rep = state.rep;
   const tasks = (state.supabaseTasks || []).sort(sortTasks);
@@ -776,32 +813,28 @@ function render() {
   document.getElementById('stat-total').textContent = tasks.length;
   document.getElementById('stat-accounts').textContent = activeAccounts;
 
-  // Remember which accounts are currently expanded + their loaded contact HTML
-  const _expandedState = {};
-  document.querySelectorAll('.account-detail.open').forEach(el => {
-    const id = el.id.replace('acd_', '');
-    const cr = document.getElementById('cr_' + id);
-    _expandedState[id] = cr ? cr.innerHTML : null;
-  });
-
-  // Body
+  // Body — full rebuild
   const wrap = document.getElementById('body-wrap');
   wrap.innerHTML = '';
 
-  // ── TODAY'S TASKS ──
+  // ── TODAY'S TASKS (in its own container so renderTasksOnly can target it) ──
+  const tasksWrap = document.createElement('div');
+  tasksWrap.id = 'tasks-section-wrap';
+  wrap.appendChild(tasksWrap);
+
   const tasksSec = makeSectionHeader('Today\'s Tasks', tasks.length, tasks.length === doneCount && tasks.length > 0 ? 'green' : 'accent');
-  wrap.appendChild(tasksSec);
+  tasksWrap.appendChild(tasksSec);
 
   if (tasks.length === 0) {
     const es = document.createElement('div');
     es.className = 'empty-state';
     es.innerHTML = '<div class="es-icon">📭</div><p>No tasks assigned for today.</p>';
-    wrap.appendChild(es);
+    tasksWrap.appendChild(es);
   } else if (doneCount === tasks.length) {
     const banner = document.createElement('div');
     banner.className = 'all-done-banner';
     banner.innerHTML = '<h3>🎉 All done for today!</h3><p>Every task is complete. Nice work — check back tomorrow.</p>';
-    wrap.appendChild(banner);
+    tasksWrap.appendChild(banner);
   } else {
     const list = document.createElement('div');
     list.className = 'tasks-list';
@@ -810,7 +843,7 @@ function render() {
       const tid = taskId(task, idx);
       list.appendChild(buildTaskCard(task, idx, tid, rep));
     });
-    wrap.appendChild(list);
+    tasksWrap.appendChild(list);
   }
 
   // ── SEQUENCE PROGRESS ──
@@ -829,20 +862,6 @@ function render() {
     al.className = 'accounts-list';
     accounts.forEach(acc => al.appendChild(buildAccountCard(acc)));
     wrap.appendChild(al);
-
-    // Restore previously expanded accounts (keeps contacts visible across renders)
-    Object.keys(_expandedState).forEach(id => {
-      const detail = document.getElementById('acd_' + id);
-      const row = document.querySelector('#ac_' + id + ' .account-row');
-      const cr = document.getElementById('cr_' + id);
-      if (detail && cr) {
-        detail.dataset.loaded = 'true';
-        cr.innerHTML = _expandedState[id];
-        detail.classList.add('open');
-        if (row) row.classList.add('open');
-        restoreBulkCheckboxes(cr);
-      }
-    });
   }
 }
 
@@ -980,10 +999,9 @@ async function handleDone(rep, tid, company) {
   // Write to Supabase (also refreshes accounts + tasks via markDone)
   await markDone(rep, tid);
 
-  // Refresh tasks from Supabase
+  // Refresh tasks only — do NOT rebuild the accounts section (would wipe bulk selection)
   state.supabaseTasks = await fetchRepTasks(rep);
-  state.supabaseAccounts = await fetchRepAccounts(rep);
-  render();
+  renderTasksOnly();
 }
 
 function handleSkip(rep, tid) {

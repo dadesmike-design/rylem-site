@@ -1562,6 +1562,7 @@ async function toggleAccount(id) {
     if (cr) {
       cr.innerHTML = contacts.length ? contacts.map(c => buildContactRow(c, id, acctStatus)).join('') : '<div style="padding:12px;color:var(--text-dim)">No contacts yet</div>';
       restoreBulkCheckboxes(cr);
+      updateBulkBar(); // restore bar visibility after expand
     }
   }
 }
@@ -1748,9 +1749,13 @@ function bulkSelectionChanged() {
       _bulkSel.delete(cb.dataset.contactId);
     }
   });
+  updateBulkBar();
+}
+
+function updateBulkBar() {
   const count = _bulkSel.size;
-  console.log('[bulk] after sync, _bulkSel size:', count);
   const bar = document.getElementById('bulk-bar');
+  if (!bar) return;
   if (count > 0) {
     document.getElementById('bulk-count').textContent = count + ' contact' + (count !== 1 ? 's' : '') + ' selected';
     bar.classList.add('visible');
@@ -1782,7 +1787,7 @@ function toggleSelectAll(accountId, checked) {
       _bulkSel.delete(cb.dataset.contactId);
     }
   });
-  bulkSelectionChanged();
+  updateBulkBar();
 }
 
 function bulkDeselectAll() {

@@ -400,6 +400,55 @@ button,input,select{font-family:inherit}
 .sr-empty{padding:14px;color:var(--text3);font-size:13px;text-align:center}
 .contact-highlight{animation:cHighlight 2s ease-out}
 @keyframes cHighlight{0%{background:var(--accent-dim);box-shadow:inset 0 0 0 1px var(--accent-border)}100%{background:transparent;box-shadow:none}}
+
+/* ─── BULK ACTION BAR ─── */
+.bulk-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:9500;
+  background:#0d1117;border-top:1px solid var(--accent-border);
+  padding:14px 28px;display:flex;align-items:center;gap:16px;
+  transform:translateY(100%);transition:transform .25s ease;
+  box-shadow:0 -4px 24px rgba(0,0,0,.5)
+}
+.bulk-bar.visible{transform:translateY(0)}
+.bulk-bar .bulk-count{font-size:14px;font-weight:700;color:var(--accent);white-space:nowrap}
+.bulk-bar select{
+  padding:8px 32px 8px 12px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius-sm);color:var(--text);font-size:13px;font-weight:600;
+  outline:none;appearance:none;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a8fa6' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center
+}
+.bulk-bar select:focus{border-color:var(--accent)}
+.bulk-bar .bulk-start{
+  padding:9px 20px;background:linear-gradient(135deg,#0a4d2a,#0d6b38);border:1px solid rgba(16,217,135,.4);
+  border-radius:var(--radius-sm);color:#10d987;font-size:13px;font-weight:700;cursor:pointer;
+  transition:all .2s;letter-spacing:.3px
+}
+.bulk-bar .bulk-start:hover{box-shadow:0 0 16px rgba(16,217,135,.25);background:linear-gradient(135deg,#0d5e35,#10804a)}
+.bulk-bar .bulk-start:disabled{opacity:.4;cursor:not-allowed}
+.bulk-bar .bulk-cancel{
+  padding:9px 16px;background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);
+  color:var(--text3);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s
+}
+.bulk-bar .bulk-cancel:hover{border-color:var(--red);color:var(--red)}
+
+/* ─── CONTACT CHECKBOX ─── */
+.contact-cb{
+  width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;
+  border-radius:4px
+}
+.select-all-wrap{
+  display:flex;align-items:center;gap:8px;padding:8px 14px;
+  border-bottom:1px solid var(--border);background:var(--surface2);border-radius:var(--radius-sm) var(--radius-sm) 0 0;
+  margin-bottom:-1px
+}
+.select-all-wrap label{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);cursor:pointer}
+
+/* ─── LAND & EXPAND BADGE ─── */
+.badge-land-expand{
+  font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;
+  background:rgba(245,200,66,.1);color:#f5c842;border:1px solid rgba(245,200,66,.25)
+}
 </style>
 </head>
 <body>
@@ -557,6 +606,14 @@ button,input,select{font-family:inherit}
     </div>
   </div>
 
+</div>
+
+<!-- BULK ACTION BAR -->
+<div class="bulk-bar" id="bulk-bar">
+  <span class="bulk-count" id="bulk-count">0 contacts selected</span>
+  <select id="bulk-seq-select"></select>
+  <button class="bulk-start" id="bulk-start-btn" onclick="bulkStartSequences()">Start Sequence</button>
+  <button class="bulk-cancel" onclick="bulkDeselectAll()">Cancel</button>
 </div>
 
 <!-- TOAST -->
@@ -937,7 +994,8 @@ async function fetchRepAccounts(rep) {
       sequence_step: 0,
       days_since_touch: daysSinceTouch,
       contact_count: countMap[a.id] || 0,
-      contacts: null // loaded on expand
+      contacts: null, // loaded on expand
+      acct_status: a.status || ''
     };
   });
 }
@@ -1332,7 +1390,9 @@ function buildAccountCard(acc) {
   const detail = document.createElement('div');
   detail.className = 'account-detail';
   detail.id = 'acd_' + acc.id;
+  detail.dataset.acctStatus = acc.acct_status || '';
   detail.innerHTML = `<div class="account-detail-hd">All Contacts</div>
+    <div class="select-all-wrap"><input type="checkbox" class="contact-cb" id="sa_${acc.id}" onchange="toggleSelectAll('${acc.id}', this.checked)"><label for="sa_${acc.id}">Select All</label></div>
     <div class="contact-rows" id="cr_${acc.id}"><div style="padding:12px;color:var(--text-dim)">Loading contacts…</div></div>
     <button class="btn btn-add-contact" onclick="event.stopPropagation(); openAddLead('${escAttr(acc.company)}', '${acc.id}')">＋ Add Contact</button>`;
   detail.dataset.loaded = 'false';
@@ -1349,10 +1409,11 @@ function buildDots(steps, curStep) {
   }).join('');
 }
 
-function buildContactRow(c) {
+function buildContactRow(c, accountId, acctStatus) {
   const roleLabels = {champion:'⭐ Champion', budget_holder:'💰 Budget Holder', executive:'👔 Executive', end_user:'🎯 End User', other:'👤 Other'};
   const roleClass = c.role === 'champion' ? 'role-champion' : 'role-' + (c.role || 'other');
   const roleLabel = roleLabels[c.role] || '👤 Other';
+  const landExpand = acctStatus === 'active' ? '<span class="badge-land-expand">🏆 Land &amp; Expand</span>' : '';
   let actionBtns = '';
   if (c.linkedin) {
     actionBtns += `<a class="cbtn" href="${esc(c.linkedin)}" target="_blank" rel="noopener">🔗</a>`;
@@ -1368,8 +1429,10 @@ function buildContactRow(c) {
     actionBtns += `<a class="cbtn" href="tel:${esc(c.phone)}">${esc(c.phone)}</a>`;
   }
   return `
-    <div class="contact-row" data-contact-id="${c.id || ''}">
+    <div class="contact-row" data-contact-id="${c.id || ''}" data-account-id="${accountId || ''}">
+      <input type="checkbox" class="contact-cb" data-contact-id="${c.id || ''}" data-account-id="${accountId || ''}" data-contact-name="${escAttr(c.name)}" onchange="bulkSelectionChanged()">
       <div class="contact-name">${esc(c.name)}</div>
+      ${landExpand}
       <div class="contact-title">${esc(c.title)}</div>
       <span class="contact-role-badge ${roleClass}">${roleLabel}</span>
       <div class="contact-step">Step ${c.sequence_step || 1}</div>
@@ -1387,8 +1450,9 @@ async function toggleAccount(id) {
   if (open && detail.dataset.loaded === 'false') {
     detail.dataset.loaded = 'true';
     const contacts = await loadAccountContacts(id);
+    const acctStatus = detail.dataset.acctStatus || '';
     const cr = document.getElementById('cr_' + id);
-    if (cr) cr.innerHTML = contacts.length ? contacts.map(c => buildContactRow(c)).join('') : '<div style="padding:12px;color:var(--text-dim)">No contacts yet</div>';
+    if (cr) cr.innerHTML = contacts.length ? contacts.map(c => buildContactRow(c, id, acctStatus)).join('') : '<div style="padding:12px;color:var(--text-dim)">No contacts yet</div>';
   }
 }
 
@@ -1550,6 +1614,128 @@ document.addEventListener('click', e => {
     document.getElementById('search-results').classList.remove('open');
   }
 });
+
+// ─── BULK SEQUENCE START ─────────────────────────────────
+function getSelectedContacts() {
+  return Array.from(document.querySelectorAll('.contact-rows .contact-cb:checked')).map(cb => ({
+    contact_id: cb.dataset.contactId,
+    account_id: cb.dataset.accountId,
+    name: cb.dataset.contactName
+  }));
+}
+
+function bulkSelectionChanged() {
+  const sel = getSelectedContacts();
+  const bar = document.getElementById('bulk-bar');
+  if (sel.length > 0) {
+    document.getElementById('bulk-count').textContent = sel.length + ' contact' + (sel.length !== 1 ? 's' : '') + ' selected';
+    bar.classList.add('visible');
+  } else {
+    bar.classList.remove('visible');
+  }
+}
+
+function toggleSelectAll(accountId, checked) {
+  const cr = document.getElementById('cr_' + accountId);
+  if (!cr) return;
+  cr.querySelectorAll('.contact-cb').forEach(cb => { cb.checked = checked; });
+  bulkSelectionChanged();
+}
+
+function bulkDeselectAll() {
+  document.querySelectorAll('.contact-cb').forEach(cb => { cb.checked = false; });
+  document.getElementById('bulk-bar').classList.remove('visible');
+}
+
+// Populate bulk sequence dropdown when templates load
+function populateBulkSeqSelect() {
+  const sel = document.getElementById('bulk-seq-select');
+  sel.innerHTML = _seqTemplates.map(t => `<option value="${t.id}">${esc(t.name)}</option>`).join('');
+}
+// Hook into loadSeqTemplates
+const _origLoadSeq = loadSeqTemplates;
+loadSeqTemplates = async function() {
+  await _origLoadSeq();
+  populateBulkSeqSelect();
+};
+// If templates already loaded, populate now
+if (_seqTemplates.length) populateBulkSeqSelect();
+
+async function bulkStartSequences() {
+  const selected = getSelectedContacts();
+  if (!selected.length) return;
+  const templateId = document.getElementById('bulk-seq-select').value;
+  if (!templateId) { showToast('Select a sequence first'); return; }
+
+  const btn = document.getElementById('bulk-start-btn');
+  btn.disabled = true;
+  btn.textContent = 'Starting...';
+
+  const rep = window._rylemProfile ? window._rylemProfile.rep_key : state.rep;
+  const tpl = _seqTemplates.find(t => t.id === templateId);
+  const tplName = tpl ? tpl.name : 'Sequence';
+
+  // Get step 1 for this template
+  const { data: step1 } = await db.from('sequence_template_steps').select('*')
+    .eq('template_id', templateId).eq('step_number', 1).single();
+
+  let started = 0, skipped = 0;
+
+  for (const c of selected) {
+    // Check for active sequence
+    const { data: existing } = await db.from('sequences').select('id')
+      .eq('contact_id', c.contact_id).eq('status', 'active');
+    if (existing && existing.length > 0) { skipped++; continue; }
+
+    // Insert sequence
+    const { data: seq, error: seqErr } = await db.from('sequences').insert({
+      contact_id: c.contact_id,
+      account_id: c.account_id,
+      template_id: templateId,
+      rep: rep,
+      status: 'active',
+      current_step: 0,
+      started_at: new Date().toISOString()
+    }).select().single();
+    if (seqErr) { console.error('Seq insert error:', seqErr); skipped++; continue; }
+
+    // Insert first task
+    if (step1) {
+      await db.from('tasks').insert({
+        sequence_id: seq.id,
+        contact_id: c.contact_id,
+        account_id: c.account_id,
+        rep: rep,
+        step_number: 1,
+        channel: step1.channel || 'linkedin',
+        action: step1.instructions || 'Step 1',
+        due_date: new Date().toISOString().split('T')[0],
+        completed: false
+      });
+    }
+
+    // Log activity
+    await db.from('activity_log').insert({
+      event_type: 'sequence_started',
+      description: 'Started ' + tplName + ' sequence',
+      contact_id: c.contact_id,
+      account_id: c.account_id,
+      rep: rep
+    });
+
+    started++;
+  }
+
+  showToast('Sequences started for ' + started + ' contacts. ' + skipped + ' skipped (already active).', true);
+  bulkDeselectAll();
+  btn.disabled = false;
+  btn.textContent = 'Start Sequence';
+
+  // Refresh data
+  state.supabaseTasks = await fetchRepTasks(state.rep);
+  state.supabaseAccounts = await fetchRepAccounts(state.rep);
+  render();
+}
 </script>
 </body>
 </html>

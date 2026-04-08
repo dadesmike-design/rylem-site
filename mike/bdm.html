@@ -1220,6 +1220,7 @@ async function loadSeqTemplates(){
   _selectedSeqId=_seqTemplates[0].id;
   renderSeqPicker();
   updateSeqBar();
+  populateBulkSeqSelect(); // keep bulk dropdown in sync
 }
 function renderSeqPicker(){
   const wrap=document.getElementById('al-seq-selector');
@@ -1917,19 +1918,12 @@ function bulkDeselectAll() {
   document.getElementById('bulk-bar').classList.remove('visible');
 }
 
-// Populate bulk sequence dropdown when templates load
+// Populate bulk sequence dropdown
 function populateBulkSeqSelect() {
   const sel = document.getElementById('bulk-seq-select');
+  if (!sel) return;
   sel.innerHTML = _seqTemplates.map(t => `<option value="${t.id}">${esc(t.name)}</option>`).join('');
 }
-// Hook into loadSeqTemplates
-const _origLoadSeq = loadSeqTemplates;
-loadSeqTemplates = async function() {
-  await _origLoadSeq();
-  populateBulkSeqSelect();
-};
-// If templates already loaded, populate now
-if (_seqTemplates.length) populateBulkSeqSelect();
 
 async function bulkStartSequences() {
   const selected = getSelectedContacts();

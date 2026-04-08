@@ -68,9 +68,10 @@
   });
 
   window.doLogout = async function () {
-    await db.auth.signOut();
+    try { await db.auth.signOut(); } catch(e) { console.warn('signOut error:', e); }
     localStorage.removeItem('bdm_auth_v1');
     localStorage.removeItem('bdm_auth_v2');
+    localStorage.removeItem('bdm_rep');
     window.location.replace('login.html');
   };
 })();

@@ -553,13 +553,24 @@ button,input,select{font-family:inherit}
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>Assigned Rep *</label>
+            <label>Account Rep *</label>
             <select id="al-rep" required>
               <option value="mike">Mike Dades</option>
               <option value="julia">Julia Dusseau</option>
               <option value="april">April Melton</option>
             </select>
           </div>
+          <div class="form-group">
+            <label>Assign BDM (email sender) *</label>
+            <select id="al-bdm" required>
+              <option value="">-- Select BDM --</option>
+              <option value="mike">Mike Dades</option>
+              <option value="julia">Julia Dusseau</option>
+              <option value="april">April Melton</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
           <div class="form-group">
             <label>Role Type</label>
             <select id="al-role">
@@ -988,11 +999,22 @@ function copyText(text, btn) {
 
 // ─── ACCOUNTS / SEQUENCE (SUPABASE) ──────────────────────
 async function fetchRepAccounts(rep) {
-  // Get accounts assigned to this rep with their contacts and sequences
-  const { data: accounts, error: accErr } = await db
-    .from('accounts')
-    .select('*')
-    .eq('assigned_rep', rep);
+  const profile = window._rylemProfile || {};
+  const isSdr = profile.role === 'sdr';
+
+  let accounts, accErr;
+  if (isSdr) {
+    // SDRs see accounts where they have contacts assigned to them as working_rep
+    const { data: myContacts } = await db.from('contacts').select('account_id').eq('working_rep', rep);
+    const accountIds = [...new Set((myContacts||[]).map(c => c.account_id).filter(Boolean))];
+    if (!accountIds.length) return [];
+    const res = await db.from('accounts').select('*').in('id', accountIds);
+    accounts = res.data; accErr = res.error;
+  } else {
+    // BDMs and admins see their own assigned accounts
+    const res = await db.from('accounts').select('*').eq('assigned_rep', rep);
+    accounts = res.data; accErr = res.error;
+  }
   if (accErr) { console.error('accounts fetch error:', accErr); return []; }
 
   // Get contact counts per account via individual head requests (reliable, no row limit)
@@ -1082,6 +1104,21 @@ loadSeqTemplates();
 function openAddLead(prefillCompany, prefillAccountId) {
   document.getElementById('add-lead-modal').classList.add('open');
   document.getElementById('al-rep').value = state.rep;
+  // Auto-set BDM for SDRs: pick the BDM from the account if prefilled, else leave blank
+  const profile = window._rylemProfile || {};
+  const bdmSel = document.getElementById('al-bdm');
+  if (profile.role === 'sdr') {
+    // SDR: try to infer BDM from the account they're adding to
+    if (prefillAccountId) {
+      const acct = (state.supabaseAccounts || []).find(a => a.id === prefillAccountId);
+      // The account's assigned_rep is the BDM
+      if (acct) { bdmSel.value = acct.assigned_rep || ''; }
+    }
+    // Hide the account rep selector (SDRs don't change account ownership)
+    document.getElementById('al-rep').parentElement.style.display = 'none';
+  } else {
+    document.getElementById('al-rep').parentElement.style.display = '';
+  }
   _dupeContact = null;
   _dncBlocked = false;
   document.getElementById('al-dupe').style.display = 'none';
@@ -1360,7 +1397,12 @@ async function fetchRepTasks(rep) {
 }
 
 async function loadAccountContacts(accountId) {
-  const { data: contacts } = await db.from('contacts').select('*').eq('account_id', accountId);
+  const profile = window._rylemProfile || {};
+  const isSdr = profile.role === 'sdr';
+  let query = db.from('contacts').select('*').eq('account_id', accountId);
+  // SDRs only see their own contacts in each account
+  if (isSdr && profile.rep_key) query = query.eq('working_rep', profile.rep_key);
+  const { data: contacts } = await query;
   const { data: seqs } = await db.from('sequences').select('*').eq('account_id', accountId);
   return (contacts || []).map(c => {
     const cSeq = (seqs || []).find(s => s.contact_id === c.id);

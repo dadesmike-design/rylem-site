@@ -561,10 +561,17 @@ button,input,select{font-family:inherit}
 <div id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="auth-guard.js"></script>
 <script>
-// ─── SUPABASE (reuse auth client) ───
-const db = window._authDb;
+// ─── SUPABASE ───
+const SUPA_URL='https://ilbfbbcaaonxejvnkffi.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsYmZiYmNhYW9ueGVqdm5rZmZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNjI3MDQsImV4cCI6MjA5MDczODcwNH0.JeL849o9ehf9Dekh6n-sYa8qtgjcpOLGdBVQPL3fDgw';
+const db=window.supabase.createClient(SUPA_URL,SUPA_KEY);
+// ─── PASSWORD GATE ───
+if(localStorage.getItem('bdm_auth_v2')!=='ok'){
+  const pw=prompt('Password:');
+  if(pw==='rylem2026'){localStorage.setItem('bdm_auth_v2','ok');}
+  else{document.body.innerHTML='<p style="color:#f04060;padding:40px;font-family:sans-serif">Incorrect password.</p>';throw new Error('auth');}
+}
 
 // ─── STATE ──────────────────────────────────────────────
 let state = {
@@ -576,26 +583,13 @@ let state = {
 
 // ─── INIT ────────────────────────────────────────────────
 async function init() {
-  // Wait for auth guard
-  const user = await window.authReady;
   document.getElementById('app').style.display = '';
   document.getElementById('app').classList.add('visible');
 
-  // Rep name from profile (lowercase to match existing data convention)
-  const myRep = user.rep_name.toLowerCase();
-  const isAdmin = user.role === 'admin';
-
-  // Configure rep selector: admins see all reps, others locked to their own
   const repSelect = document.getElementById('rep-select');
-  if (!isAdmin) {
-    repSelect.innerHTML = `<option value="${myRep}">${user.full_name}</option>`;
-    repSelect.disabled = true;
-  }
-  repSelect.value = myRep;
-
   setDateLabel();
-  state.rep = isAdmin ? (localStorage.getItem('bdm_rep') || myRep) : myRep;
-  if (isAdmin) repSelect.value = state.rep;
+  state.rep = localStorage.getItem('bdm_rep') || 'mike';
+  repSelect.value = state.rep;
 
   updateManagerLink();
 
@@ -611,8 +605,8 @@ async function init() {
   }
 }
 
-// Boot via auth guard
-window.authReady.then(() => init());
+// Boot
+init();
 
 function setDateLabel() {
   const d = new Date();

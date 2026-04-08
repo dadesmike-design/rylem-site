@@ -1553,17 +1553,20 @@ async function toggleAccount(id) {
   if (!detail) return;
   const open = detail.classList.toggle('open');
   if (row) row.classList.toggle('open', open);
-  // Lazy-load contacts on first expand
-  if (open && detail.dataset.loaded === 'false') {
-    detail.dataset.loaded = 'true';
-    const contacts = await loadAccountContacts(id);
-    const acctStatus = detail.dataset.acctStatus || '';
-    const cr = document.getElementById('cr_' + id);
-    if (cr) {
-      cr.innerHTML = contacts.length ? contacts.map(c => buildContactRow(c, id, acctStatus)).join('') : '<div style="padding:12px;color:var(--text-dim)">No contacts yet</div>';
-      restoreBulkCheckboxes(cr);
-      updateBulkBar(); // restore bar visibility after expand
+  if (open) {
+    if (detail.dataset.loaded === 'false') {
+      // First open — fetch contacts from Supabase
+      detail.dataset.loaded = 'true';
+      const contacts = await loadAccountContacts(id);
+      const acctStatus = detail.dataset.acctStatus || '';
+      const cr = document.getElementById('cr_' + id);
+      if (cr) {
+        cr.innerHTML = contacts.length ? contacts.map(c => buildContactRow(c, id, acctStatus)).join('') : '<div style="padding:12px;color:var(--text-dim)">No contacts yet</div>';
+        restoreBulkCheckboxes(cr);
+      }
     }
+    // Always update bar on every open (handles re-open of already-loaded accounts)
+    updateBulkBar();
   }
 }
 

@@ -1004,11 +1004,8 @@ async function fetchRepAccounts(rep) {
 
   let accounts, accErr;
   if (isSdr) {
-    // SDRs see accounts where they have contacts assigned to them as working_rep
-    const { data: myContacts } = await db.from('contacts').select('account_id').eq('working_rep', rep);
-    const accountIds = [...new Set((myContacts||[]).map(c => c.account_id).filter(Boolean))];
-    if (!accountIds.length) return [];
-    const res = await db.from('accounts').select('*').in('id', accountIds);
+    // SDRs see ALL accounts — full visibility, claim by action
+    const res = await db.from('accounts').select('*').order('company');
     accounts = res.data; accErr = res.error;
   } else {
     // BDMs and admins see their own assigned accounts
@@ -1104,21 +1101,16 @@ loadSeqTemplates();
 function openAddLead(prefillCompany, prefillAccountId) {
   document.getElementById('add-lead-modal').classList.add('open');
   document.getElementById('al-rep').value = state.rep;
-  // Auto-set BDM for SDRs: pick the BDM from the account if prefilled, else leave blank
+  // Auto-set BDM: infer from account if prefilled
   const profile = window._rylemProfile || {};
   const bdmSel = document.getElementById('al-bdm');
-  if (profile.role === 'sdr') {
-    // SDR: try to infer BDM from the account they're adding to
-    if (prefillAccountId) {
-      const acct = (state.supabaseAccounts || []).find(a => a.id === prefillAccountId);
-      // The account's assigned_rep is the BDM
-      if (acct) { bdmSel.value = acct.assigned_rep || ''; }
-    }
-    // Hide the account rep selector (SDRs don't change account ownership)
-    document.getElementById('al-rep').parentElement.style.display = 'none';
-  } else {
-    document.getElementById('al-rep').parentElement.style.display = '';
+  if (prefillAccountId) {
+    const acct = (state.supabaseAccounts || []).find(a => a.id === prefillAccountId);
+    if (acct) { bdmSel.value = acct.assigned_rep || ''; }
   }
+  // SDRs don't change account ownership — hide that field
+  const repRow = document.getElementById('al-rep').parentElement;
+  repRow.style.display = (profile.role === 'sdr') ? 'none' : '';
   _dupeContact = null;
   _dncBlocked = false;
   document.getElementById('al-dupe').style.display = 'none';
@@ -1397,11 +1389,8 @@ async function fetchRepTasks(rep) {
 }
 
 async function loadAccountContacts(accountId) {
-  const profile = window._rylemProfile || {};
-  const isSdr = profile.role === 'sdr';
+  // All roles see all contacts — SDRs claim by starting a sequence
   let query = db.from('contacts').select('*').eq('account_id', accountId);
-  // SDRs only see their own contacts in each account
-  if (isSdr && profile.rep_key) query = query.eq('working_rep', profile.rep_key);
   const { data: contacts } = await query;
   const { data: seqs } = await db.from('sequences').select('*').eq('account_id', accountId);
   return (contacts || []).map(c => {
@@ -1411,7 +1400,8 @@ async function loadAccountContacts(accountId) {
       title: c.title||'', email: c.email||'', phone: c.phone||'',
       linkedin: c.linkedin_url||'', role: c.role_type||'other',
       sequence_step: cSeq ? cSeq.current_step + 1 : 0, status: c.status||'new',
-      assigned_bdm: c.assigned_bdm||''
+      assigned_bdm: c.assigned_bdm||'',
+      working_rep: c.working_rep||''
     };
   });
 }
@@ -1482,7 +1472,11 @@ function buildContactRow(c, accountId, acctStatus) {
   const roleLabel = roleLabels[c.role] || '👤 Other';
   const landExpand = acctStatus === 'active' ? '<span class="badge-land-expand">🏆 Land &amp; Expand</span>' : '';
   const bdmNames = {mike:'Mike',julia:'Julia',april:'April'};
+  const sdrNames = {jean:'Jean',dee:'Dee',mike:'Mike',julia:'Julia',april:'April'};
   const bdmPill = c.assigned_bdm ? `<span class="bdm-pill bdm-${c.assigned_bdm}">${esc(bdmNames[c.assigned_bdm]||c.assigned_bdm)}</span>` : '';
+  const workerPill = c.working_rep
+    ? `<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(16,217,135,.12);color:#10d987;border:1px solid rgba(16,217,135,.25);margin-left:4px">👤 ${esc(sdrNames[c.working_rep]||c.working_rep)}</span>`
+    : `<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(122,143,166,.08);color:#4a5f75;border:1px solid rgba(122,143,166,.15);margin-left:4px">unclaimed</span>`;
   let actionBtns = '';
   if (c.linkedin) {
     actionBtns += `<a class="cbtn" href="${esc(c.linkedin)}" target="_blank" rel="noopener">🔗</a>`;
@@ -1500,7 +1494,7 @@ function buildContactRow(c, accountId, acctStatus) {
   return `
     <div class="contact-row" data-contact-id="${c.id || ''}" data-account-id="${accountId || ''}">
       <input type="checkbox" class="contact-cb" data-contact-id="${c.id || ''}" data-account-id="${accountId || ''}" data-contact-name="${escAttr(c.name)}" onchange="bulkSelectionChanged()">
-      <div class="contact-name">${esc(c.name)}${bdmPill}</div>
+      <div class="contact-name">${esc(c.name)}${bdmPill}${workerPill}</div>
       ${landExpand}
       <div class="contact-title">${esc(c.title)}</div>
       <span class="contact-role-badge ${roleClass}">${roleLabel}</span>

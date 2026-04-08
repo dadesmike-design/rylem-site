@@ -814,6 +814,7 @@ function render() {
   document.getElementById('stat-accounts').textContent = activeAccounts;
 
   // Body — full rebuild
+  console.log('[render] FULL RENDER called — accounts will rebuild. Stack:', new Error().stack.split('\n').slice(1,4).join(' | '));
   const wrap = document.getElementById('body-wrap');
   wrap.innerHTML = '';
 
@@ -1734,7 +1735,9 @@ function getSelectedContacts() {
 
 function bulkSelectionChanged() {
   // Sync DOM checkboxes → _bulkSel
-  document.querySelectorAll('.contact-rows .contact-cb[data-contact-id]').forEach(cb => {
+  const allCbs = document.querySelectorAll('.contact-rows .contact-cb[data-contact-id]');
+  console.log('[bulk] bulkSelectionChanged fired, DOM checkboxes found:', allCbs.length, 'current _bulkSel size:', _bulkSel.size);
+  allCbs.forEach(cb => {
     if (cb.checked) {
       _bulkSel.set(cb.dataset.contactId, {
         contact_id: cb.dataset.contactId,
@@ -1746,6 +1749,7 @@ function bulkSelectionChanged() {
     }
   });
   const count = _bulkSel.size;
+  console.log('[bulk] after sync, _bulkSel size:', count);
   const bar = document.getElementById('bulk-bar');
   if (count > 0) {
     document.getElementById('bulk-count').textContent = count + ' contact' + (count !== 1 ? 's' : '') + ' selected';

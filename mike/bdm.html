@@ -626,7 +626,7 @@ async function switchRep(rep) {
 
 function updateManagerLink() {
   const el = document.getElementById('manager-intel-link');
-  if (el) el.style.display = (window.currentUser && window.currentUser.role === 'admin') ? 'inline-flex' : 'none';
+  if (el) el.style.display = 'inline-flex'; // always visible (password gate is the access control)
 }
 
 // ─── DONE STATE ──────────────────────────────────────────

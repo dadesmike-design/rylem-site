@@ -326,21 +326,6 @@ button,input,select,textarea{font-family:inherit}
 .dd-dot-julia{background:var(--neon-purple)}
 .dd-dot-april{background:var(--neon-pink)}
 /* BDM PILL */
-.hdr-bdm-wrap{position:relative;display:inline-block}
-.hdr-bdm-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid;transition:filter .2s}
-.hdr-bdm-pill:hover{filter:brightness(1.3)}
-.hdr-bdm-pill .caret{font-size:9px;opacity:.6}
-.bdm-mike{background:rgba(0,212,255,.1);border-color:rgba(0,212,255,.3);color:var(--neon-cyan)}
-.bdm-julia{background:rgba(191,90,242,.1);border-color:rgba(191,90,242,.3);color:var(--neon-purple)}
-.bdm-april{background:rgba(255,45,120,.1);border-color:rgba(255,45,120,.3);color:var(--neon-pink)}
-.bdm-none{background:var(--surface2);border-color:var(--border);color:var(--text3)}
-.hdr-bdm-dd{position:absolute;top:calc(100% + 4px);left:0;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:4px 0;min-width:160px;z-index:100;display:none;box-shadow:0 8px 24px rgba(0,0,0,.4)}
-.hdr-bdm-dd.open{display:block}
-.hdr-bdm-dd .dd-opt{padding:8px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .15s}
-.hdr-bdm-dd .dd-opt:hover{background:var(--surface3)}
-.dd-dot-mike{background:var(--neon-cyan)}
-.dd-dot-julia{background:var(--neon-purple)}
-.dd-dot-april{background:var(--neon-pink)}
 /* WORKING REP LABEL */
 .hdr-working-rep{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:12px;font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--surface2);color:var(--text2)}
 .hdr-status-wrap{position:relative;display:inline-block}
@@ -603,14 +588,6 @@ function renderHeader(){
           </div>`).join('')}
         </div>
       </div>
-      <div class="hdr-bdm-wrap">
-        <span class="hdr-bdm-pill ${bdm?'bdm-'+bdm:'bdm-none'}" onclick="toggleBdmDD(event)">${bdm?esc(ownerName[bdm]||bdm):'No BDM'} <span class="caret">▼</span></span>
-        <div class="hdr-bdm-dd" id="bdm-dd">
-          ${allReps.map(r=>`<div class="dd-opt" onclick="setBdm('${r}')">
-            <span class="dd-dot dd-dot-${r}" style="width:8px;height:8px;border-radius:50%;display:inline-block"></span>${esc(ownerName[r])}
-          </div>`).join('')}
-        </div>
-      </div>
       ${wRep?`<span class="hdr-working-rep">Working: ${esc(repNames[wRep]||wRep)}</span>`:''}
       <div class="hdr-status-wrap">
         <span class="hdr-status-badge" onclick="toggleStatusDD(event)">${esc(statusLabel)} <span class="caret">▼</span></span>
@@ -634,24 +611,13 @@ function renderHeader(){
   `;
 }
 
-function closeAllDD(){['owner-dd','status-dd','role-dd','bdm-dd'].forEach(id=>document.getElementById(id)?.classList.remove('open'));}
+function closeAllDD(){['owner-dd','status-dd','role-dd'].forEach(id=>document.getElementById(id)?.classList.remove('open'));}
 function toggleOwnerDD(e){e.stopPropagation();closeAllDD();document.getElementById('owner-dd')?.classList.toggle('open');}
 function toggleStatusDD(e){e.stopPropagation();closeAllDD();document.getElementById('status-dd')?.classList.toggle('open');}
 function toggleRoleDD(e){e.stopPropagation();closeAllDD();document.getElementById('role-dd')?.classList.toggle('open');}
-function toggleBdmDD(e){e.stopPropagation();closeAllDD();document.getElementById('bdm-dd')?.classList.toggle('open');}
 document.addEventListener('click',closeAllDD);
 
-async function setBdm(val){
-  document.getElementById('bdm-dd')?.classList.remove('open');
-  const {error}=await db.from('contacts').update({assigned_bdm:val}).eq('id',contact.id);
-  if(error){showToast('Error: '+error.message);return;}
-  contact.assigned_bdm=val;
-  // Re-fetch to get the alias assigned by the trigger
-  const {data:updated}=await db.from('contacts').select('assigned_alias').eq('id',contact.id).single();
-  if(updated) contact.assigned_alias=updated.assigned_alias;
-  renderHeader();
-  showToast('BDM updated to '+val);
-}
+
 
 async function setOwner(val){
   document.getElementById('owner-dd')?.classList.remove('open');

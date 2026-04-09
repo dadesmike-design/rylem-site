@@ -52,7 +52,40 @@ button,input,select,textarea{font-family:inherit}
 .pill-won{border-color:rgba(57,255,20,.3);background:rgba(57,255,20,.08);color:var(--neon-green)}
 .pill-lost{border-color:rgba(255,23,68,.3);background:rgba(255,23,68,.08);color:var(--neon-red)}
 .pill-do_not_contact{border-color:rgba(255,23,68,.3);background:rgba(255,23,68,.08);color:var(--neon-red)}
-.pill-role{border-color:rgba(0,229,255,.25);background:rgba(0,229,255,.06);color:var(--neon-cyan)}
+/* status pills from bdm-latest */
+.status-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:14px;font-size:10px;font-weight:600;border:1px solid;margin-right:6px}
+.status-pill-meeting{border-color:rgba(57,255,20,.3);background:rgba(57,255,20,.1);color:var(--neon-green)}
+.status-pill-met{border-color:rgba(0,229,255,.3);background:rgba(0,229,255,.1);color:var(--neon-cyan)}
+.status-pill-replied{border-color:rgba(191,90,242,.3);background:rgba(191,90,242,.1);color:var(--neon-purple)}
+.status-pill-unsub{border-color:rgba(255,23,68,.3);background:rgba(255,23,68,.1);color:var(--neon-red)}
+.status-pill-notint{border-color:var(--border);background:var(--surface2);color:var(--text3)}
+/* toggle switches */
+.toggle-switch{position:relative;display:inline-block;width:50px;height:24px}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--surface3);border:1px solid var(--border);transition:.3s;border-radius:24px}
+.toggle-slider:before{position:absolute;content:"";height:18px;width:18px;left:2px;bottom:2px;background-color:var(--text3);transition:.3s;border-radius:50%}
+.toggle-switch input:checked + .toggle-slider{background-color:var(--neon-green);border-color:var(--neon-green)}
+.toggle-switch input:checked + .toggle-slider:before{background-color:var(--bg);transform:translateX(26px)}
+.toggle-switch.locked input:checked + .toggle-slider{background-color:var(--neon-red);border-color:var(--neon-red)}
+.toggle-switch.locked input + .toggle-slider{cursor:not-allowed;opacity:.6}
+/* meeting form animation */
+.meeting-form{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0 14px;margin-top:10px;max-height:0;overflow:hidden;opacity:0;transition:max-height .3s ease,opacity .25s ease,padding .3s ease}
+.meeting-form.open{max-height:300px;opacity:1;padding:14px}
+/* status modal */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(13,13,13,.9);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s;backdrop-filter:blur(6px)}
+.modal-overlay.open{opacity:1;visibility:visible}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;width:480px;max-width:calc(100vw - 60px);max-height:80vh;overflow-y:auto;box-shadow:0 16px 32px rgba(0,0,0,.8)}
+.modal h2{margin-bottom:8px;font-size:24px;color:var(--neon-cyan)}
+.modal .sub{margin-bottom:20px;font-size:14px;color:var(--text2)}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px}
+.form-group input[type="date"],.form-group select{width:100%;padding:9px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:14px;outline:none;transition:border-color .2s}
+.form-group input[type="date"]:focus,.form-group select:focus{border-color:var(--neon-cyan)}
+.meeting-info{background:rgba(255,255,255,.04);border-radius:var(--radius-sm);padding:14px;margin-bottom:16px;font-size:13px;line-height:1.6}
+.meeting-info div{margin-bottom:4px}
+.status-flags{display:grid;gap:16px;margin-top:24px;padding-top:24px;border-top:1px solid var(--border)}
+.status-flag{display:flex;align-items:center;justify-content:space-between}
+.status-flag .flag-label{font-size:14px;color:var(--text2)}.pill-role{border-color:rgba(0,229,255,.25);background:rgba(0,229,255,.06);color:var(--neon-cyan)}
 .pill-loc{border-color:var(--border);background:var(--surface2);color:var(--text2)}
 .pill-icon{border-color:var(--border);background:var(--surface2);cursor:pointer;transition:.15s;text-decoration:none;font-size:14px}
 .pill-icon:hover{border-color:var(--neon-cyan);background:rgba(0,229,255,.08)}
@@ -596,6 +629,7 @@ function renderHeader(){
       ${c.phone?`<a class="pill pill-icon" href="rcapp://r/call?number=${stripPhone(c.phone)}" onclick="logCall()" title="Call ${esc(c.phone)} via RingCentral" style="background:rgba(57,255,20,.1);border:1px solid rgba(57,255,20,.25);color:var(--neon-green)">📲</a>`:`<span class="pill pill-icon disabled" title="No phone number on file" style="opacity:.3">📲</span>`}
       ${c.linkedin_url?`<a class="pill pill-icon" href="${esc(c.linkedin_url)}" target="_blank" rel="noopener" title="LinkedIn">🔗</a>`:`<span class="pill pill-icon disabled">🔗</span>`}
       <span class="pill" onclick="toggleContactDNC()" style="cursor:pointer;border:1px solid ${c.status==='do_not_contact'?'var(--neon-green)':'var(--neon-red)'};background:${c.status==='do_not_contact'?'rgba(57,255,20,.08)':'rgba(255,23,68,.08)'};color:${c.status==='do_not_contact'?'var(--neon-green)':'var(--neon-red)'};font-weight:700;font-size:11px">${c.status==='do_not_contact'?'✅ Remove DNC':'🚫 DNC'}</span>
+      <span class="pill" onclick="openStatusModal('${esc(contact.id)}','${esc(contact.account_id)}')" style="cursor:pointer;border:1px solid var(--neon-cyan);background:rgba(0,229,255,.1);color:var(--neon-cyan);font-weight:700;font-size:11px">⚙ Status</span>
     </div>
   `;
 }
@@ -1423,7 +1457,140 @@ async function generateAISummary(){
   if(btn)btn.disabled=false;
 }
 
+// ─── STATUS MODAL FROM BDM-LATEST ───
+let _csmContactId=null,_csmAccountId=null;
+
+async function openStatusModal(contactId,accountId){
+  _csmContactId=contactId;
+  _csmAccountId=accountId;
+  const {data:c}=await db.from('contacts').select('full_name,meeting_set_date,meeting_set_by,meeting_type,meeting_completed_date,meeting_completed_by,replied,unsubscribed,not_interested').eq('id',contactId).single();
+  if(!c){showToast('Contact not found');return;}
+  document.getElementById('csm-name').textContent=c.full_name||'';
+  document.getElementById('csm-replied').checked=!!c.replied;
+  document.getElementById('csm-unsubscribed').checked=!!c.unsubscribed;
+  document.getElementById('csm-not_interested').checked=!!c.not_interested;
+  
+  const mc=document.getElementById('csm-meeting-content');
+  const repNames={mike:'Mike',julia:'Julia',april:'April',jean:'Jean',dee:'Dee'};
+  if(c.meeting_completed_date){
+    mc.innerHTML=`<div class="meeting-info">
+      <div>📅 <strong>Meeting set:</strong> ${esc(c.meeting_set_date)}</div>
+      <div>👤 <strong>Set by:</strong> ${esc(repNames[c.meeting_set_by]||c.meeting_set_by||'—')}</div>
+      <div>✅ <strong>Completed:</strong> ${esc(c.meeting_completed_date)} (${esc(c.meeting_type==='in_person'?'In Person':'Virtual')})</div>
+      <div>👤 <strong>Completed by:</strong> ${esc(repNames[c.meeting_completed_by]||c.meeting_completed_by||'—')}</div>
+    </div>`;
+  }else{
+    mc.innerHTML=`<button class="btn btn-submit" onclick="showSetMeetingForm()">Set Meeting</button>
+    <div class="meeting-form" id="csm-set-form">
+      <div class="form-group" style="margin-bottom:10px"><label>Meeting Date *</label><input type="date" id="csm-meeting-date" required></div>
+      <button class="btn btn-submit" onclick="saveMeetingSet()">Save Meeting</button>
+    </div>`;
+  }
+  document.getElementById('contact-status-modal').classList.add('open');
+}
+
+function closeStatusModal(){
+  document.getElementById('contact-status-modal').classList.remove('open');
+  document.getElementById('csm-name').textContent='';
+  _csmContactId=null;_csmAccountId=null;
+}
+
+function showSetMeetingForm(){
+  const setForm=document.getElementById('csm-set-form');
+  setForm?.classList.add('open');
+  const dateInput=document.getElementById('csm-meeting-date');
+  if(dateInput&&!dateInput.value)dateInput.value=new Date().toISOString().split('T')[0];
+}
+
+async function saveMeetingSet(){
+  const dateInput=document.getElementById('csm-meeting-date');
+  const date=dateInput?.value;
+  if(!date){showToast('Pick a date');return;}
+  const {data:profile}=await db.auth.getSession();
+  const repKey=profile?.session?.user?.email?.includes('mike')?'mike':profile?.session?.user?.email?.includes('julia')?'julia':profile?.session?.user?.email?.includes('april')?'april':profile?.session?.user?.email?.includes('jean')?'jean':'dee';
+  const {error}=await db.from('contacts').update({meeting_set_date:date,meeting_set_by:repKey}).eq('id',_csmContactId);
+  if(error){showToast('Error: '+error.message);return;}
+  showToast('Meeting date saved');
+  setTimeout(()=>{closeStatusModal();renderHeader();},1000);
+}
+
+function showCompleteForm(){
+  document.getElementById('csm-complete-form')?.classList.add('open');
+}
+
+async function saveMeetingCompleted(){
+  const dateInput=document.getElementById('csm-complete-date');
+  const typeSelect=document.getElementById('csm-meeting-type');
+  if(!dateInput?.value||!typeSelect?.value){showToast('Fill both fields');return;}
+  const {data:profile}=await db.auth.getSession();
+  const completedBy=profile?.session?.user?.email?.includes('mike')?'mike':profile?.session?.user?.email?.includes('julia')?'julia':profile?.session?.user?.email?.includes('april')?'april':profile?.session?.user?.email?.includes('jean')?'jean':'dee';
+  const {error}=await db.from('contacts').update({
+    meeting_completed_date:dateInput.value,
+    meeting_completed_by:completedBy,
+    meeting_type:typeSelect.value
+  }).eq('id',_csmContactId);
+  if(error){showToast('Error: '+error.message);return;}
+  showToast('Meeting marked completed');
+  // TODO: client.html should show Meeting History section for meeting_completed_date IS NOT NULL
+  setTimeout(()=>{closeStatusModal();renderHeader();},1000);
+}
+
+async function toggleStatusFlag(toggleId){
+  if(!_csmContactId)return;
+  const field=toggleId.replace('csm-','');
+  const checkbox=document.getElementById(toggleId);
+  const checked=!!checkbox?.checked;
+  const data={[field]:checked};
+  const {error}=await db.from('contacts').update(data).eq('id',_csmContactId);
+  if(error){showToast('Error: '+error.message);return;}
+  if(field==='unsubscribed'&&checked){
+    await db.from('contacts').update({status:'do_not_contact'}).eq('id',_csmContactId);
+  }
+  showToast(field+' '+(checked?'set':'cleared'));
+}
+
 function esc(s){return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''}
 </script>
+
+<!-- status modal -->
+<div id="contact-status-modal" class="modal-overlay" onclick="if(event.target===this)closeStatusModal()">
+  <div class="modal">
+    <h2>Status — <span id="csm-name"></span></h2>
+    <div class="sub">Manage meeting log and contact intel flags.</div>
+    <div id="csm-meeting-content"></div>
+    <div id="csm-complete-form" class="meeting-form">
+      <div class="form-group" style="margin-bottom:10px"><label>Completed Date</label><input type="date" id="csm-complete-date" value="${new Date().toISOString().split('T')[0]}"></div>
+      <div class="form-group" style="margin-bottom:10px"><label>Meeting Type</label>
+        <select id="csm-meeting-type"><option value="virtual">Virtual</option><option value="in_person">In Person</option></select>
+      </div>
+      <button class="btn btn-submit" onclick="saveMeetingCompleted()">Confirm Completed</button>
+    </div>
+    <div class="status-flags">
+      <div class="status-flag">
+        <span class="flag-label">💬 Replied</span>
+        <div class="toggle-switch">
+          <input type="checkbox" id="csm-replied" onclick="toggleStatusFlag('csm-replied')">
+          <div class="toggle-slider"></div>
+        </div>
+      </div>
+      <div class="status-flag">
+        <span class="flag-label">🚫 Unsubscribed</span>
+        <div class="toggle-switch">
+          <input type="checkbox" id="csm-unsubscribed" onclick="toggleStatusFlag('csm-unsubscribed')">
+          <div class="toggle-slider"></div>
+        </div>
+      </div>
+      <div class="status-flag">
+        <span class="flag-label">👎 Not Interested</span>
+        <div class="toggle-switch">
+          <input type="checkbox" id="csm-not_interested" onclick="toggleStatusFlag('csm-not_interested')">
+          <div class="toggle-slider"></div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-cyan" style="margin-top:20px" onclick="closeStatusModal()">Close</button>
+  </div>
+</div>
+
 </body>
 </html>

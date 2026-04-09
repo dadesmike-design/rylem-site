@@ -120,9 +120,12 @@ button,input,select{font-family:inherit}
 .metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:8px}
 .metric-card{
   background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-  padding:20px 22px;transition:border-color .2s;position:relative;overflow:hidden
+  padding:20px 22px;transition:border-color .2s,background .2s;position:relative;overflow:hidden
 }
-.metric-card:hover{border-color:var(--border-hover)}
+.metric-card.clickable{cursor:pointer}
+.metric-card.clickable:hover{
+  border-color:var(--border-hover);background:var(--surface2)
+}
 .metric-card::before{
   content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0
 }
@@ -135,6 +138,8 @@ button,input,select{font-family:inherit}
 .metric-card.cyan .metric-value{color:var(--accent)}
 .metric-card.green .metric-value{color:var(--green)}
 .metric-card.purple .metric-value{color:var(--purple)}
+.metric-card.pink::before{background:var(--pink)}
+.metric-card.pink .metric-value{color:var(--pink)}
 .metric-card.accent .metric-value{color:var(--yellow)}
 .metric-sub{font-size:11px;color:var(--text3);margin-top:4px}
 
@@ -207,6 +212,42 @@ button,input,select{font-family:inherit}
 .activity-desc{font-size:13px;color:var(--text2);line-height:1.5}
 .activity-desc strong{color:var(--text);font-weight:600}
 .activity-meta{font-size:11px;color:var(--text3);margin-top:3px}
+
+/* ─── MEETINGS DRILLDOWN MODAL ─── */
+.meetings-drilldown-modal{
+  position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(13,13,13,.9);z-index:2000;
+  display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;
+  transition:opacity .2s,visibility .2s;backdrop-filter:blur(6px);
+}
+.meetings-drilldown-modal.open{opacity:1;visibility:visible}
+.meetings-drilldown-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  width:90%;max-width:800px;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;
+  box-shadow:0 16px 48px rgba(0,0,0,.6);
+}
+.drilldown-header{
+  padding:20px 24px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.drilldown-header h3{margin:0;font-size:20px;font-weight:700;color:var(--text)}
+.drilldown-close{background:transparent;border:0;color:var(--text3);font-size:24px;cursor:pointer;padding:0;line-height:1}
+.drilldown-body{padding:0;flex:1;overflow:auto}
+.drilldown-table{
+  width:100%;border-collapse:collapse;
+}
+.drilldown-table thead{
+  position:sticky;top:0;background:var(--surface);z-index:10;border-bottom:2px solid var(--border);
+}
+.drilldown-table th{
+  text-align:left;padding:12px 24px;font-size:12px;font-weight:600;text-transform:uppercase;color:var(--text3);letter-spacing:.5px;
+}
+.drilldown-table td{
+  padding:16px 24px;border-bottom:1px solid var(--border);font-size:14px;color:var(--text2);
+}
+.drilldown-table tbody tr:hover td{background:var(--surface2)}
+.drilldown-empty{
+  padding:40px 24px;text-align:center;color:var(--text3);font-size:15px;
+}
 
 /* ─── LOADING ─── */
 .loading-text{text-align:center;padding:40px;color:var(--text3);font-size:13px}
@@ -285,9 +326,14 @@ button,input,select{font-family:inherit}
         <div class="metric-value" id="m-sequences">—</div>
         <div class="metric-sub">Currently running</div>
       </div>
-      <div class="metric-card purple">
-        <div class="metric-label">Meetings</div>
-        <div class="metric-value" id="m-meetings">—</div>
+      <div class="metric-card purple clickable" onclick="showMeetingsDrilldown('set')" id="card-meetings-set">
+        <div class="metric-label">Meetings Set</div>
+        <div class="metric-value" id="m-meetings-set">—</div>
+        <div class="metric-sub">This month</div>
+      </div>
+      <div class="metric-card pink clickable" onclick="showMeetingsDrilldown('attended')" id="card-meetings-attended">
+        <div class="metric-label">Meetings Attended</div>
+        <div class="metric-value" id="m-meetings-attended">—</div>
         <div class="metric-sub">This month</div>
       </div>
       <div class="metric-card accent">
@@ -573,20 +619,26 @@ async function loadMetrics() {
   const cutoff = thirtyDaysAgo();
 
   const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
-  const [actRes, seqRes, meetRes, contRes] = await Promise.all([
+  const [actRes, seqRes, allMeetingsRes, attendedRes, contRes] = await Promise.all([
     db.from('activity_log').select('id', { count: 'exact', head: true })
       .eq('rep', currentRep).gte('created_at', cutoff),
     db.from('sequences').select('id', { count: 'exact', head: true })
       .eq('rep', currentRep).eq('status', 'active'),
-    db.from('meetings').select('id', { count: 'exact', head: true })
+    db.from('meetings').select('*')
       .eq('rep', currentRep).gte('meeting_date', monthStart.split('T')[0]),
+    db.from('meetings').select('id', { count: 'exact', head: true })
+      .eq('rep', currentRep).eq('completed', true).gte('meeting_date', monthStart.split('T')[0]),
     db.from('activity_log').select('contact_id')
       .eq('rep', currentRep).gte('created_at', cutoff)
   ]);
 
+  const meetingsSet = allMeetingsRes.data?.length || 0;
+  const meetingsAttended = attendedRes.count || 0;
+
   document.getElementById('m-activities').textContent = actRes.count ?? 0;
   document.getElementById('m-sequences').textContent = seqRes.count ?? 0;
-  document.getElementById('m-meetings').textContent = meetRes.count ?? 0;
+  document.getElementById('m-meetings-set').textContent = meetingsSet;
+  document.getElementById('m-meetings-attended').textContent = meetingsAttended;
 
   // Count distinct contact_ids
   const uniqueContacts = new Set((contRes.data || []).map(r => r.contact_id).filter(Boolean));
@@ -849,6 +901,70 @@ async function loadActivityFeed() {
   }
   document.getElementById('activity-feed').innerHTML = html;
 }
+
+// ─── MEETINGS DRILLDOWN ─────────────────────────────────
+async function showMeetingsDrilldown(type) {
+  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+  let { data: meetings } = await db.from('meetings')
+    .select('*, contacts(full_name,email,phone), accounts(company)')
+    .eq('rep', currentRep)
+    .gte('meeting_date', monthStart)
+    .order('meeting_date', { ascending: false });
+  
+  if (!meetings) meetings = [];
+  let filtered = type === 'attended' 
+    ? meetings.filter(m => m.completed && !m.cancelled)
+    : meetings;
+  
+  document.getElementById('drilldown-title').textContent = type === 'set' 
+    ? `Meetings Set — ${filtered.length}`
+    : `Meetings Attended — ${filtered.length}`;
+  
+  const tbody = document.getElementById('drilldown-body');
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="drilldown-empty">No meetings found for this category.</td></tr>';
+  } else {
+    tbody.innerHTML = filtered.map(m => `
+      <tr>
+        <td>${esc(m.meeting_date)}</td>
+        <td><strong>${esc(m.contacts?.full_name || '—')}</strong><div style="font-size:11px;color:var(--text3);margin-top:2px">${esc(m.contacts?.email || '')}</div></td>
+        <td>${esc(m.accounts?.company || '—')}</td>
+        <td><span class="status-badge ${m.type === 'virtual' ? 'status-prospecting' : 'status-active'}">${esc(m.type === 'virtual' ? 'Virtual' : 'In‑Person')}</span></td>
+        <td><span class="status-badge ${m.outcome === 'positive' ? 'status-active' : m.outcome === 'neutral' ? 'status-prospecting' : 'status-dormant'}">${esc(m.outcome || '—')}</span></td>
+        <td><a href="contact.html?id=${m.contact_id}" class="drilldown-link" target="_blank">View →</a></td>
+      </tr>
+    `).join('');
+  }
+  
+  document.getElementById('meetings-drilldown-modal').classList.add('open');
+}
+
+function closeMeetingsDrilldown() {
+  document.getElementById('meetings-drilldown-modal').classList.remove('open');
+}
+
+// Escape HTML
+function esc(s){return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''}
 </script>
+
+<!-- MEETINGS DRILLDOWN MODAL -->
+<div id="meetings-drilldown-modal" class="meetings-drilldown-modal" onclick="if(event.target===this)closeMeetingsDrilldown()">
+  <div class="meetings-drilldown-card">
+    <div class="drilldown-header">
+      <h3 id="drilldown-title"></h3>
+      <button class="drilldown-close" onclick="closeMeetingsDrilldown()">×</button>
+    </div>
+    <div class="drilldown-body">
+      <table class="drilldown-table">
+        <thead>
+          <tr><th>Date</th><th>Contact</th><th>Company</th><th>Type</th><th>Outcome</th><th></th></tr>
+        </thead>
+        <tbody id="drilldown-body">
+          <tr><td colspan="6" class="drilldown-empty">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 </body>
 </html>

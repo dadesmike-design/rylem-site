@@ -683,7 +683,7 @@ let state = {
   rep: 'mike',
   supabaseAccounts: [],
   supabaseTasks: [],
-  today: new Date().toISOString().split('T')[0]
+  today: localDateStr()
 };
 
 // ─── INIT ────────────────────────────────────────────────
@@ -1455,7 +1455,7 @@ async function fetchRepTasks(rep) {
     .select('*, contacts(full_name, title, email, phone, linkedin_url, status), accounts(company, do_not_contact)')
     .eq('rep', rep)
     .eq('completed', false)
-    .lte('due_date', new Date().toISOString().split('T')[0])
+    .lte('due_date', localDateStr())
     .order('due_date');
   if (error) { console.error('tasks fetch error:', error); return []; }
 
@@ -2006,6 +2006,14 @@ async function bulkStartSequences() {
 }
 
 // ─── BUSINESS DAY UTILITY ────────────────────────────────────
+function localDateStr() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 function nextBusinessDay(date) {
   const holidays = _usHolidays();
   const d = new Date(date);
@@ -2151,7 +2159,7 @@ async function openStatusModal(contactId, accountId) {
     </div>
     <button class="btn btn-submit" style="margin-top:10px" onclick="showCompleteForm()">Mark Completed</button>
     <div class="meeting-form" id="csm-complete-form">
-      <div class="form-group" style="margin-bottom:10px"><label>Completed Date</label><input type="date" id="csm-complete-date" value="${new Date().toISOString().split('T')[0]}"></div>
+      <div class="form-group" style="margin-bottom:10px"><label>Completed Date</label><input type="date" id="csm-complete-date" value="${localDateStr()}"></div>
       <div class="form-group" style="margin-bottom:10px"><label>Meeting Type</label>
         <select id="csm-meeting-type"><option value="virtual">Virtual</option><option value="in_person">In Person</option></select>
       </div>

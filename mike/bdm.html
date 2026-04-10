@@ -1346,7 +1346,7 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
     if (seqErr) throw seqErr;
 
     // Get first step from template
-    const { data: step1 } = await db.from('sequence_steps').select('*')
+    const { data: step1 } = await db.from('sequence_template_steps').select('*')
       .eq('template_id', templateId).eq('step_number', 1).single();
 
     // Create first task
@@ -1365,14 +1365,15 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
     }
 
     // Log activity
-    const tplNames = {'12864255-86a7-4493-b1fd-2851364e96d6':'Cold Outbound','a1b2c3d4-1111-4000-a000-000000000001':'Warm Connect','a1b2c3d4-2222-4000-a000-000000000002':'Referral / Inbound'};
+    const tplObj = _seqTemplates.find(t => t.id === templateId);
+    const tplName = tplObj ? tplObj.name : 'sequence';
     await db.from('activity_log').insert({
       account_id: accountId,
       contact_id: con.id,
       sequence_id: seq.id,
       rep: rep,
       event_type: 'lead_added',
-      description: contact + ' (' + title + ') added to ' + company + ' — ' + (tplNames[templateId]||'sequence') + ' by ' + rep
+      description: contact + ' (' + title + ') added to ' + company + ' — ' + tplName + ' by ' + rep
     });
 
     status.style.color = 'var(--green)';

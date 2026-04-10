@@ -196,6 +196,7 @@ button,input,select,textarea{font-family:inherit}
 .meetings-body.open{display:block}
 .mtg-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
 .mtg-row:last-child{border-bottom:none}
+.mtg-actions{margin-left:auto;flex-shrink:0}
 .mtg-date{font-size:12px;font-weight:700;color:var(--text);min-width:80px}
 .mtg-type{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px}
 .mtg-type.virtual{background:rgba(0,229,255,.1);color:var(--neon-cyan)}
@@ -549,6 +550,14 @@ async function boot(){
   generateAISummary();
 }
 
+function localDateStr(){
+  const d=new Date();
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,'0');
+  const day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+
 function showError(msg){
   const el=document.getElementById('page-loading');el.style.display='block';
   el.innerHTML=`<div class="spin">❌</div><p>${msg} <a href="bdm.html">Go back</a></p>`;
@@ -646,7 +655,7 @@ let _mtgOutcome=null,_mtgType=null,_contactMeetings=[];
 function showMeetingDetailsModal(){
   if(document.getElementById('mtg-modal-el')) return;
   _mtgOutcome=null;_mtgType='virtual';
-  const today=new Date().toISOString().split('T')[0];
+  const today=localDateStr();
   const m=document.createElement('div');
   m.id='mtg-modal-el';
   m.className='mtg-modal-overlay';
@@ -748,7 +757,7 @@ async function submitMeeting(){
   if(mtgErr){showToast('❌ '+mtgErr.message);btn.disabled=false;btn.textContent='Save Meeting + Start Follow Up Sequence';return;}
 
   // 2. Append to contacts.intel
-  const dateStr=new Date(mtgDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const dateStr=mtgDate.replace(/(\d{4})-(\d{2})-(\d{2})/,(_,y,m,d)=>{const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return `${months[parseInt(m)-1]} ${parseInt(d)}, ${y}`;});
   const intelLine=`[Meeting ${dateStr}]: ${notes||'No notes'}${nextStep?' | Next step: '+nextStep:''}${_mtgOutcome?' | Outcome: '+_mtgOutcome:''}`;
   const newIntel=contact.intel ? contact.intel+'\n\n'+intelLine : intelLine;
   await db.from('contacts').update({intel:newIntel}).eq('id',contact.id);
@@ -829,16 +838,29 @@ async function loadMeetings(){
   card.style.display='block';
   badge.textContent=_contactMeetings.length;
   body.innerHTML=_contactMeetings.map(m=>{
-    const d=new Date(m.meeting_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const d=m.meeting_date.replace(/(\d{4})-(\d{2})-(\d{2})/,(_,y,mo,day)=>{const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return `${months[parseInt(mo)-1]} ${parseInt(day)}, ${y}`;});
     const outcomeLabel=(m.outcome||'').replace(/_/g,' ');
     return `<div class="mtg-row">
       <span class="mtg-date">${d}</span>
       <span class="mtg-type ${m.meeting_type||''}">${m.meeting_type==='in_person'?'In Person':'Virtual'}</span>
       ${m.outcome?`<span class="mtg-outcome ${m.outcome}">${outcomeLabel}</span>`:''}
       <span class="mtg-notes">${esc(m.notes||'No notes')}</span>
+      <span class="mtg-actions">
+        <button onclick="deleteMtg('${m.id}')" style="background:none;border:none;color:var(--neon-red);cursor:pointer;font-size:13px;padding:2px 6px" title="Delete meeting">✕</button>
+      </span>
     </div>`;
   }).join('');
 }
+async function deleteMtg(mtgId){
+  if(!confirm('Delete this meeting?')) return;
+  const {error}=await db.from('meetings').delete().eq('id',mtgId);
+  if(error){showToast('Error: '+error.message);return;}
+  _contactMeetings=_contactMeetings.filter(m=>m.id!==mtgId);
+  document.getElementById('mtg-badge').textContent=_contactMeetings.length;
+  renderMeetings();
+  showToast('Meeting deleted');
+}
+
 function toggleMeetings(){
   const body=document.getElementById('mtg-body');
   const chev=document.getElementById('mtg-chev');
@@ -1485,7 +1507,7 @@ function showSetMeetingForm(){
   const setForm=document.getElementById('csm-set-form');
   setForm?.classList.add('open');
   const dateInput=document.getElementById('csm-meeting-date');
-  if(dateInput&&!dateInput.value)dateInput.value=new Date().toISOString().split('T')[0];
+  if(dateInput&&!dateInput.value)dateInput.value=localDateStr();
 }
 
 async function saveMeetingSet(){
@@ -1545,7 +1567,7 @@ function esc(s){return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').re
     <div class="sub">Manage meeting log and contact intel flags.</div>
     <div id="csm-meeting-content"></div>
     <div id="csm-complete-form" class="meeting-form">
-      <div class="form-group" style="margin-bottom:10px"><label>Completed Date</label><input type="date" id="csm-complete-date" value="${new Date().toISOString().split('T')[0]}"></div>
+      <div class="form-group" style="margin-bottom:10px"><label>Completed Date</label><input type="date" id="csm-complete-date" value="${localDateStr()}"></div>
       <div class="form-group" style="margin-bottom:10px"><label>Meeting Type</label>
         <select id="csm-meeting-type"><option value="virtual">Virtual</option><option value="in_person">In Person</option></select>
       </div>

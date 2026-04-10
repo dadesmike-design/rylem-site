@@ -660,16 +660,20 @@ function showMeetingDetailsModal(){
         <input type="date" id="mtg-date" value="${today}">
       </div>
       <div class="mtg-field" style="flex:1">
-        <label>Assigned To</label>
-        <select id="mtg-assigned" style="width:100%;padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;font-family:inherit">
-          <option value="jean">Jean</option>
-          <option value="darice">Darice</option>
-          <option value="dee">Dee</option>
-          <option value="april">April</option>
-          <option value="julia">Julia</option>
-          <option value="mike">Mike</option>
-        </select>
+        <label>Meeting Time</label>
+        <input type="time" id="mtg-time" value="09:00">
       </div>
+    </div>
+    <div class="mtg-field">
+      <label>Assigned To</label>
+      <select id="mtg-assigned" style="width:100%;padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;font-family:inherit">
+        <option value="jean">Jean</option>
+        <option value="darice">Darice</option>
+        <option value="dee">Dee</option>
+        <option value="april">April</option>
+        <option value="julia">Julia</option>
+        <option value="mike">Mike</option>
+      </select>
     </div>
     <div class="mtg-field">
       <label>Meeting Type</label>
@@ -697,6 +701,7 @@ function showMeetingDetailsModal(){
         <div class="mtg-outcome-btn" data-val="neutral" onclick="pickMtgOutcome(this)">➖ Neutral</div>
         <div class="mtg-outcome-btn" data-val="not_interested" onclick="pickMtgOutcome(this)">❌ Not Interested</div>
         <div class="mtg-outcome-btn" data-val="follow_up_scheduled" onclick="pickMtgOutcome(this)">📅 Follow-up Scheduled</div>
+        <div class="mtg-outcome-btn" data-val="scheduled" onclick="pickMtgOutcome(this)">📆 Scheduled (upcoming)</div>
       </div>
     </div>
     <div class="mtg-field">
@@ -725,6 +730,7 @@ async function submitMeeting(){
   const btn=document.getElementById('mtg-submit-btn');
   btn.disabled=true;btn.textContent='Saving…';
   const mtgDate=document.getElementById('mtg-date').value;
+  const mtgTime=document.getElementById('mtg-time').value||null;
   const mtgAssigned=document.getElementById('mtg-assigned').value||null;
   const location=document.getElementById('mtg-location').value.trim()||null;
   const attendees=document.getElementById('mtg-attendees').value.trim()||null;
@@ -736,7 +742,7 @@ async function submitMeeting(){
   // 1. Insert meeting record
   const {data:mtg,error:mtgErr}=await db.from('meetings').insert({
     contact_id:contact.id,account_id:contact.account_id,rep,
-    meeting_date:mtgDate,meeting_type:_mtgType,location,attendees,notes,
+    meeting_date:mtgDate,meeting_time:mtgTime,meeting_type:_mtgType,location,attendees,notes,
     outcome:_mtgOutcome||null,next_step:nextStep,next_step_date:nextDate
   }).select().single();
   if(mtgErr){showToast('❌ '+mtgErr.message);btn.disabled=false;btn.textContent='Save Meeting + Start Follow Up Sequence';return;}

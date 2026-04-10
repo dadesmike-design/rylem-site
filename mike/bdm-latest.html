@@ -1712,7 +1712,7 @@ async function handleSearch(q) {
       if (contactHits.length) {
         html += '<div class="sr-group-label">Contacts</div>';
         html += contactHits.map(h => `
-          <div class="sr-item" onclick="jumpToContact('${h.account_id}','${h.id}')">
+          <div class="sr-item" onclick="goToContact('${h.id}','${h.account_id}')">
             <span class="sr-name">${esc(h.name)}</span>
             <span class="sr-title">${esc(h.title)}</span>
             <span class="sr-company">${esc(h.company)}</span>
@@ -1734,6 +1734,12 @@ function scrollToAccount(accountId) {
     row.style.boxShadow = '0 0 0 2px var(--accent)';
     setTimeout(() => { row.style.boxShadow = ''; }, 2000);
   }
+}
+
+function goToContact(contactId, accountId) {
+  document.getElementById('search-results').classList.remove('open');
+  document.getElementById('global-search').value = '';
+  window.location.href = `contact.html?id=${contactId}`;
 }
 
 async function jumpToContact(accountId, contactId) {

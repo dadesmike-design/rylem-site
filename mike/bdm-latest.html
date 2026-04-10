@@ -721,6 +721,8 @@ async function init(user) {
     state.supabaseAccounts = await fetchRepAccounts(state.rep);
     state.supabaseTasks = await fetchRepTasks(state.rep);
     render();
+    // Fix null rep values on existing tasks/sequences (one-time migration)
+    fixNullReps(state.rep);
   } catch(e) {
     console.warn('Data load error:', e);
     state.supabaseAccounts = [];
@@ -785,6 +787,30 @@ function taskId(task, idx) {
 }
 
 // ─── MESSAGES (removed — now uses tasks.message_body from Supabase) ───
+
+// ─── FIX NULL REPS (one-time migration) ─────────────────────────
+async function fixNullReps(currentRep) {
+  try {
+    // Patch tasks with null rep assigned to current user's accounts
+    const { data: nullTasks } = await db.from('tasks').select('id').is('rep', null).eq('completed', false).limit(100);
+    if (nullTasks && nullTasks.length > 0) {
+      console.log(`Fixing ${nullTasks.length} tasks with null rep...`);
+      for (const t of nullTasks) {
+        // Look up the task's sequence to find the rep
+        const { data: taskFull } = await db.from('tasks').select('sequence_id').eq('id', t.id).single();
+        if (taskFull && taskFull.sequence_id) {
+          const { data: seq } = await db.from('sequences').select('rep').eq('id', taskFull.sequence_id).single();
+          if (seq && seq.rep) {
+            await db.from('tasks').update({ rep: seq.rep }).eq('id', t.id);
+          }
+        }
+      }
+      console.log('Null rep tasks fixed.');
+    }
+  } catch(e) {
+    console.warn('fixNullReps error:', e);
+  }
+}
 
 // ─── RENDER ──────────────────────────────────────────────
 // Render ONLY the tasks section — never touches the accounts/contacts DOM

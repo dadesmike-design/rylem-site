@@ -411,9 +411,9 @@ button,input,select{font-family:inherit}
 .search-results.open{display:block}
 .sr-group-label{padding:6px 14px;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);background:var(--surface);border-bottom:1px solid var(--border)}
 .sr-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s}
-.sr-item:hover{background:var(--surface3)}
+.sr-item:hover{background:var(--surface3);box-shadow:inset 3px 0 0 var(--neon-cyan)}
 .sr-item:last-child{border-bottom:none}
-.sr-name{font-weight:600;color:var(--text);font-size:13px}
+.sr-name{font-weight:600;color:var(--neon-cyan);font-size:13px;text-decoration:underline;text-underline-offset:2px}
 .sr-title{color:var(--text2);font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sr-company{color:var(--accent);font-size:12px;font-weight:600;white-space:nowrap}
 .sr-city{color:var(--text3);font-size:11px;white-space:nowrap}
@@ -1365,6 +1365,7 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
       account_id: accountId,
       template_id: templateId,
       current_step: 0,
+      rep: rep,
       status: 'active'
     }).select().single();
     if (seqErr) throw seqErr;
@@ -1380,6 +1381,7 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
         sequence_id: seq.id,
         contact_id: con.id,
         account_id: accountId,
+        rep: rep,
         step_number: 1,
         channel: step1.channel || 'linkedin',
         action: step1.instructions || 'Step 1',
@@ -1739,6 +1741,28 @@ function scrollToAccount(accountId) {
 function goToContact(contactId, accountId) {
   document.getElementById('search-results').classList.remove('open');
   document.getElementById('global-search').value = '';
+  // Try to find the contact within the current BDM page first
+  if (accountId) {
+    const acctRow = document.querySelector(`[data-account-id="${accountId}"]`);
+    if (acctRow) {
+      // Scroll to the account, then open the contact's status modal
+      acctRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      acctRow.style.transition = 'box-shadow .3s';
+      acctRow.style.boxShadow = '0 0 0 2px var(--neon-cyan)';
+      setTimeout(() => { acctRow.style.boxShadow = ''; }, 3000);
+      // Try to find and highlight the specific contact row
+      const contactRows = acctRow.querySelectorAll('.contact-row');
+      for (const cr of contactRows) {
+        if (cr.dataset.contactId === contactId) {
+          cr.style.background = 'rgba(0,229,255,0.15)';
+          setTimeout(() => { cr.style.background = ''; }, 3000);
+          break;
+        }
+      }
+      return;
+    }
+  }
+  // Fallback: navigate to contact detail page
   window.location.href = `contact.html?id=${contactId}`;
 }
 

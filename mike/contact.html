@@ -853,12 +853,14 @@ async function loadMeetings(){
 }
 async function deleteMtg(mtgId){
   if(!confirm('Delete this meeting?')) return;
-  const {error}=await db.from('meetings').delete().eq('id',mtgId);
-  if(error){showToast('Error: '+error.message);return;}
-  _contactMeetings=_contactMeetings.filter(m=>m.id!==mtgId);
-  document.getElementById('mtg-badge').textContent=_contactMeetings.length;
-  renderMeetings();
-  showToast('Meeting deleted');
+  if(!db){showToast('Error: database not connected');return;}
+  try{
+    const result=await db.from('meetings').delete().eq('id',mtgId).select();
+    console.log('deleteMtg result:',result);
+    if(result.error){showToast('Error: '+result.error.message);console.error('deleteMtg error:',result.error);return;}
+    showToast('Meeting deleted');
+    await loadMeetings();
+  }catch(e){showToast('Error deleting: '+e.message);console.error('deleteMtg exception:',e);}
 }
 
 function toggleMeetings(){

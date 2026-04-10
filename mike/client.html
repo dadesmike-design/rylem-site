@@ -112,6 +112,55 @@ button,input,select,textarea{font-family:inherit}
 .ct-add{margin-top:12px;padding:8px 16px;border:1px dashed var(--border);border-radius:var(--radius-sm);background:transparent;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;transition:.15s;width:100%}
 .ct-add:hover{border-color:var(--neon-cyan);color:var(--neon-cyan)}
 
+/* MEETINGS SECTION */
+.meetings-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden}
+.meetings-hd{display:flex;align-items:center;gap:8px;padding:14px 20px;cursor:pointer;user-select:none}
+.meetings-hd:hover{background:var(--surface2)}
+.meetings-chevron{font-size:10px;color:var(--text3);transition:transform .2s}
+.meetings-chevron.open{transform:rotate(90deg)}
+.meetings-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+.meetings-badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px;background:rgba(57,255,20,.1);color:var(--neon-green)}
+.meetings-body{padding:0 20px 16px;display:none}
+.meetings-body.open{display:block}
+.mtg-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.mtg-row:last-child{border-bottom:none}
+.mtg-date{font-size:12px;font-weight:700;color:var(--text);min-width:80px}
+.mtg-time{font-size:11px;color:var(--text3);min-width:55px}
+.mtg-type{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px}
+.mtg-type.virtual{background:rgba(0,229,255,.1);color:var(--neon-cyan)}
+.mtg-type.in_person{background:rgba(191,90,247,.1);color:var(--neon-purple)}
+.mtg-outcome{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.mtg-outcome.positive{background:rgba(57,255,20,.1);color:var(--neon-green)}
+.mtg-outcome.neutral{background:rgba(0,229,255,.1);color:var(--neon-cyan)}
+.mtg-outcome.not_interested{background:rgba(255,45,120,.1);color:var(--neon-pink)}
+.mtg-outcome.follow_up_scheduled{background:rgba(168,85,247,.1);color:var(--neon-amber)}
+.mtg-outcome.scheduled{background:rgba(255,255,255,.06);color:var(--text3)}
+.mtg-contact{font-size:12px;color:var(--text2);min-width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mtg-notes{font-size:12px;color:var(--text3);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mtg-complete-btn{padding:4px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid rgba(57,255,20,.3);background:rgba(57,255,20,.08);color:var(--neon-green);transition:.15s;white-space:nowrap}
+.mtg-complete-btn:hover{background:rgba(57,255,20,.18);border-color:var(--neon-green)}
+
+/* MEETING COMPLETE MODAL */
+.mtg-modal-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.7);backdrop-filter:blur(4px)}
+.mtg-modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;width:520px;max-width:94vw;max-height:90vh;overflow-y:auto}
+.mtg-modal h2{font-size:20px;font-weight:800;margin-bottom:4px}
+.mtg-modal .sub{font-size:13px;color:var(--text2);margin-bottom:20px}
+.mtg-field{margin-bottom:14px}
+.mtg-field label{display:block;font-size:12px;font-weight:700;color:var(--neon-cyan);margin-bottom:6px}
+.mtg-field input,.mtg-field textarea{width:100%;padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;font-family:inherit;outline:none}
+.mtg-field input:focus,.mtg-field textarea:focus{border-color:var(--neon-purple)}
+.mtg-field textarea{min-height:100px;resize:vertical;line-height:1.5}
+.mtg-outcome-row{display:flex;gap:8px;flex-wrap:wrap}
+.mtg-outcome-btn{flex:1;min-width:100px;padding:10px 8px;text-align:center;border-radius:var(--radius-sm);font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--text3);transition:all .15s}
+.mtg-outcome-btn.active{border-color:var(--neon-green);background:rgba(57,255,20,.1);color:var(--neon-green)}
+.mtg-outcome-btn[data-val=neutral].active{border-color:var(--neon-cyan);background:rgba(0,229,255,.1);color:var(--neon-cyan)}
+.mtg-outcome-btn[data-val=not_interested].active{border-color:var(--neon-pink);background:rgba(255,45,120,.1);color:var(--neon-pink)}
+.mtg-outcome-btn[data-val=follow_up_scheduled].active{border-color:var(--neon-amber);background:rgba(168,85,247,.1);color:var(--neon-amber)}
+.mtg-submit{width:100%;padding:12px;border-radius:var(--radius-sm);font-size:15px;font-weight:800;cursor:pointer;border:none;background:var(--neon-green);color:#000;margin-top:16px}
+.mtg-submit:disabled{opacity:.5;cursor:not-allowed}
+.mtg-cancel{width:100%;padding:10px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text3);margin-top:8px}
+.mtg-cancel:hover{border-color:var(--text3);color:var(--text)}
+
 /* AI SUMMARY */
 .ai-text{font-size:14px;line-height:1.8;color:var(--text)}
 .ai-loading{color:var(--text3);font-style:italic}
@@ -192,6 +241,16 @@ button,input,select,textarea{font-family:inherit}
     <div class="sec-body" id="body-activity"></div>
   </div>
 
+  <!-- MEETINGS -->
+  <div class="meetings-card" id="meetings-card" style="display:none">
+    <div class="meetings-hd" onclick="toggleMeetings()">
+      <span class="meetings-chevron" id="mtg-chev">▶</span>
+      <span class="meetings-title">Meetings</span>
+      <span class="meetings-badge" id="mtg-badge">0</span>
+    </div>
+    <div class="meetings-body" id="mtg-body"></div>
+  </div>
+
   <!-- NOTES -->
   <div class="section">
     <div class="sec-hd no-collapse">
@@ -245,6 +304,7 @@ async function boot(){
   renderMetrics();
   renderContacts();
   renderActivity();
+  renderMeetings();
   renderNotes();
   generateSummary();
 }
@@ -355,7 +415,7 @@ function renderMetrics(){
     <div class="m-card clickable" onclick="jumpToContacts('all')"><div class="m-val m-info">${total}</div><div class="m-label">Total Contacts</div></div>
     <div class="m-card"><div class="m-val ${eClass}">${engaged}</div><div class="m-label">Engaged</div></div>
     <div class="m-card clickable" onclick="jumpToContacts('sequenced')"><div class="m-val ${sClass}">${sequenced}</div><div class="m-label">In Sequence</div></div>
-    <div class="m-card"><div class="m-val ${msClass}">${accountMeetings.length||meetingSet}</div><div class="m-label">Meetings</div>${accountMeetings.length?`<div style="font-size:10px;color:var(--text3);margin-top:2px">Latest: ${new Date(accountMeetings[0].meeting_date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div>`:''}</div>
+    <div class="m-card clickable" onclick="scrollToMeetings()"><div class="m-val ${msClass}">${accountMeetings.length||meetingSet}</div><div class="m-label">Meetings</div>${accountMeetings.length?`<div style="font-size:10px;color:var(--text3);margin-top:2px">Latest: ${new Date(accountMeetings[0].meeting_date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div>`:''}</div>
   `;
 }
 
@@ -443,6 +503,19 @@ function jumpToContacts(filter){
   document.getElementById('sec-contacts')?.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
+function scrollToMeetings(){
+  const card=document.getElementById('meetings-card');
+  if(!card||card.style.display==='none')return;
+  // Expand if collapsed
+  const body=document.getElementById('mtg-body');
+  const chev=document.getElementById('mtg-chev');
+  if(body&&!body.classList.contains('open')){
+    body.classList.add('open');
+    if(chev)chev.classList.add('open');
+  }
+  card.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
 // ─── SECTIONS ───
 function toggleSec(name){
   const chev=document.getElementById('chev-'+name);
@@ -465,6 +538,143 @@ function renderActivity(){
     const dot=a.event_type||'default';
     return `<div class="act-item"><div class="act-dot ${esc(dot)}"></div><div class="act-time">${time}</div><div class="act-desc">${esc(a.description||a.event_type||'')}</div></div>`;
   }).join('');
+}
+
+// ─── MEETINGS ───
+let _completeOutcome=null;
+
+function renderMeetings(){
+  const card=document.getElementById('meetings-card');
+  const badge=document.getElementById('mtg-badge');
+  const body=document.getElementById('mtg-body');
+  if(!accountMeetings.length){card.style.display='none';return;}
+  card.style.display='block';
+  badge.textContent=accountMeetings.length;
+  const scheduled=accountMeetings.filter(m=>m.outcome==='scheduled'||!m.outcome).length;
+  if(scheduled>0){badge.style.background='rgba(0,229,255,.1)';badge.style.color='var(--neon-cyan)';}
+  else{badge.style.background='rgba(57,255,20,.1)';badge.style.color='var(--neon-green)';}
+
+  body.innerHTML=accountMeetings.map(m=>{
+    const d=new Date(m.meeting_date+('T'+(m.meeting_time||'00:00'))).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const t=m.meeting_time?new Date('1970-01-01T'+m.meeting_time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}):'';
+    const contact=contacts.find(c=>c.id===m.contact_id);
+    const contactName=contact?contact.full_name:'Unknown';
+    const isScheduled=m.outcome==='scheduled'||!m.outcome;
+    const outcomeLabel=(m.outcome||'scheduled').replace(/_/g,' ');
+    return `<div class="mtg-row">
+      <span class="mtg-date">${d}</span>
+      ${t?`<span class="mtg-time">${t}</span>`:''}
+      <span class="mtg-type ${m.meeting_type||'virtual'}">${m.meeting_type==='in_person'?'In Person':'Virtual'}</span>
+      <span class="mtg-contact">${esc(contactName)}</span>
+      <span class="mtg-outcome ${m.outcome||'scheduled'}">${outcomeLabel}</span>
+      <span class="mtg-notes">${esc(m.notes||'')}</span>
+      ${isScheduled?`<button class="mtg-complete-btn" onclick="showCompleteModal('${m.id}')">✓ Mark Completed</button>`:''}
+    </div>`;
+  }).join('');
+}
+
+function toggleMeetings(){
+  const body=document.getElementById('mtg-body');
+  const chev=document.getElementById('mtg-chev');
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
+}
+
+function showCompleteModal(meetingId){
+  if(document.getElementById('mtg-complete-modal')) document.getElementById('mtg-complete-modal').remove();
+  _completeOutcome=null;
+  const mtg=accountMeetings.find(m=>m.id===meetingId);
+  if(!mtg)return;
+  const contact=contacts.find(c=>c.id===mtg.contact_id);
+  const contactName=contact?contact.full_name:'Unknown';
+  const d=new Date(mtg.meeting_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const m=document.createElement('div');
+  m.id='mtg-complete-modal';
+  m.className='mtg-modal-overlay';
+  m.innerHTML=`
+  <div class="mtg-modal">
+    <h2>✅ Meeting Completed</h2>
+    <div class="sub">${esc(contactName)} — ${d}${mtg.meeting_type==='in_person'?' (In Person)':' (Virtual)'}</div>
+    <div class="mtg-field">
+      <label>Outcome</label>
+      <div class="mtg-outcome-row">
+        <button class="mtg-outcome-btn" data-val="positive" onclick="selectCompleteOutcome(this,'positive')">👍 Positive</button>
+        <button class="mtg-outcome-btn" data-val="neutral" onclick="selectCompleteOutcome(this,'neutral')">😐 Neutral</button>
+        <button class="mtg-outcome-btn" data-val="not_interested" onclick="selectCompleteOutcome(this,'not_interested')">👎 Not Interested</button>
+        <button class="mtg-outcome-btn" data-val="follow_up_scheduled" onclick="selectCompleteOutcome(this,'follow_up_scheduled')">📅 Follow Up</button>
+      </div>
+    </div>
+    <div class="mtg-field">
+      <label>Discussion Notes</label>
+      <textarea id="mtg-complete-notes" placeholder="What was discussed, key takeaways, action items...">${esc(mtg.notes||'')}</textarea>
+    </div>
+    <div class="mtg-field">
+      <label>Next Step</label>
+      <input id="mtg-complete-next" placeholder="e.g. Send proposal, Schedule follow-up call">
+    </div>
+    <div class="mtg-field">
+      <label>Next Step Date</label>
+      <input id="mtg-complete-next-date" type="date">
+    </div>
+    <button class="mtg-submit" id="mtg-complete-submit" onclick="submitComplete('${meetingId}')" disabled>Save Outcome</button>
+    <button class="mtg-cancel" onclick="document.getElementById('mtg-complete-modal').remove()">Cancel</button>
+  </div>`;
+  m.addEventListener('click',e=>{if(e.target===m)m.remove()});
+  document.body.appendChild(m);
+}
+
+function selectCompleteOutcome(btn,val){
+  document.querySelectorAll('#mtg-complete-modal .mtg-outcome-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  _completeOutcome=val;
+  document.getElementById('mtg-complete-submit').disabled=false;
+}
+
+async function submitComplete(meetingId){
+  const btn=document.getElementById('mtg-complete-submit');
+  btn.disabled=true;btn.textContent='Saving...';
+  const notes=document.getElementById('mtg-complete-notes').value.trim();
+  const nextStep=document.getElementById('mtg-complete-next').value.trim();
+  const nextStepDate=document.getElementById('mtg-complete-next-date').value||null;
+  const mtg=accountMeetings.find(m=>m.id===meetingId);
+  if(!mtg){btn.textContent='Error';return;}
+
+  // 1. Update meeting record
+  const {error:updateErr}=await db.from('meetings').update({
+    outcome:_completeOutcome,
+    notes:notes||null,
+    next_step:nextStep||null,
+    next_step_date:nextStepDate
+  }).eq('id',meetingId);
+  if(updateErr){btn.textContent='❌ '+updateErr.message;btn.disabled=false;return;}
+
+  // 2. Update local data
+  mtg.outcome=_completeOutcome;
+  mtg.notes=notes||null;
+  mtg.next_step=nextStep||null;
+  mtg.next_step_date=nextStepDate;
+
+  // 3. Log to activity_log
+  const contact=contacts.find(c=>c.id===mtg.contact_id);
+  const contactName=contact?contact.full_name:'Unknown';
+  const outcomeLabels={positive:'Positive',neutral:'Neutral',not_interested:'Not Interested',follow_up_scheduled:'Follow Up Scheduled'};
+  const rep=account.assigned_rep||'system';
+  await db.from('activity_log').insert({
+    account_id:account.id,
+    contact_id:mtg.contact_id,
+    event_type:'meeting_completed',
+    description:`Meeting with ${contactName} completed — ${outcomeLabels[_completeOutcome]||_completeOutcome}${notes?'. '+notes.slice(0,100):''}`
+  });
+
+  // 4. Close modal, refresh UI
+  document.getElementById('mtg-complete-modal').remove();
+  renderMeetings();
+  renderMetrics();
+  renderAlert();
+  // Refresh activity
+  const {data:acts}=await db.from('activity_log').select('*').eq('account_id',account.id).order('created_at',{ascending:false}).limit(50);
+  activity=acts||[];
+  renderActivity();
 }
 
 // ─── NOTES ───

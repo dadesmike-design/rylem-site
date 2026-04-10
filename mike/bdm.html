@@ -1346,7 +1346,7 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
     if (seqErr) throw seqErr;
 
     // Get first step from template
-    const { data: step1 } = await db.from('sequence_template_steps').select('*')
+    const { data: step1 } = await db.from('sequence_steps').select('*')
       .eq('template_id', templateId).eq('step_number', 1).single();
 
     // Create first task
@@ -1827,7 +1827,7 @@ async function bulkStartSequences() {
   const tplName = tpl ? tpl.name : 'Sequence';
 
   // Get step 1 for this template
-  const { data: step1 } = await db.from('sequence_template_steps').select('*')
+  const { data: step1 } = await db.from('sequence_steps').select('*')
     .eq('template_id', templateId).eq('step_number', 1).single();
 
   let started = 0, skipped = 0;

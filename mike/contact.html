@@ -654,9 +654,22 @@ function showMeetingDetailsModal(){
   <div class="mtg-modal">
     <h2>🤝 Log Meeting — ${esc(contact.full_name)}</h2>
     <div class="sub">Capture details and optionally start a 10-step, 60-day follow up sequence.</div>
-    <div class="mtg-field">
-      <label>Meeting Date</label>
-      <input type="date" id="mtg-date" value="${today}">
+    <div style="display:flex;gap:10px">
+      <div class="mtg-field" style="flex:1">
+        <label>Meeting Date</label>
+        <input type="date" id="mtg-date" value="${today}">
+      </div>
+      <div class="mtg-field" style="flex:1">
+        <label>Assigned To</label>
+        <select id="mtg-assigned" style="width:100%;padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;font-family:inherit">
+          <option value="jean">Jean</option>
+          <option value="darice">Darice</option>
+          <option value="dee">Dee</option>
+          <option value="april">April</option>
+          <option value="julia">Julia</option>
+          <option value="mike">Mike</option>
+        </select>
+      </div>
     </div>
     <div class="mtg-field">
       <label>Meeting Type</label>
@@ -694,7 +707,7 @@ function showMeetingDetailsModal(){
       <label>Next step date <span style="color:var(--text3);font-weight:400">(optional)</span></label>
       <input type="date" id="mtg-next-date">
     </div>
-    <button class="mtg-submit" id="mtg-submit-btn" onclick="submitMeeting()" disabled>Save Meeting + Start Follow Up Sequence</button>
+    <button class="mtg-submit" id="mtg-submit-btn" onclick="submitMeeting()">Save Meeting + Start Follow Up Sequence</button>
   </div>`;
   m.addEventListener('click',e=>{if(e.target===m)m.remove()});
   document.body.appendChild(m);
@@ -712,18 +725,19 @@ async function submitMeeting(){
   const btn=document.getElementById('mtg-submit-btn');
   btn.disabled=true;btn.textContent='Saving…';
   const mtgDate=document.getElementById('mtg-date').value;
+  const mtgAssigned=document.getElementById('mtg-assigned').value||null;
   const location=document.getElementById('mtg-location').value.trim()||null;
   const attendees=document.getElementById('mtg-attendees').value.trim()||null;
   const notes=document.getElementById('mtg-notes').value.trim()||null;
   const nextStep=document.getElementById('mtg-next-step').value.trim()||null;
   const nextDate=document.getElementById('mtg-next-date').value||null;
-  const rep=contact.working_rep||(window.currentUser&&window.currentUser.rep_name)||contact.owner||'system';
+  const rep=mtgAssigned||contact.working_rep||(window.currentUser&&window.currentUser.rep_name)||contact.owner||'system';
 
   // 1. Insert meeting record
   const {data:mtg,error:mtgErr}=await db.from('meetings').insert({
     contact_id:contact.id,account_id:contact.account_id,rep,
     meeting_date:mtgDate,meeting_type:_mtgType,location,attendees,notes,
-    outcome:_mtgOutcome,next_step:nextStep,next_step_date:nextDate
+    outcome:_mtgOutcome||null,next_step:nextStep,next_step_date:nextDate
   }).select().single();
   if(mtgErr){showToast('❌ '+mtgErr.message);btn.disabled=false;btn.textContent='Save Meeting + Start Follow Up Sequence';return;}
 

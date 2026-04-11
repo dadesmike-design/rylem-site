@@ -328,6 +328,30 @@ button,input,select{font-family:inherit}
 .role-peer{background:var(--purple-dim);color:var(--purple);border:1px solid rgba(168,85,247,.2)}
 .contact-step{font-size:11px;color:var(--text3);white-space:nowrap}
 .contact-actions{display:flex;gap:6px;flex-shrink:0}
+.contact-status-badges{display:flex;gap:4px;flex-wrap:wrap;flex-shrink:0}
+.status-pill{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;white-space:nowrap;letter-spacing:.2px}
+.status-pill-meeting{background:rgba(0,188,188,.12);color:#00d4d4;border:1px solid rgba(0,188,188,.25)}
+.status-pill-met{background:rgba(16,217,135,.12);color:#10d987;border:1px solid rgba(16,217,135,.25)}
+.status-pill-replied{background:rgba(0,212,255,.12);color:#00d4ff;border:1px solid rgba(0,212,255,.25)}
+.status-pill-unsub{background:rgba(255,23,68,.12);color:#ff1744;border:1px solid rgba(255,23,68,.25)}
+.status-pill-notint{background:rgba(122,143,166,.12);color:#7a8fa6;border:1px solid rgba(122,143,166,.2)}
+/* toggle switch */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.toggle-row:last-child{border-bottom:none}
+.toggle-label{font-size:13px;font-weight:600;color:var(--text)}
+.toggle-desc{font-size:11px;color:var(--text3);margin-top:2px}
+.toggle-switch{position:relative;width:42px;height:24px;flex-shrink:0}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--surface3);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:.2s}
+.toggle-slider:before{content:'';position:absolute;width:18px;height:18px;left:2px;top:2px;background:var(--text3);border-radius:50%;transition:.2s}
+.toggle-switch input:checked + .toggle-slider{background:rgba(16,217,135,.2);border-color:rgba(16,217,135,.4)}
+.toggle-switch input:checked + .toggle-slider:before{transform:translateX(18px);background:var(--green)}
+.status-modal-section{margin-bottom:20px}
+.status-modal-section h4{font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+.meeting-info{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-size:13px;line-height:1.8}
+.meeting-info strong{color:var(--text)}
+.meeting-form{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0 14px;margin-top:10px;max-height:0;overflow:hidden;opacity:0;transition:max-height .3s ease,opacity .25s ease,padding .3s ease}
+.meeting-form.open{max-height:300px;opacity:1;padding:14px}
 .cbtn{
   padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface3);
   color:var(--text3);font-size:11px;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center
@@ -387,9 +411,9 @@ button,input,select{font-family:inherit}
 .search-results.open{display:block}
 .sr-group-label{padding:6px 14px;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);background:var(--surface);border-bottom:1px solid var(--border)}
 .sr-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s}
-.sr-item:hover{background:var(--surface3)}
+.sr-item:hover{background:var(--surface3);box-shadow:inset 3px 0 0 var(--neon-cyan)}
 .sr-item:last-child{border-bottom:none}
-.sr-name{font-weight:600;color:var(--text);font-size:13px}
+.sr-name{font-weight:600;color:var(--neon-cyan);font-size:13px;text-decoration:underline;text-underline-offset:2px}
 .sr-title{color:var(--text2);font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sr-company{color:var(--accent);font-size:12px;font-weight:600;white-space:nowrap}
 .sr-city{color:var(--text3);font-size:11px;white-space:nowrap}
@@ -659,7 +683,7 @@ let state = {
   rep: 'mike',
   supabaseAccounts: [],
   supabaseTasks: [],
-  today: new Date().toISOString().split('T')[0]
+  today: localDateStr()
 };
 
 // ─── INIT ────────────────────────────────────────────────
@@ -697,6 +721,8 @@ async function init(user) {
     state.supabaseAccounts = await fetchRepAccounts(state.rep);
     state.supabaseTasks = await fetchRepTasks(state.rep);
     render();
+    // Fix null rep values on existing tasks/sequences (one-time migration)
+    fixNullReps(state.rep);
   } catch(e) {
     console.warn('Data load error:', e);
     state.supabaseAccounts = [];
@@ -761,6 +787,30 @@ function taskId(task, idx) {
 }
 
 // ─── MESSAGES (removed — now uses tasks.message_body from Supabase) ───
+
+// ─── FIX NULL REPS (one-time migration) ─────────────────────────
+async function fixNullReps(currentRep) {
+  try {
+    // Patch tasks with null rep assigned to current user's accounts
+    const { data: nullTasks } = await db.from('tasks').select('id').is('rep', null).eq('completed', false).limit(100);
+    if (nullTasks && nullTasks.length > 0) {
+      console.log(`Fixing ${nullTasks.length} tasks with null rep...`);
+      for (const t of nullTasks) {
+        // Look up the task's sequence to find the rep
+        const { data: taskFull } = await db.from('tasks').select('sequence_id').eq('id', t.id).single();
+        if (taskFull && taskFull.sequence_id) {
+          const { data: seq } = await db.from('sequences').select('rep').eq('id', taskFull.sequence_id).single();
+          if (seq && seq.rep) {
+            await db.from('tasks').update({ rep: seq.rep }).eq('id', t.id);
+          }
+        }
+      }
+      console.log('Null rep tasks fixed.');
+    }
+  } catch(e) {
+    console.warn('fixNullReps error:', e);
+  }
+}
 
 // ─── RENDER ──────────────────────────────────────────────
 // Render ONLY the tasks section — never touches the accounts/contacts DOM
@@ -1341,6 +1391,7 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
       account_id: accountId,
       template_id: templateId,
       current_step: 0,
+      rep: rep,
       status: 'active'
     }).select().single();
     if (seqErr) throw seqErr;
@@ -1356,6 +1407,7 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
         sequence_id: seq.id,
         contact_id: con.id,
         account_id: accountId,
+        rep: rep,
         step_number: 1,
         channel: step1.channel || 'linkedin',
         action: step1.instructions || 'Step 1',
@@ -1365,15 +1417,14 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
     }
 
     // Log activity
-    const tplObj = _seqTemplates.find(t => t.id === templateId);
-    const tplName = tplObj ? tplObj.name : 'sequence';
+    const tplNames = {'12864255-86a7-4493-b1fd-2851364e96d6':'Cold Outbound','a1b2c3d4-1111-4000-a000-000000000001':'Warm Connect','a1b2c3d4-2222-4000-a000-000000000002':'Referral / Inbound'};
     await db.from('activity_log').insert({
       account_id: accountId,
       contact_id: con.id,
       sequence_id: seq.id,
       rep: rep,
       event_type: 'lead_added',
-      description: contact + ' (' + title + ') added to ' + company + ' — ' + tplName + ' by ' + rep
+      description: contact + ' (' + title + ') added to ' + company + ' — ' + (tplNames[templateId]||'sequence') + ' by ' + rep
     });
 
     status.style.color = 'var(--green)';
@@ -1404,7 +1455,7 @@ async function fetchRepTasks(rep) {
     .select('*, contacts(full_name, title, email, phone, linkedin_url, status), accounts(company, do_not_contact)')
     .eq('rep', rep)
     .eq('completed', false)
-    .lte('due_date', new Date().toISOString().split('T')[0])
+    .lte('due_date', localDateStr())
     .order('due_date');
   if (error) { console.error('tasks fetch error:', error); return []; }
 
@@ -1435,7 +1486,11 @@ async function fetchRepTasks(rep) {
 
 async function loadAccountContacts(accountId) {
   // All roles see all contacts — SDRs claim by starting a sequence
-  let query = db.from('contacts').select('*').eq('account_id', accountId);
+  let query = db.from('contacts').select(
+    'id,full_name,title,email,phone,linkedin_url,role_type,status,assigned_bdm,working_rep,' +
+    'meeting_set_date,meeting_set_by,meeting_type,meeting_completed_date,meeting_completed_by,' +
+    'replied,unsubscribed,not_interested'
+  ).eq('account_id', accountId);
   const { data: contacts } = await query;
   const { data: seqs } = await db.from('sequences').select('*').eq('account_id', accountId);
   return (contacts || []).map(c => {
@@ -1446,7 +1501,15 @@ async function loadAccountContacts(accountId) {
       linkedin: c.linkedin_url||'', role: c.role_type||'other',
       sequence_step: cSeq ? cSeq.current_step + 1 : 0, status: c.status||'new',
       assigned_bdm: c.assigned_bdm||'',
-      working_rep: c.working_rep||''
+      working_rep: c.working_rep||'',
+      meeting_set_date: c.meeting_set_date||null,
+      meeting_set_by: c.meeting_set_by||null,
+      meeting_type: c.meeting_type||null,
+      meeting_completed_date: c.meeting_completed_date||null,
+      meeting_completed_by: c.meeting_completed_by||null,
+      replied: c.replied||false,
+      unsubscribed: c.unsubscribed||false,
+      not_interested: c.not_interested||false
     };
   });
 }
@@ -1537,6 +1600,13 @@ function buildContactRow(c, accountId, acctStatus) {
   if (c.phone) {
     actionBtns += `<a class="cbtn" href="tel:${esc(c.phone)}">${esc(c.phone)}</a>`;
   }
+  // Status badges
+  let statusBadges = '';
+  if (c.meeting_completed_date) statusBadges += '<span class="status-pill status-pill-met">✅ Met</span>';
+  else if (c.meeting_set_date) statusBadges += '<span class="status-pill status-pill-meeting">📅 Meeting Set</span>';
+  if (c.replied) statusBadges += '<span class="status-pill status-pill-replied">💬 Replied</span>';
+  if (c.unsubscribed) statusBadges += '<span class="status-pill status-pill-unsub">🚫 Unsub</span>';
+  if (c.not_interested) statusBadges += '<span class="status-pill status-pill-notint">👎 Not Interested</span>';
   return `
     <div class="contact-row" data-contact-id="${c.id || ''}" data-account-id="${accountId || ''}">
       <input type="checkbox" class="contact-cb" data-contact-id="${c.id || ''}" data-account-id="${accountId || ''}" data-contact-name="${escAttr(c.name)}" onchange="bulkSelectionChanged()" onclick="event.stopPropagation()">
@@ -1549,7 +1619,8 @@ function buildContactRow(c, accountId, acctStatus) {
         <span>Step ${c.sequence_step || 1}</span>
         <button class="cbtn" style="padding:2px 6px;font-size:11px" onclick="event.stopPropagation();bumpContactStep('${c.id}','${accountId}',${c.sequence_step||1},+1)">▶</button>
       </div>
-      <div class="contact-actions">${actionBtns}</div>
+      <div class="contact-actions">${actionBtns}<button class="cbtn" onclick="event.stopPropagation();openStatusModal('${c.id}','${accountId}')" title="Contact Status">⚙</button></div>
+      <div class="contact-status-badges">${statusBadges}</div>
     </div>`;
 }
 
@@ -1669,7 +1740,7 @@ async function handleSearch(q) {
       if (contactHits.length) {
         html += '<div class="sr-group-label">Contacts</div>';
         html += contactHits.map(h => `
-          <div class="sr-item" onclick="jumpToContact('${h.account_id}','${h.id}')">
+          <div class="sr-item" onclick="goToContact('${h.id}','${h.account_id}')">
             <span class="sr-name">${esc(h.name)}</span>
             <span class="sr-title">${esc(h.title)}</span>
             <span class="sr-company">${esc(h.company)}</span>
@@ -1691,6 +1762,34 @@ function scrollToAccount(accountId) {
     row.style.boxShadow = '0 0 0 2px var(--accent)';
     setTimeout(() => { row.style.boxShadow = ''; }, 2000);
   }
+}
+
+function goToContact(contactId, accountId) {
+  document.getElementById('search-results').classList.remove('open');
+  document.getElementById('global-search').value = '';
+  // Try to find the contact within the current BDM page first
+  if (accountId) {
+    const acctRow = document.querySelector(`[data-account-id="${accountId}"]`);
+    if (acctRow) {
+      // Scroll to the account, then open the contact's status modal
+      acctRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      acctRow.style.transition = 'box-shadow .3s';
+      acctRow.style.boxShadow = '0 0 0 2px var(--neon-cyan)';
+      setTimeout(() => { acctRow.style.boxShadow = ''; }, 3000);
+      // Try to find and highlight the specific contact row
+      const contactRows = acctRow.querySelectorAll('.contact-row');
+      for (const cr of contactRows) {
+        if (cr.dataset.contactId === contactId) {
+          cr.style.background = 'rgba(0,229,255,0.15)';
+          setTimeout(() => { cr.style.background = ''; }, 3000);
+          break;
+        }
+      }
+      return;
+    }
+  }
+  // Fallback: navigate to contact detail page
+  window.location.href = `contact.html?id=${contactId}`;
 }
 
 async function jumpToContact(accountId, contactId) {
@@ -1907,6 +2006,14 @@ async function bulkStartSequences() {
 }
 
 // ─── BUSINESS DAY UTILITY ────────────────────────────────────
+function localDateStr() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 function nextBusinessDay(date) {
   const holidays = _usHolidays();
   const d = new Date(date);
@@ -2020,7 +2127,203 @@ async function bumpContactStep(contactId, accountId, currentStep, direction) {
 }
 
 
+// ═══ CONTACT STATUS MODAL ═══════════════════════════════════════
+let _csmContactId = null, _csmAccountId = null;
+
+async function openStatusModal(contactId, accountId) {
+  _csmContactId = contactId;
+  _csmAccountId = accountId;
+  const { data: c } = await db.from('contacts').select(
+    'full_name,meeting_set_date,meeting_set_by,meeting_type,meeting_completed_date,meeting_completed_by,replied,unsubscribed,not_interested'
+  ).eq('id', contactId).single();
+  if (!c) { showToast('Contact not found'); return; }
+  document.getElementById('csm-name').textContent = c.full_name || '';
+  // Flags
+  document.getElementById('csm-replied').checked = !!c.replied;
+  document.getElementById('csm-unsubscribed').checked = !!c.unsubscribed;
+  document.getElementById('csm-not_interested').checked = !!c.not_interested;
+  // Meeting section
+  const mc = document.getElementById('csm-meeting-content');
+  const repNames = {mike:'Mike',julia:'Julia',april:'April',jean:'Jean',dee:'Dee'};
+  if (c.meeting_completed_date) {
+    mc.innerHTML = `<div class="meeting-info">
+      <div>📅 <strong>Meeting set:</strong> ${esc(c.meeting_set_date)}</div>
+      <div>👤 <strong>Set by:</strong> ${esc(repNames[c.meeting_set_by]||c.meeting_set_by||'—')}</div>
+      <div>✅ <strong>Completed:</strong> ${esc(c.meeting_completed_date)} (${esc(c.meeting_type==='in_person'?'In Person':'Virtual')})</div>
+      <div>👤 <strong>Completed by:</strong> ${esc(repNames[c.meeting_completed_by]||c.meeting_completed_by||'—')}</div>
+    </div>`;
+  } else if (c.meeting_set_date) {
+    mc.innerHTML = `<div class="meeting-info">
+      <div>📅 <strong>Meeting:</strong> ${esc(c.meeting_set_date)}</div>
+      <div>👤 <strong>Set by:</strong> ${esc(repNames[c.meeting_set_by]||c.meeting_set_by||'—')}</div>
+    </div>
+    <button class="btn btn-submit" style="margin-top:10px" onclick="showCompleteForm()">Mark Completed</button>
+    <div class="meeting-form" id="csm-complete-form">
+      <div class="form-group" style="margin-bottom:10px"><label>Completed Date</label><input type="date" id="csm-complete-date" value="${localDateStr()}"></div>
+      <div class="form-group" style="margin-bottom:10px"><label>Meeting Type</label>
+        <select id="csm-meeting-type"><option value="virtual">Virtual</option><option value="in_person">In Person</option></select>
+      </div>
+      <button class="btn btn-submit" onclick="saveMeetingCompleted()">Confirm Completed</button>
+    </div>`;
+  } else {
+    mc.innerHTML = `<button class="btn btn-submit" onclick="showSetMeetingForm()">Set Meeting</button>
+    <div class="meeting-form" id="csm-set-form">
+      <div class="form-group" style="margin-bottom:10px"><label>Meeting Date *</label><input type="date" id="csm-meeting-date" required></div>
+      <button class="btn btn-submit" onclick="saveMeetingSet()">Save Meeting</button>
+    </div>`;
+  }
+  document.getElementById('contact-status-modal').classList.add('open');
+}
+
+function closeStatusModal() {
+  const modal = document.getElementById('contact-status-modal');
+  modal.classList.remove('open');
+  document.getElementById('csm-meeting-content').innerHTML = '';
+  document.getElementById('csm-name').textContent = '';
+  _csmContactId = null; _csmAccountId = null;
+}
+
+function showSetMeetingForm() {
+  const f = document.getElementById('csm-set-form');
+  if (f) f.classList.toggle('open');
+}
+function showCompleteForm() {
+  const f = document.getElementById('csm-complete-form');
+  if (f) f.classList.toggle('open');
+}
+
+async function saveMeetingSet() {
+  const dt = document.getElementById('csm-meeting-date').value;
+  if (!dt) { showToast('Date is required'); return; }
+  await db.from('contacts').update({ meeting_set_date: dt, meeting_set_by: state.rep }).eq('id', _csmContactId);
+  await db.from('activity_log').insert({
+    event_type: 'meeting_set',
+    description: `Meeting set for ${dt}`,
+    contact_id: _csmContactId, account_id: _csmAccountId, rep: state.rep
+  });
+  showToast('📅 Meeting set!', true);
+  await _refreshContactRow(_csmAccountId);
+  openStatusModal(_csmContactId, _csmAccountId); // refresh modal
+}
+
+async function saveMeetingCompleted() {
+  const dt = document.getElementById('csm-complete-date').value;
+  if (!dt) { showToast('Date is required'); return; }
+  // 1. Write completed fields + meeting type
+  // TODO: client.html should query contacts where meeting_completed_date IS NOT NULL for this account and display them in a "Meeting History" section so reps can see who has already been met before enrolling contacts in sequences.
+  const tp = document.getElementById('csm-meeting-type').value;
+  await db.from('contacts').update({ meeting_completed_date: dt, meeting_completed_by: state.rep, meeting_type: tp }).eq('id', _csmContactId);
+  // 2. End active sequence
+  await db.from('sequences').update({ status: 'completed' }).eq('contact_id', _csmContactId).eq('status', 'active');
+  // 3. Start Meeting Follow-Up sequence
+  const followUp = _seqTemplates.find(t => t.name === 'Meeting Follow-Up');
+  if (followUp) {
+    const { data: step1 } = await db.from('sequence_steps').select('*').eq('template_id', followUp.id).eq('step_number', 1).single();
+    const { data: newSeq } = await db.from('sequences').insert({
+      contact_id: _csmContactId, account_id: _csmAccountId,
+      template_id: followUp.id, rep: state.rep, current_step: 0, status: 'active',
+      started_at: new Date().toISOString()
+    }).select().single();
+    if (newSeq && step1) {
+      await db.from('tasks').insert({
+        sequence_id: newSeq.id, contact_id: _csmContactId, account_id: _csmAccountId,
+        rep: state.rep, step_number: 1, channel: step1.channel || 'email',
+        action: step1.instructions || 'Meeting Follow-Up Step 1',
+        due_date: nextBusinessDay(new Date()), completed: false
+      });
+    }
+  }
+  // 4. Log
+  await db.from('activity_log').insert({
+    event_type: 'meeting_completed',
+    description: `Meeting completed on ${dt} (${tp === 'in_person' ? 'In Person' : 'Virtual'})` + (followUp ? '. Follow-up sequence started.' : ''),
+    contact_id: _csmContactId, account_id: _csmAccountId, rep: state.rep
+  });
+  showToast('✅ Meeting completed!' + (followUp ? ' Follow-up sequence started.' : ''), true);
+  await _refreshContactRow(_csmAccountId);
+  openStatusModal(_csmContactId, _csmAccountId);
+}
+
+async function toggleStatusFlag(field, value) {
+  const update = {};
+  update[field] = value;
+  // Unsubscribed ON → also set DNC status + pause active sequence
+  if (field === 'unsubscribed' && value) {
+    update.status = 'do_not_contact';
+    await db.from('sequences').update({ status: 'paused' }).eq('contact_id', _csmContactId).eq('status', 'active');
+  }
+  // Not interested ON → pause active sequence
+  if (field === 'not_interested' && value) {
+    await db.from('sequences').update({ status: 'paused' }).eq('contact_id', _csmContactId).eq('status', 'active');
+  }
+  await db.from('contacts').update(update).eq('id', _csmContactId);
+  // Logging with field-specific event_type and description
+  let evtType, desc;
+  if (field === 'replied' && value) {
+    evtType = 'replied'; desc = 'Contact replied — manual follow-up';
+  } else if (field === 'unsubscribed' && value) {
+    evtType = 'unsubscribed'; desc = 'Contact unsubscribed — marked DNC, sequence paused';
+  } else if (field === 'not_interested' && value) {
+    evtType = 'not_interested'; desc = 'Contact not interested — sequence paused';
+  } else {
+    evtType = value ? field + '_set' : field + '_cleared';
+    const labels = { replied: '💬 Replied', unsubscribed: '🚫 Unsubscribed', not_interested: '👎 Not Interested' };
+    desc = (labels[field] || field) + (value ? ' — marked' : ' — cleared');
+  }
+  await db.from('activity_log').insert({
+    event_type: evtType, description: desc,
+    contact_id: _csmContactId, account_id: _csmAccountId, rep: state.rep
+  });
+  const toastLabels = { replied: '💬 Replied', unsubscribed: '🚫 Unsubscribed', not_interested: '👎 Not Interested' };
+  showToast((value ? '✅ ' : '↩ ') + (toastLabels[field] || field), true);
+  await _refreshContactRow(_csmAccountId);
+}
+
+async function _refreshContactRow(accountId) {
+  const contacts = await loadAccountContacts(accountId);
+  const cr = document.getElementById('cr_' + accountId);
+  const acctStatus = (document.getElementById('acd_' + accountId) || {}).dataset?.acctStatus || '';
+  if (cr) {
+    cr.innerHTML = contacts.length
+      ? contacts.map(c => buildContactRow(c, accountId, acctStatus)).join('')
+      : '<div style="padding:12px;color:var(--text-dim)">No contacts yet</div>';
+    restoreBulkCheckboxes(cr);
+  }
+}
+
 </script>
+<!-- ═══ CONTACT STATUS MODAL ═══ -->
+<div class="modal-overlay" id="contact-status-modal" onclick="if(event.target===this)closeStatusModal()">
+  <div class="modal-card" style="width:480px">
+    <div class="modal-header">
+      <div><h3>Contact Status</h3><div id="csm-name" style="font-size:13px;color:var(--text2);margin-top:2px"></div></div>
+      <button class="modal-close" onclick="closeStatusModal()">✕</button>
+    </div>
+
+    <!-- SECTION A: MEETING -->
+    <div class="status-modal-section">
+      <h4>📅 Meeting</h4>
+      <div id="csm-meeting-content"></div>
+    </div>
+
+    <!-- SECTION B: FLAGS -->
+    <div class="status-modal-section">
+      <h4>🏷️ Status Flags</h4>
+      <div class="toggle-row">
+        <div><div class="toggle-label">💬 Replied</div><div class="toggle-desc">Contact has responded to outreach</div></div>
+        <label class="toggle-switch"><input type="checkbox" id="csm-replied" onchange="toggleStatusFlag('replied',this.checked)"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div><div class="toggle-label">🚫 Unsubscribed</div><div class="toggle-desc">Opted out of email sequences</div></div>
+        <label class="toggle-switch"><input type="checkbox" id="csm-unsubscribed" onchange="toggleStatusFlag('unsubscribed',this.checked)"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div><div class="toggle-label">👎 Not Interested</div><div class="toggle-desc">Declined — do not pursue</div></div>
+        <label class="toggle-switch"><input type="checkbox" id="csm-not_interested" onchange="toggleStatusFlag('not_interested',this.checked)"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
 

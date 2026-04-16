@@ -582,9 +582,6 @@ button,input,select{font-family:inherit}
               <option value="mike">Mike Dades</option>
               <option value="julia">Julia Dusseau</option>
               <option value="april">April Melton</option>
-              <option value="jean">Jean</option>
-              <option value="dee">Dee</option>
-              <option value="april">April Melton</option>
             </select>
           </div>
           <div class="form-group">
@@ -594,8 +591,6 @@ button,input,select{font-family:inherit}
               <option value="mike">Mike Dades</option>
               <option value="julia">Julia Dusseau</option>
               <option value="april">April Melton</option>
-              <option value="jean">Jean</option>
-              <option value="dee">Dee</option>
             </select>
           </div>
         </div>
@@ -628,8 +623,6 @@ button,input,select{font-family:inherit}
               <option value="mike">Mike Dades</option>
               <option value="julia">Julia Dusseau</option>
               <option value="april">April Melton</option>
-              <option value="jean">Jean</option>
-              <option value="dee">Dee</option>
             </select>
           </div>
         </div>
@@ -1202,28 +1195,6 @@ loadSeqTemplates();
 
 function openAddLead(prefillCompany, prefillAccountId) {
   document.getElementById('add-lead-modal').classList.add('open');
-  // Populate rep dropdowns from reps table (keeps in sync)
-  try {
-    const { data: repsList } = await db.from('reps').select('id,name,rep_key').order('name');
-    if (repsList && repsList.length) {
-      ['al-rep','al-bdm','rep-select'].forEach(selId => {
-        const sel = document.getElementById(selId);
-        if (!sel) return;
-        const curVal = sel.value;
-        sel.innerHTML = '';
-        if (selId === 'rep-select') sel.innerHTML = '<option value="">(Inherit from Rep)</option>';
-        repsList.forEach(r => {
-          const opt = document.createElement('option');
-          opt.value = r.rep_key;
-          opt.textContent = r.name;
-          sel.appendChild(opt);
-        });
-        if (curVal) sel.value = curVal;
-        if (!sel.value && state.rep) sel.value = state.rep;
-      });
-    }
-  } catch(e) { console.warn('reps table load failed, using hardcoded options', e); }
-
   document.getElementById('al-rep').value = state.rep;
   // Auto-set BDM: infer from account if prefilled
   const profile = window._rylemProfile || {};

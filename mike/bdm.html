@@ -518,6 +518,7 @@ button,input,select{font-family:inherit}
         <option value="dee">Dee</option>
       </select>
       <button class="btn-add-lead" onclick="openAddLead()">＋ Add Lead</button>
+      <button class="btn-add-lead" style="background:var(--accent-dim);border-color:var(--accent-border);color:var(--accent)" onclick="openBulkAdd()">📋 Bulk Add</button>
       <a href="manager.html" class="btn-manager-intel" id="manager-intel-link" style="display:none;padding:7px 14px;background:var(--purple-dim);border:1px solid rgba(168,85,247,.3);border-radius:var(--radius-sm);color:var(--purple);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.3px;text-decoration:none">📊 Manager Intel</a>
       <button class="btn-logout" onclick="doLogout()">Sign Out</button>
     </div>
@@ -654,6 +655,60 @@ button,input,select{font-family:inherit}
           <button type="submit" class="btn btn-submit" id="al-submit" disabled>Submit Lead</button>
         </div>
         <div class="form-status" id="al-status"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- BULK ADD MODAL -->
+  <div class="modal-overlay" id="bulk-add-modal">
+    <div class="modal-card" style="max-width:680px">
+      <div class="modal-header">
+        <h3>📋 Bulk Add Leads</h3>
+        <button class="modal-close" onclick="closeBulkAdd()">✕</button>
+      </div>
+      <div style="padding:0 24px 4px;font-size:12px;color:var(--text2)">
+        Paste one lead per line. Format: <code style="background:var(--surface3);padding:2px 6px;border-radius:4px;font-size:11px">Company, Contact Name, Title, Email, LinkedIn URL</code><br>
+        Only Company & Contact Name are required. Example:<br>
+        <code style="background:var(--surface3);padding:2px 6px;border-radius:4px;font-size:11px">CoreWeave, Jane Smith, VP Engineering, jane@coreweave.com, https://linkedin.com/in/janesmith</code>
+      </div>
+      <form id="bulk-add-form" style="padding:16px 24px">
+        <textarea id="bulk-leads-text" rows="10" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;padding:10px;resize:vertical;font-family:monospace" placeholder="CoreWeave, Jane Smith, VP Engineering, jane@coreweave.com, https://linkedin.com/in/janesmith
+Smartsheet, Bob Lee, CISO, bob@smartsheet.com"></textarea>
+        <div class="form-row" style="margin-top:12px">
+          <div class="form-group">
+            <label>Account Rep *</label>
+            <select id="bulk-rep" required>
+              <option value="mike">Mike Dades</option>
+              <option value="julia">Julia Dusseau</option>
+              <option value="april">April Melton</option>
+              <option value="jean">Jean</option>
+              <option value="dee">Dee</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Assign BDM *</label>
+            <select id="bulk-bdm" required>
+              <option value="">-- Select BDM --</option>
+              <option value="mike">Mike Dades</option>
+              <option value="julia">Julia Dusseau</option>
+              <option value="april">April Melton</option>
+              <option value="jean">Jean</option>
+              <option value="dee">Dee</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-actions" style="margin-top:12px">
+          <button type="button" class="btn btn-cancel" onclick="closeBulkAdd()">Cancel</button>
+          <button type="submit" class="btn btn-submit" id="bulk-submit">Import Leads</button>
+        </div>
+        <div class="form-status" id="bulk-status"></div>
+        <div id="bulk-progress" style="display:none;margin-top:8px">
+          <div style="background:var(--surface3);border-radius:4px;height:6px;overflow:hidden">
+            <div id="bulk-progress-bar" style="height:100%;background:var(--accent);border-radius:4px;width:0%;transition:width .3s"></div>
+          </div>
+          <div id="bulk-progress-text" style="font-size:12px;color:var(--text2);margin-top:4px"></div>
+        </div>
+        <div id="bulk-results" style="display:none;margin-top:12px;max-height:200px;overflow-y:auto;font-size:12px;line-height:1.6"></div>
       </form>
     </div>
   </div>
@@ -1302,6 +1357,176 @@ function hideDNCWarn() {
   document.getElementById('al-dnc-warn').style.display = 'none';
   updateSubmitState();
 }
+
+// ─── BULK ADD ──────────────────────────────────────────
+function openBulkAdd() {
+  document.getElementById('bulk-add-modal').classList.add('open');
+  document.getElementById('bulk-leads-text').value = '';
+  document.getElementById('bulk-status').textContent = '';
+  document.getElementById('bulk-progress').style.display = 'none';
+  document.getElementById('bulk-results').style.display = 'none';
+  // Default rep to current user
+  const profile = window._rylemProfile;
+  if (profile) {
+    document.getElementById('bulk-rep').value = profile.rep_key;
+    document.getElementById('bulk-bdm').value = profile.rep_key;
+  }
+}
+function closeBulkAdd() {
+  document.getElementById('bulk-add-modal').classList.remove('open');
+}
+
+document.getElementById('bulk-add-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('bulk-submit');
+  const status = document.getElementById('bulk-status');
+  const text = document.getElementById('bulk-leads-text').value.trim();
+  const rep = document.getElementById('bulk-rep').value;
+  const bdm = document.getElementById('bulk-bdm').value;
+
+  if (!text) { status.style.color = 'var(--red)'; status.textContent = 'Paste at least one lead.'; return; }
+  if (!bdm) { status.style.color = 'var(--red)'; status.textContent = 'Select a BDM.'; return; }
+
+  // Parse lines
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+  const leads = lines.map((line, idx) => {
+    const parts = line.split(',').map(p => p.trim());
+    return {
+      line: idx + 1,
+      company: parts[0] || '',
+      contact: parts[1] || '',
+      title: parts[2] || '',
+      email: parts[3] || '',
+      linkedin: parts[4] || ''
+    };
+  }).filter(l => l.company && l.contact);
+
+  if (leads.length === 0) { status.style.color = 'var(--red)'; status.textContent = 'No valid leads found. Need: Company, Contact Name at minimum.'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Importing...';
+  status.textContent = '';
+  const progWrap = document.getElementById('bulk-progress');
+  const progBar = document.getElementById('bulk-progress-bar');
+  const progText = document.getElementById('bulk-progress-text');
+  const resultsDiv = document.getElementById('bulk-results');
+  progWrap.style.display = 'block';
+  resultsDiv.style.display = 'block';
+  resultsDiv.innerHTML = '';
+
+  let created = 0, skipped = 0, errors = 0;
+  const templateId = '12864255-86a7-4493-b1fd-2851364e96d6';
+  const workingRep = window._rylemProfile ? window._rylemProfile.rep_key : state.rep;
+
+  for (let i = 0; i < leads.length; i++) {
+    const l = leads[i];
+    const pct = Math.round(((i + 1) / leads.length) * 100);
+    progBar.style.width = pct + '%';
+    progText.textContent = `Processing ${i+1} of ${leads.length}...`;
+
+    try {
+      // Find or create account
+      let accountId;
+      const { data: existing } = await db.from('accounts').select('id, do_not_contact').ilike('company', l.company);
+      const existAcc = (existing||[])[0];
+      if (existAcc) {
+        if (existAcc.do_not_contact) {
+          skipped++;
+          resultsDiv.innerHTML += `<div style="color:var(--red)">⏭ Line ${l.line}: ${l.company} — Do Not Contact, skipped</div>`;
+          continue;
+        }
+        accountId = existAcc.id;
+      } else {
+        const { data: acc, error: accErr } = await db.from('accounts').insert({
+          company: l.company,
+          assigned_rep: rep,
+          status: 'prospecting'
+        }).select().single();
+        if (accErr) throw accErr;
+        accountId = acc.id;
+      }
+
+      // Check duplicate contact
+      const { data: dupes } = await db.from('contacts').select('id,full_name').eq('account_id', accountId).ilike('full_name', l.contact);
+      if (dupes && dupes.length > 0) {
+        skipped++;
+        resultsDiv.innerHTML += `<div style="color:var(--yellow)">⏭ Line ${l.line}: ${l.contact} at ${l.company} — already exists, skipped</div>`;
+        continue;
+      }
+
+      // Create contact
+      const { data: con, error: conErr } = await db.from('contacts').insert({
+        account_id: accountId,
+        full_name: l.contact,
+        title: l.title || null,
+        email: l.email || null,
+        linkedin_url: l.linkedin || null,
+        role_type: 'champion',
+        status: 'new',
+        source: 'bulk_import',
+        assigned_bdm: bdm || null,
+        working_rep: workingRep
+      }).select().single();
+      if (conErr) throw conErr;
+
+      // Create sequence
+      const { data: seq, error: seqErr } = await db.from('sequences').insert({
+        contact_id: con.id,
+        account_id: accountId,
+        template_id: templateId,
+        current_step: 0,
+        rep: rep,
+        status: 'active'
+      }).select().single();
+      if (seqErr) throw seqErr;
+
+      // Create first task
+      const { data: step1 } = await db.from('sequence_steps').select('*')
+        .eq('template_id', templateId).eq('step_number', 1).single();
+      if (step1) {
+        const dueDate = nextBusinessDay(new Date());
+        await db.from('tasks').insert({
+          sequence_id: seq.id,
+          contact_id: con.id,
+          account_id: accountId,
+          rep: rep,
+          step_number: 1,
+          channel: step1.channel || 'linkedin',
+          action: step1.instructions || 'Step 1',
+          due_date: dueDate,
+          completed: false
+        });
+      }
+
+      // Log activity
+      await db.from('activity_log').insert({
+        account_id: accountId,
+        contact_id: con.id,
+        sequence_id: seq.id,
+        rep: rep,
+        event_type: 'lead_added',
+        description: l.contact + ' (' + l.title + ') bulk-added to ' + l.company + ' — Cold Outbound by ' + rep
+      });
+
+      created++;
+      resultsDiv.innerHTML += `<div style="color:var(--green)">✅ Line ${l.line}: ${l.contact} at ${l.company}</div>`;
+    } catch(err) {
+      errors++;
+      resultsDiv.innerHTML += `<div style="color:var(--red)">❌ Line ${l.line}: ${l.company} — ${err.message||'Error'}</div>`;
+    }
+  }
+
+  progText.textContent = 'Done!';
+  status.style.color = 'var(--green)';
+  status.textContent = `✅ ${created} added, ${skipped} skipped, ${errors} errors out of ${leads.length} leads`;
+  btn.disabled = false;
+  btn.textContent = 'Import Leads';
+
+  // Refresh
+  state.supabaseAccounts = await fetchRepAccounts(state.rep);
+  state.supabaseTasks = await fetchRepTasks(state.rep);
+  render();
+});
 
 // Debounced dupe check on contact name
 document.getElementById('al-contact')?.addEventListener('input', (e) => {

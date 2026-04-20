@@ -481,6 +481,44 @@ button,input,select{font-family:inherit}
 .bdm-mike{background:rgba(0,212,255,.12);color:#00d4ff;border:1px solid rgba(0,212,255,.25)}
 .bdm-julia{background:rgba(168,85,247,.12);color:#a855f7;border:1px solid rgba(168,85,247,.25)}
 .bdm-april{background:rgba(255,45,120,.12);color:#ff2d78;border:1px solid rgba(255,45,120,.25)}
+
+/* ─── AI EMAIL BUTTON ─── */
+.btn-ai-email{
+  background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.3);color:var(--purple);
+  padding:7px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;
+  cursor:pointer;transition:all .18s;white-space:nowrap;display:inline-flex;align-items:center;gap:5px
+}
+.btn-ai-email:hover{background:rgba(168,85,247,.22);box-shadow:0 0 12px rgba(168,85,247,.2)}
+.btn-ai-email:disabled{opacity:.5;cursor:wait}
+.ai-email-result{
+  margin-top:12px;padding:12px 14px;background:var(--surface3);border:1px solid rgba(168,85,247,.25);
+  border-radius:var(--radius-sm);position:relative
+}
+.ai-email-result .ai-label{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--purple);text-transform:uppercase;margin-bottom:8px}
+.ai-email-result .ai-text{font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap;word-break:break-word}
+.ai-email-actions{display:flex;gap:8px;margin-top:10px}
+
+/* ─── MEETING INSIGHTS PANEL ─── */
+.meeting-insights{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px 24px;margin-bottom:8px
+}
+.mi-stats{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.mi-stat{
+  flex:1;min-width:120px;padding:14px 16px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius-sm);text-align:center
+}
+.mi-stat .mi-val{font-size:24px;font-weight:800;color:var(--accent);line-height:1.2}
+.mi-stat .mi-label{font-size:11px;color:var(--text2);margin-top:4px;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.mi-stat.green .mi-val{color:var(--green)}
+.mi-stat.purple .mi-val{color:var(--purple)}
+.mi-stat.yellow .mi-val{color:var(--yellow)}
+.mi-rep-bars{display:flex;flex-direction:column;gap:8px}
+.mi-rep-row{display:flex;align-items:center;gap:12px}
+.mi-rep-name{font-size:12px;font-weight:600;color:var(--text2);min-width:70px;text-align:right}
+.mi-bar-track{flex:1;height:10px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;overflow:hidden}
+.mi-bar-fill{height:100%;border-radius:5px;transition:width .6s ease}
+.mi-bar-count{font-size:11px;font-weight:700;color:var(--text2);min-width:24px}
 </style>
 </head>
 <body>
@@ -529,11 +567,11 @@ button,input,select{font-family:inherit}
   </div>
 
   <!-- ADD LEAD MODAL -->
-  <div class="modal-overlay" id="add-lead-modal">
+  <div class="modal-overlay" id="add-lead-modal" onclick="if(event.target===this)closeAddLead(false)">
     <div class="modal-card">
       <div class="modal-header">
         <h3>＋ Add Lead</h3>
-        <button class="modal-close" onclick="closeAddLead()">✕</button>
+        <button class="modal-close" onclick="closeAddLead(true)">✕</button>
       </div>
       <form id="add-lead-form">
         <div class="form-row">
@@ -651,7 +689,7 @@ button,input,select{font-family:inherit}
           <textarea id="al-notes" rows="3" placeholder="Trigger event, hiring signal, referral source..."></textarea>
         </div>
         <div class="form-actions">
-          <button type="button" class="btn btn-cancel" onclick="closeAddLead()">Cancel</button>
+          <button type="button" class="btn btn-cancel" onclick="closeAddLead(true)">Cancel</button>
           <button type="submit" class="btn btn-submit" id="al-submit" disabled>Submit Lead</button>
         </div>
         <div class="form-status" id="al-status"></div>
@@ -958,6 +996,13 @@ function render() {
     tasksWrap.appendChild(list);
   }
 
+  // ── MEETING INSIGHTS (async — renders when data arrives) ──
+  const miWrap = document.createElement('div');
+  miWrap.id = 'meeting-insights-wrap';
+  miWrap.style.marginTop = '36px';
+  wrap.appendChild(miWrap);
+  loadMeetingInsights(miWrap);
+
   // ── SEQUENCE PROGRESS ──
   const accounts = getRepAccounts(rep);
   const seqSec = makeSectionHeader('Sequence Progress', accounts.length, 'accent');
@@ -1072,7 +1117,8 @@ function buildActionBtn(task, tid) {
     const to = encodeURIComponent(task.email || '');
     const subj = encodeURIComponent('Quick intro — Rylem Staffing');
     const body = encodeURIComponent(task.message_body || '');
-    return `<a class="btn btn-action email" href="https://outlook.office.com/mail/deeplink/compose?to=${to}&subject=${subj}&body=${body}" target="_blank" rel="noopener">✉️ Open Outlook</a>`;
+    return `<a class="btn btn-action email" href="https://outlook.office.com/mail/deeplink/compose?to=${to}&subject=${subj}&body=${body}" target="_blank" rel="noopener">✉️ Open Outlook</a>`
+      + `<button class="btn btn-ai-email" onclick="generateAIEmail('${tid}',${JSON.stringify(esc(task.contact))},${JSON.stringify(esc(task.title||''))},${JSON.stringify(esc(task.company))})">🤖 AI Email</button>`;
   }
   if (type === 'call') {
     if (task.phone) {
@@ -1152,6 +1198,92 @@ function copyText(text, btn) {
   });
 }
 
+// ─── AI EMAIL GENERATION ─────────────────────────────────
+async function generateAIEmail(tid, contactName, contactTitle, company) {
+  // Find the button that triggered this
+  const btns = document.querySelectorAll(`#ta_${tid} .btn-ai-email`);
+  const btn = btns[0];
+  if (btn) { btn.disabled = true; btn.textContent = '🤖 Generating...'; }
+
+  const systemPrompt = `You are a staffing recruiter at Rylem, a specialized staffing firm. Write signal-based cold outreach emails following these rules:
+- Lead with a PROBLEM or SIGNAL (hiring pain, growth, turnover) — never a generic intro
+- Under 150 words, conversational tone, no buzzwords
+- End with a specific timeline CTA (e.g. "15 min this Thursday or Friday?")
+- No subject line — just the email body
+- First name basis, professional but human
+- Reference the prospect's role and company specifically`;
+
+  const userPrompt = `Write a personalized cold outreach email to ${contactName}, ${contactTitle} at ${company}. Use signal-based outreach — reference a plausible hiring signal or pain point for their role/industry.`;
+
+  try {
+    const resp = await fetch('https://rylem-ai-chat.rylem-ai.workers.dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mode: 'generate',
+        system_prompt: systemPrompt,
+        user_prompt: userPrompt,
+        max_tokens: 300
+      })
+    });
+    if (!resp.ok) throw new Error('AI service returned ' + resp.status);
+    const data = await resp.json();
+    const emailText = data.message || data.text || '';
+    if (!emailText) throw new Error('Empty response from AI');
+
+    // Show result in the message area
+    const msgWrap = document.getElementById('msg_' + tid);
+    const toggle = document.getElementById('toggle_' + tid);
+    if (msgWrap) {
+      // Ensure expanded
+      msgWrap.classList.add('open');
+      if (toggle) toggle.classList.add('open');
+      // Append AI result
+      let aiDiv = msgWrap.querySelector('.ai-email-result');
+      if (!aiDiv) {
+        aiDiv = document.createElement('div');
+        aiDiv.className = 'ai-email-result';
+        msgWrap.querySelector('.task-message-body').appendChild(aiDiv);
+      }
+      const escapedText = esc(emailText);
+      aiDiv.innerHTML = `
+        <div class="ai-label">🤖 AI-Generated Email</div>
+        <div class="ai-text">${escapedText}</div>
+        <div class="ai-email-actions">
+          <button class="btn btn-copy" onclick="copyText(${JSON.stringify(emailText)}, this)">📋 Copy Email</button>
+          <button class="btn btn-action email" onclick="window.open('https://outlook.office.com/mail/deeplink/compose?body='+encodeURIComponent(${JSON.stringify(emailText)}),'_blank')">✉️ Use in Outlook</button>
+        </div>`;
+    } else {
+      // No message wrap exists — create one dynamically
+      const card = document.getElementById('tc_' + tid);
+      if (card) {
+        const newWrap = document.createElement('div');
+        newWrap.className = 'task-message-wrap open';
+        newWrap.id = 'msg_' + tid;
+        const body = document.createElement('div');
+        body.className = 'task-message-body';
+        const escapedText = esc(emailText);
+        body.innerHTML = `<div class="ai-email-result">
+          <div class="ai-label">🤖 AI-Generated Email</div>
+          <div class="ai-text">${escapedText}</div>
+          <div class="ai-email-actions">
+            <button class="btn btn-copy" onclick="copyText(${JSON.stringify(emailText)}, this)">📋 Copy Email</button>
+            <button class="btn btn-action email" onclick="window.open('https://outlook.office.com/mail/deeplink/compose?body='+encodeURIComponent(${JSON.stringify(emailText)}),'_blank')">✉️ Use in Outlook</button>
+          </div></div>`;
+        newWrap.appendChild(body);
+        card.appendChild(newWrap);
+      }
+    }
+
+    showToast('🤖 AI email generated!', true);
+  } catch(err) {
+    console.error('AI email error:', err);
+    showToast('❌ AI email failed: ' + (err.message || 'Unknown error'));
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '🤖 AI Email'; }
+  }
+}
+
 // ─── ACCOUNTS / SEQUENCE (SUPABASE) ──────────────────────
 async function fetchRepAccounts(rep) {
   const profile = window._rylemProfile || {};
@@ -1205,6 +1337,12 @@ let _dupeTimer = null;
 let _dncBlocked = false;
 let _seqTemplates = [];
 let _selectedSeqId = '';
+
+// BUG 1 FIX: Persist notes when clicking outside modal
+let _savedNotes = '';
+document.getElementById('al-notes')?.addEventListener('input', (e) => {
+  _savedNotes = e.target.value;
+});
 
 async function loadSeqTemplates(){
   try{
@@ -1305,10 +1443,19 @@ function openAddLead(prefillCompany, prefillAccountId) {
     document.getElementById('al-company').dataset.accountId = '';
     setTimeout(() => document.getElementById('al-company').focus(), 100);
   }
+  // Restore saved notes if any (BUG 1 FIX)
+  if (_savedNotes) {
+    document.getElementById('al-notes').value = _savedNotes;
+  }
 }
-function closeAddLead() {
+function closeAddLead(clearAll) {
   document.getElementById('add-lead-modal').classList.remove('open');
-  document.getElementById('add-lead-form').reset();
+  if (clearAll) {
+    // Cancel/X: clear everything including saved notes
+    _savedNotes = '';
+    document.getElementById('add-lead-form').reset();
+  }
+  // Always reset UI state
   document.getElementById('al-status').textContent = '';
   document.getElementById('al-submit').disabled = true;
   document.getElementById('al-company').readOnly = false;
@@ -1690,8 +1837,9 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
     state.supabaseTasks = await fetchRepTasks(state.rep);
     render();
 
-    // Auto-close after 1.5s
-    setTimeout(closeAddLead, 1500);
+    // Auto-close after 1.5s — clear notes on successful submit
+    _savedNotes = '';
+    setTimeout(() => closeAddLead(true), 1500);
 
   } catch(err) {
     console.error('Add lead error:', err);
@@ -1909,6 +2057,81 @@ function defaultSteps() {
     {name:'Call #2'},{name:'Email #5'},{name:'LinkedIn DM'},
     {name:'Final Attempt'}
   ];
+}
+
+// ─── MEETING INSIGHTS ──────────────────────────────────────
+async function loadMeetingInsights(container) {
+  try {
+    // Get start of this week (Monday)
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() + mondayOffset);
+    weekStart.setHours(0, 0, 0, 0);
+    const weekStartStr = weekStart.toISOString().split('T')[0];
+
+    // Query meeting events this week
+    const { data: meetingEvents } = await db.from('activity_log')
+      .select('rep, created_at, event_type')
+      .ilike('event_type', '%meeting%')
+      .gte('created_at', weekStartStr + 'T00:00:00');
+
+    // Query leads added this week
+    const { data: leadsAdded } = await db.from('activity_log')
+      .select('id')
+      .eq('event_type', 'lead_added')
+      .gte('created_at', weekStartStr + 'T00:00:00');
+
+    // Get active reps
+    const { data: activeReps } = await db.from('reps').select('rep_key, name');
+
+    const meetings = meetingEvents || [];
+    const meetingCount = meetings.filter(e => e.event_type === 'meeting_set' || e.event_type === 'meeting_completed').length;
+    const leadsCount = (leadsAdded || []).length;
+    const conversionRate = leadsCount > 0 ? Math.round((meetingCount / leadsCount) * 100) : 0;
+    const repsCount = (activeReps || []).length;
+
+    // Per-rep breakdown
+    const repMap = {};
+    (activeReps || []).forEach(r => { repMap[r.rep_key] = { name: r.name, count: 0 }; });
+    meetings.forEach(m => {
+      if (repMap[m.rep]) repMap[m.rep].count++;
+      else repMap[m.rep] = { name: m.rep, count: 1 };
+    });
+    const repEntries = Object.values(repMap).sort((a, b) => b.count - a.count);
+    const maxCount = Math.max(1, ...repEntries.map(r => r.count));
+
+    const colors = ['var(--accent)', 'var(--green)', 'var(--purple)', 'var(--yellow)', 'var(--red)'];
+
+    // Build section
+    const hdr = makeSectionHeader('Meeting Insights', meetingCount, meetingCount > 0 ? 'green' : 'accent');
+    container.appendChild(hdr);
+
+    const panel = document.createElement('div');
+    panel.className = 'meeting-insights';
+    panel.innerHTML = `
+      <div class="mi-stats">
+        <div class="mi-stat"><div class="mi-val">${meetingCount}</div><div class="mi-label">Meetings This Week</div></div>
+        <div class="mi-stat green"><div class="mi-val">${conversionRate}%</div><div class="mi-label">Lead → Meeting</div></div>
+        <div class="mi-stat purple"><div class="mi-val">${leadsCount}</div><div class="mi-label">Leads Added</div></div>
+        <div class="mi-stat yellow"><div class="mi-val">${repsCount}</div><div class="mi-label">Active Reps</div></div>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Per-Rep Meetings</div>
+      <div class="mi-rep-bars">
+        ${repEntries.map((r, i) => `
+          <div class="mi-rep-row">
+            <div class="mi-rep-name">${esc(r.name)}</div>
+            <div class="mi-bar-track">
+              <div class="mi-bar-fill" style="width:${Math.round((r.count / maxCount) * 100)}%;background:${colors[i % colors.length]}"></div>
+            </div>
+            <div class="mi-bar-count">${r.count}</div>
+          </div>`).join('')}
+      </div>`;
+    container.appendChild(panel);
+  } catch(e) {
+    console.warn('Meeting insights load error:', e);
+  }
 }
 
 // ─── TOAST ────────────────────────────────────────────────
@@ -2269,17 +2492,23 @@ function localDateStr() {
 }
 
 function nextBusinessDay(date) {
+  return addBusinessDays(date, 1);
+}
+
+// BUG 4 FIX: Skip weekends + 11 US federal holidays for all due date calculations
+function addBusinessDays(startDate, days) {
   const holidays = _usHolidays();
-  const d = new Date(date);
-  d.setDate(d.getDate() + 1);
-  while (true) {
+  const d = new Date(startDate);
+  let added = 0;
+  while (added < days) {
+    d.setDate(d.getDate() + 1);
     const dow = d.getDay();
-    if (dow === 0) { d.setDate(d.getDate() + 1); continue; } // Sunday → Monday
-    if (dow === 6) { d.setDate(d.getDate() + 2); continue; } // Saturday → Monday
+    if (dow === 0 || dow === 6) continue; // skip weekends
     const iso = d.toISOString().split('T')[0];
-    if (holidays.has(iso)) { d.setDate(d.getDate() + 1); continue; }
-    return iso;
+    if (holidays.has(iso)) continue; // skip holidays
+    added++;
   }
+  return d.toISOString().split('T')[0];
 }
 
 function _usHolidays() {

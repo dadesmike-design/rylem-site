@@ -496,6 +496,12 @@ button,input,select{font-family:inherit}
 }
 .btn-ai-linkedin:hover{background:rgba(0,119,181,.25);box-shadow:0 0 12px rgba(0,119,181,.2)}
 .btn-ai-linkedin:disabled{opacity:.5;cursor:wait}
+.btn-smartlead{
+  padding:6px 12px;background:rgba(76,175,80,.15);border:1px solid rgba(76,175,80,.35);border-radius:var(--radius-sm);
+  color:#66bb6a;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap
+}
+.btn-smartlead:hover{background:rgba(76,175,80,.25);box-shadow:0 0 12px rgba(76,175,80,.2)}
+.btn-smartlead:disabled{opacity:.5;cursor:wait}
 .ai-email-result{
   margin-top:12px;padding:12px 14px;background:var(--surface3);border:1px solid rgba(168,85,247,.25);
   border-radius:var(--radius-sm);position:relative
@@ -619,6 +625,14 @@ button,input,select{font-family:inherit}
             <label>LinkedIn URL</label>
             <input type="url" id="al-linkedin" placeholder="https://linkedin.com/in/...">
           </div>
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="tel" id="al-phone" placeholder="e.g. (425) 555-0123">
+          </div>
+          <div class="form-group">
+            <label>Mobile</label>
+            <input type="tel" id="al-mobile" placeholder="e.g. (206) 555-0456">
+          </div>
         </div>
         <div class="form-row">
           <div class="form-group">
@@ -711,12 +725,12 @@ button,input,select{font-family:inherit}
         <button class="modal-close" onclick="closeBulkAdd()">✕</button>
       </div>
       <div style="padding:0 24px 4px;font-size:12px;color:var(--text2)">
-        Paste one lead per line. Format: <code style="background:var(--surface3);padding:2px 6px;border-radius:4px;font-size:11px">Company, Contact Name, Title, Email, LinkedIn URL</code><br>
+        Paste one lead per line. Format: <code style="background:var(--surface3);padding:2px 6px;border-radius:4px;font-size:11px">Company, Contact Name, Title, Email, LinkedIn URL, Phone, Mobile</code><br>
         Only Company & Contact Name are required. Example:<br>
-        <code style="background:var(--surface3);padding:2px 6px;border-radius:4px;font-size:11px">CoreWeave, Jane Smith, VP Engineering, jane@coreweave.com, https://linkedin.com/in/janesmith</code>
+        <code style="background:var(--surface3);padding:2px 6px;border-radius:4px;font-size:11px">CoreWeave, Jane Smith, VP Engineering, jane@coreweave.com, https://linkedin.com/in/janesmith, (425) 555-0123, (206) 555-0456</code>
       </div>
       <form id="bulk-add-form" style="padding:16px 24px">
-        <textarea id="bulk-leads-text" rows="10" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;padding:10px;resize:vertical;font-family:monospace" placeholder="CoreWeave, Jane Smith, VP Engineering, jane@coreweave.com, https://linkedin.com/in/janesmith
+        <textarea id="bulk-leads-text" rows="10" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;padding:10px;resize:vertical;font-family:monospace" placeholder="CoreWeave, Jane Smith, VP Engineering, jane@coreweave.com, https://linkedin.com/in/janesmith, (425) 555-0123, (206) 555-0456
 Smartsheet, Bob Lee, CISO, bob@smartsheet.com"></textarea>
         <div class="form-row" style="margin-top:12px">
           <div class="form-group">
@@ -1090,6 +1104,7 @@ function buildTaskCard(task, idx, tid, rep) {
       body.innerHTML = `
         <div class="task-message-label">📞 Call Script</div>
         ${task.phone ? `<div style="font-size:18px;font-weight:700;color:var(--green);margin-bottom:10px">${esc(task.phone)}</div>` : ''}
+        ${task.mobile ? `<div style="font-size:14px;color:var(--blue);margin-bottom:10px">📱 ${esc(task.mobile)}</div>` : ''}
         <div class="task-message-text">${esc(msgBody)}</div>
         <div class="message-actions">
           <button class="btn btn-copy" onclick="copyText(${JSON.stringify(msgBody)}, this)">📋 Copy Script</button>
@@ -1128,8 +1143,15 @@ function buildActionBtn(task, tid) {
     const to = encodeURIComponent(task.email || '');
     const subj = encodeURIComponent('Quick intro — Rylem Staffing');
     const body = encodeURIComponent(task.message_body || '');
-    return `<a class="btn btn-action email" href="https://outlook.office.com/mail/deeplink/compose?to=${to}&subject=${subj}&body=${body}" target="_blank" rel="noopener">✉️ Open Outlook</a>`
-      + `<button class="btn btn-ai-email" onclick="generateAIEmail('${tid}',${JSON.stringify(esc(task.contact))},${JSON.stringify(esc(task.title||''))},${JSON.stringify(esc(task.company))})">🤖 AI Email</button>`;
+    const alias = task.sent_from || '';
+    const aliasLabel = alias ? `<div style="font-size:10px;color:var(--blue);margin-bottom:4px">📤 From: ${esc(alias)}</div>` : '';
+    let btns = aliasLabel;
+    btns += `<a class="btn btn-action email" href="https://outlook.office.com/mail/deeplink/compose?to=${to}&subject=${subj}&body=${body}" target="_blank" rel="noopener">✉️ Open Outlook</a>`;
+    btns += `<button class="btn btn-ai-email" onclick="generateAIEmail('${tid}',${JSON.stringify(esc(task.contact))},${JSON.stringify(esc(task.title||''))},${JSON.stringify(esc(task.company))})">🤖 AI Email</button>`;
+    if (alias) {
+      btns += `<button class="btn btn-smartlead" onclick="sendViaSmartlead('${tid}','${esc(alias)}')">🚀 Smartlead</button>`;
+    }
+    return btns;
   }
   if (type === 'call' || type === 'phone') {
     if (task.phone) {
@@ -1386,6 +1408,76 @@ async function generateAILinkedIn(tid, contactName, contactTitle, company, isCon
     showToast('❌ AI message failed: ' + (err.message || 'Unknown error'));
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = '💬 AI Message'; }
+  }
+}
+
+// ─── SMARTLEAD EMAIL SENDING ────────────────────────────
+const SMARTLEAD_ALIAS_MAP = {
+  'mike@rylemconsulting.com': 17584923,
+  'mike@hirerylem.com': 17584914,
+  'mike@scalewithrylem.com': 17584910,
+  'mike@rylemstaffing.com': 17584902,
+  'julia@rylemconsulting.com': 17584900,
+  'julia@hirerylem.com': 17584949,
+  'julia@scalewithrylem.com': 17584897,
+  'julia@rylemstaffing.com': 17584888,
+  'april@rylemconsulting.com': 17584884,
+  'april@hirerylem.com': 17584878,
+  'april@scalewithrylem.com': 17584875,
+  'april@rylemstaffing.com': 17584851
+};
+
+async function sendViaSmartlead(tid, fromAlias) {
+  const taskEl = document.getElementById('ta_' + tid);
+  const btn = taskEl?.querySelector('.btn-smartlead');
+  if (btn) { btn.disabled = true; btn.textContent = '🚀 Sending...'; }
+
+  // Get task data
+  const task = state.tasks.find(t => t.id === tid);
+  if (!task) { showToast('❌ Task not found', false); return; }
+
+  // Check if AI email was generated
+  const aiResult = taskEl?.querySelector('.ai-email-result .ai-text');
+  const emailBody = aiResult ? aiResult.textContent : (task.message_body || '');
+  if (!emailBody) {
+    showToast('❌ Generate an AI email first', false);
+    if (btn) { btn.disabled = false; btn.textContent = '🚀 Smartlead'; }
+    return;
+  }
+
+  const accountId = SMARTLEAD_ALIAS_MAP[fromAlias.toLowerCase()];
+  if (!accountId) {
+    showToast('❌ Unknown alias: ' + fromAlias, false);
+    if (btn) { btn.disabled = false; btn.textContent = '🚀 Smartlead'; }
+    return;
+  }
+
+  // Use the Cloudflare worker as proxy to avoid exposing API key
+  try {
+    const resp = await fetch('https://rylem-ai-chat.rylem-ai.workers.dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mode: 'smartlead_send',
+        to_email: task.email,
+        to_name: task.contact,
+        from_alias: fromAlias,
+        from_account_id: accountId,
+        subject: 'Quick intro — Rylem Staffing',
+        body: emailBody
+      })
+    });
+    if (!resp.ok) throw new Error('Smartlead proxy returned ' + resp.status);
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error);
+    showToast('🚀 Email sent from ' + fromAlias + '!', true);
+    // Mark task as done
+    if (task) await handleDone(state.rep, tid, task.company);
+  } catch(err) {
+    console.error('Smartlead send error:', err);
+    showToast('❌ Send failed: ' + (err.message || 'Unknown error'), false);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '🚀 Smartlead'; }
   }
 }
 
@@ -1649,7 +1741,9 @@ document.getElementById('bulk-add-form')?.addEventListener('submit', async (e) =
       contact: parts[1] || '',
       title: parts[2] || '',
       email: parts[3] || '',
-      linkedin: parts[4] || ''
+      linkedin: parts[4] || '',
+      phone: parts[5] || '',
+      mobile: parts[6] || ''
     };
   }).filter(l => l.company && l.contact);
 
@@ -1713,6 +1807,8 @@ document.getElementById('bulk-add-form')?.addEventListener('submit', async (e) =
         title: l.title || null,
         email: l.email || null,
         linkedin_url: l.linkedin || null,
+        phone: l.phone || null,
+        mobile: l.mobile || null,
         role_type: 'champion',
         status: 'new',
         source: 'bulk_import',
@@ -1841,6 +1937,8 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
     const title = document.getElementById('al-title').value.trim();
     const email = document.getElementById('al-email').value.trim();
     const linkedin = document.getElementById('al-linkedin').value.trim();
+    const phone = document.getElementById('al-phone').value.trim();
+    const mobile = document.getElementById('al-mobile').value.trim();
     const rep = document.getElementById('al-rep').value;
     const role = document.getElementById('al-role').value;
     const ownerVal = document.getElementById('al-owner').value;
@@ -1879,6 +1977,8 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
       title: title || null,
       email: email || null,
       linkedin_url: linkedin || null,
+      phone: phone || null,
+      mobile: mobile || null,
       role_type: role,
       status: 'new',
       source: 'manual',
@@ -1959,7 +2059,7 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
 async function fetchRepTasks(rep) {
   const { data: tasks, error } = await db
     .from('tasks')
-    .select('*, contacts(full_name, title, email, phone, linkedin_url, status), accounts(company, do_not_contact)')
+    .select('*, contacts(full_name, title, email, phone, mobile, linkedin_url, status), accounts(company, do_not_contact)')
     .eq('rep', rep)
     .eq('completed', false)
     .lte('due_date', localDateStr())
@@ -1981,11 +2081,13 @@ async function fetchRepTasks(rep) {
     title: t.contacts?.title || '',
     email: t.contacts?.email || '',
     phone: t.contacts?.phone || '',
+    mobile: t.contacts?.mobile || '',
     linkedin: t.contacts?.linkedin_url || '',
     type: t.channel === 'linkedin' ? 'linkedin_connect' : t.channel === 'phone' ? 'call' : t.channel,
     step: t.step_number,
     action: t.action || '',
     message_body: t.message_body || '',
+    sent_from: t.sent_from || '',
     priority: 'normal',
     lead_id: t.account_id
   }));
@@ -1994,9 +2096,9 @@ async function fetchRepTasks(rep) {
 async function loadAccountContacts(accountId) {
   // All roles see all contacts — SDRs claim by starting a sequence
   let query = db.from('contacts').select(
-    'id,full_name,title,email,phone,linkedin_url,role_type,status,assigned_bdm,working_rep,' +
+    'id,full_name,title,email,phone,mobile,linkedin_url,role_type,status,assigned_bdm,working_rep,' +
     'meeting_set_date,meeting_set_by,meeting_type,meeting_completed_date,meeting_completed_by,' +
-    'replied,unsubscribed,not_interested'
+    'replied,unsubscribed,not_interested,assigned_alias'
   ).eq('account_id', accountId);
   const { data: contacts } = await query;
   const { data: seqs } = await db.from('sequences').select('*').eq('account_id', accountId);
@@ -2004,7 +2106,7 @@ async function loadAccountContacts(accountId) {
     const cSeq = (seqs || []).find(s => s.contact_id === c.id);
     return {
       id: c.id, name: c.full_name, first_name: (c.full_name||'').split(' ')[0],
-      title: c.title||'', email: c.email||'', phone: c.phone||'',
+      title: c.title||'', email: c.email||'', phone: c.phone||'', mobile: c.mobile||'', assigned_alias: c.assigned_alias||'',
       linkedin: c.linkedin_url||'', role: c.role_type||'other',
       sequence_step: cSeq ? cSeq.current_step + 1 : 0, status: c.status||'new',
       assigned_bdm: c.assigned_bdm||'',
@@ -2093,6 +2195,7 @@ function buildContactRow(c, accountId, acctStatus) {
   const workerPill = c.working_rep
     ? `<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(16,217,135,.12);color:#10d987;border:1px solid rgba(16,217,135,.25);margin-left:4px">👤 ${esc(sdrNames[c.working_rep]||c.working_rep)}</span>`
     : `<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(122,143,166,.08);color:#4a5f75;border:1px solid rgba(122,143,166,.15);margin-left:4px">unclaimed</span>`;
+  const aliasPill = c.assigned_alias ? `<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(0,119,181,.1);color:#6bb5e8;border:1px solid rgba(0,119,181,.2);margin-left:4px">📤 ${esc(c.assigned_alias)}</span>` : '';
   let actionBtns = '';
   if (c.linkedin) {
     actionBtns += `<a class="cbtn" href="${esc(c.linkedin)}" target="_blank" rel="noopener">🔗</a>`;
@@ -2107,6 +2210,9 @@ function buildContactRow(c, accountId, acctStatus) {
   if (c.phone) {
     actionBtns += `<a class="cbtn" href="tel:${esc(c.phone)}">${esc(c.phone)}</a>`;
   }
+  if (c.mobile) {
+    actionBtns += `<a class="cbtn" href="tel:${esc(c.mobile)}" style="color:var(--blue)">📱${esc(c.mobile)}</a>`;
+  }
   // Status badges
   let statusBadges = '';
   if (c.meeting_completed_date) statusBadges += '<span class="status-pill status-pill-met">✅ Met</span>';
@@ -2117,7 +2223,7 @@ function buildContactRow(c, accountId, acctStatus) {
   return `
     <div class="contact-row" data-contact-id="${c.id || ''}" data-account-id="${accountId || ''}">
       <input type="checkbox" class="contact-cb" data-contact-id="${c.id || ''}" data-account-id="${accountId || ''}" data-contact-name="${escAttr(c.name)}" onchange="bulkSelectionChanged()" onclick="event.stopPropagation()">
-      <div class="contact-name">${esc(c.name)}${bdmPill}${workerPill}</div>
+      <div class="contact-name">${esc(c.name)}${bdmPill}${workerPill}${aliasPill}</div>
       ${landExpand}
       <div class="contact-title">${esc(c.title)}</div>
       <span class="contact-role-badge ${roleClass}">${roleLabel}</span>
@@ -2126,7 +2232,7 @@ function buildContactRow(c, accountId, acctStatus) {
         <span>Step ${c.sequence_step || 1}</span>
         <button class="cbtn" style="padding:2px 6px;font-size:11px" onclick="event.stopPropagation();bumpContactStep('${c.id}','${accountId}',${c.sequence_step||1},+1)">▶</button>
       </div>
-      <div class="contact-actions">${actionBtns}<button class="cbtn" onclick="event.stopPropagation();openStatusModal('${c.id}','${accountId}')" title="Contact Status">⚙</button></div>
+      <div class="contact-actions">${actionBtns}<button class="cbtn" onclick="event.stopPropagation();openTransferContact('${c.id}','${accountId}')" title="Transfer to another company">↗</button><button class="cbtn" onclick="event.stopPropagation();openStatusModal('${c.id}','${accountId}')" title="Contact Status">⚙</button></div>
       <div class="contact-status-badges">${statusBadges}</div>
     </div>`;
 }
@@ -2771,6 +2877,73 @@ function closeStatusModal() {
   _csmContactId = null; _csmAccountId = null;
 }
 
+// ─── TRANSFER CONTACT ──────────────────────────────────────
+let _xferContactId = null, _xferFromAccountId = null;
+
+async function openTransferContact(contactId, fromAccountId) {
+  _xferContactId = contactId;
+  _xferFromAccountId = fromAccountId;
+  // Get contact name
+  const { data: ct } = await db.from('contacts').select('full_name').eq('id', contactId).single();
+  document.getElementById('xfer-contact-name').textContent = ct?.full_name || '';
+  // Populate account dropdown (exclude current)
+  const { data: accounts } = await db.from('accounts').select('id,company').order('company');
+  const sel = document.getElementById('xfer-target-account');
+  sel.innerHTML = '<option value="">-- Select Company --</option>';
+  (accounts||[]).forEach(a => {
+    if (a.id !== fromAccountId) {
+      sel.innerHTML += `<option value="${a.id}">${esc(a.company)}</option>`;
+    }
+  });
+  document.getElementById('xfer-status').textContent = '';
+  document.getElementById('transfer-contact-modal').classList.add('open');
+}
+
+function closeTransferModal() {
+  document.getElementById('transfer-contact-modal').classList.remove('open');
+  _xferContactId = null; _xferFromAccountId = null;
+}
+
+async function doTransferContact() {
+  const targetAccountId = document.getElementById('xfer-target-account').value;
+  const status = document.getElementById('xfer-status');
+  if (!targetAccountId) { status.style.color = 'var(--red)'; status.textContent = 'Select a target company.'; return; }
+  const btn = document.getElementById('xfer-submit');
+  btn.disabled = true; btn.textContent = 'Transferring...';
+  try {
+    // Move contact to new account
+    const { error: ctErr } = await db.from('contacts').update({ account_id: targetAccountId }).eq('id', _xferContactId);
+    if (ctErr) throw ctErr;
+    // Move sequence to new account
+    const { data: seqs } = await db.from('sequences').select('id').eq('contact_id', _xferContactId);
+    if (seqs && seqs.length > 0) {
+      for (const s of seqs) {
+        await db.from('sequences').update({ account_id: targetAccountId }).eq('id', s.id);
+        // Move tasks under this sequence
+        await db.from('tasks').update({ account_id: targetAccountId }).eq('sequence_id', s.id);
+      }
+    }
+    // Log activity
+    const { data: tgtAcc } = await db.from('accounts').select('company').eq('id', targetAccountId).single();
+    const { data: srcAcc } = await db.from('accounts').select('company').eq('id', _xferFromAccountId).single();
+    await db.from('activity_log').insert({
+      account_id: targetAccountId,
+      contact_id: _xferContactId,
+      event_type: 'contact_transferred',
+      description: `Transferred from ${srcAcc?.company || '?'} to ${tgtAcc?.company || '?'}`
+    });
+    status.style.color = 'var(--green)';
+    status.textContent = `✅ Transferred to ${tgtAcc?.company || 'new company'}`;
+    setTimeout(() => { closeTransferModal(); refreshData(); }, 1500);
+  } catch(err) {
+    console.error('Transfer error:', err);
+    status.style.color = 'var(--red)';
+    status.textContent = '❌ ' + (err.message || 'Transfer failed');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Transfer';
+  }
+}
+
 function showSetMeetingForm() {
   const f = document.getElementById('csm-set-form');
   if (f) f.classList.toggle('open');
@@ -2881,6 +3054,27 @@ async function _refreshContactRow(accountId) {
 
 </script>
 <!-- ═══ CONTACT STATUS MODAL ═══ -->
+<div class="modal-overlay" id="transfer-contact-modal" onclick="if(event.target===this)closeTransferModal()">
+  <div class="modal-card" style="width:480px">
+    <div class="modal-header">
+      <div><h3>↗ Transfer Contact</h3><div id="xfer-contact-name" style="font-size:13px;color:var(--text2);margin-top:2px"></div></div>
+      <button class="modal-close" onclick="closeTransferModal()">✕</button>
+    </div>
+    <div style="padding:20px 24px">
+      <div class="form-group">
+        <label>Move to Company *</label>
+        <select id="xfer-target-account" style="width:100%"></select>
+      </div>
+      <div style="font-size:12px;color:var(--text3);margin:8px 0">This will move the contact, their sequence, and all tasks to the new company.</div>
+      <div class="form-actions">
+        <button class="btn btn-cancel" onclick="closeTransferModal()">Cancel</button>
+        <button class="btn btn-submit" id="xfer-submit" onclick="doTransferContact()">Transfer</button>
+      </div>
+      <div id="xfer-status" style="margin-top:8px;font-size:13px"></div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="contact-status-modal" onclick="if(event.target===this)closeStatusModal()">
   <div class="modal-card" style="width:480px">
     <div class="modal-header">

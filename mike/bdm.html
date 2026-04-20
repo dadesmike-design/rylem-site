@@ -1131,7 +1131,7 @@ function buildActionBtn(task, tid) {
     return `<a class="btn btn-action email" href="https://outlook.office.com/mail/deeplink/compose?to=${to}&subject=${subj}&body=${body}" target="_blank" rel="noopener">✉️ Open Outlook</a>`
       + `<button class="btn btn-ai-email" onclick="generateAIEmail('${tid}',${JSON.stringify(esc(task.contact))},${JSON.stringify(esc(task.title||''))},${JSON.stringify(esc(task.company))})">🤖 AI Email</button>`;
   }
-  if (type === 'call') {
+  if (type === 'call' || type === 'phone') {
     if (task.phone) {
       return `<a class="btn btn-action call" href="tel:${esc(task.phone)}">📞 ${esc(task.phone)}</a>`;
     }
@@ -1144,7 +1144,7 @@ function getTypeInfo(type) {
   if (!type) return { emoji:'📌', label:'Task', iconClass:'icon-linkedin' };
   if (type.startsWith('linkedin')) return { emoji:'🔗', label:'LinkedIn', iconClass:'icon-linkedin' };
   if (type === 'email') return { emoji:'✉️', label:'Email', iconClass:'icon-email' };
-  if (type === 'call') return { emoji:'📞', label:'Call', iconClass:'icon-call' };
+  if (type === 'call' || type === 'phone') return { emoji:'📞', label:'Call', iconClass:'icon-call' };
   return { emoji:'📌', label:'Task', iconClass:'icon-linkedin' };
 }
 
@@ -1982,7 +1982,7 @@ async function fetchRepTasks(rep) {
     email: t.contacts?.email || '',
     phone: t.contacts?.phone || '',
     linkedin: t.contacts?.linkedin_url || '',
-    type: t.channel === 'linkedin' ? 'linkedin_connect' : t.channel,
+    type: t.channel === 'linkedin' ? 'linkedin_connect' : t.channel === 'phone' ? 'call' : t.channel,
     step: t.step_number,
     action: t.action || '',
     message_body: t.message_body || '',

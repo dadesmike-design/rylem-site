@@ -56,11 +56,11 @@
       <div class="rylem-avatar">R</div>
       <div class="rylem-header-text">
         <h3>Rylem</h3>
-        <p>Hiring or looking for a role? We can help.</p>
+        <p>Typically replies instantly</p>
       </div>
     </div>
     <div class="rylem-messages" id="rylem-messages">
-      <div class="rylem-msg bot">Hi! Are you looking to hire talent for your team, or exploring career opportunities for yourself?</div>
+      <div class="rylem-msg bot">Hey — what are you trying to accomplish?</div>
     </div>
     <div class="rylem-typing" id="rylem-typing"><span></span><span></span><span></span></div>
     <div class="rylem-input">

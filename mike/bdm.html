@@ -560,6 +560,11 @@ button,input,select{font-family:inherit}
         <span class="sp-label">Accounts</span>
         <span class="sp-val accent" id="stat-accounts">0</span>
       </div>
+      <div class="stat-pill">
+        <span class="sp-label">🗓 Meetings</span>
+        <span class="sp-val green" id="stat-meetings">0</span>
+        <span class="sp-label">this week</span>
+      </div>
       <select class="rep-select" id="rep-select" onchange="switchRep(this.value)">
         <option value="mike">Mike Dades</option>
         <option value="julia">Julia Dusseau</option>
@@ -941,6 +946,7 @@ function renderTasksOnly() {
   document.getElementById('stat-done').textContent = doneCount;
   document.getElementById('stat-total').textContent = tasks.length;
   document.getElementById('stat-accounts').textContent = activeAccounts;
+  updateMeetingCounter();
 
   const tasksWrap = document.getElementById('tasks-section-wrap');
   if (!tasksWrap) { render(); return; } // fallback: full render if not yet built
@@ -981,6 +987,7 @@ function render() {
   document.getElementById('stat-done').textContent = doneCount;
   document.getElementById('stat-total').textContent = tasks.length;
   document.getElementById('stat-accounts').textContent = activeAccounts;
+  updateMeetingCounter();
 
   // Body — full rebuild
   console.log('[render] FULL RENDER called — accounts will rebuild. Stack:', new Error().stack.split('\n').slice(1,4).join(' | '));
@@ -1207,6 +1214,7 @@ function updateStats(rep) {
   const doneCount = tasks.filter((t, i) => isTaskDone(rep, taskId(t, i))).length;
   document.getElementById('stat-done').textContent = doneCount;
   document.getElementById('stat-total').textContent = tasks.length;
+  updateMeetingCounter();
 }
 
 // ─── COPY ─────────────────────────────────────────────────
@@ -2268,6 +2276,28 @@ function defaultSteps() {
     {name:'Call #2'},{name:'Email #5'},{name:'LinkedIn DM'},
     {name:'Final Attempt'}
   ];
+}
+
+// ─── MEETING COUNTER (top bar) ───────────────────────────
+async function updateMeetingCounter() {
+  try {
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() + mondayOffset);
+    weekStart.setHours(0, 0, 0, 0);
+    const weekStartStr = weekStart.toISOString().split('T')[0];
+    const { data: meetingEvents } = await db.from('activity_log')
+      .select('id')
+      .ilike('event_type', '%meeting%')
+      .gte('created_at', weekStartStr + 'T00:00:00');
+    const count = (meetingEvents || []).length;
+    const el = document.getElementById('stat-meetings');
+    if (el) el.textContent = count;
+  } catch(e) {
+    console.error('meeting counter error:', e);
+  }
 }
 
 // ─── MEETING INSIGHTS ──────────────────────────────────────

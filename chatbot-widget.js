@@ -55,12 +55,12 @@
     <div class="rylem-header">
       <div class="rylem-avatar">R</div>
       <div class="rylem-header-text">
-        <h3>Rylem's AI Assistant</h3>
-        <p>Typically replies instantly</p>
+        <h3>Rylem</h3>
+        <p>Hiring or looking for a role? We can help.</p>
       </div>
     </div>
     <div class="rylem-messages" id="rylem-messages">
-      <div class="rylem-msg bot">Hey — welcome to Rylem. What are you trying to accomplish?</div>
+      <div class="rylem-msg bot">Hi! Are you looking to hire talent for your team, or exploring career opportunities for yourself?</div>
     </div>
     <div class="rylem-typing" id="rylem-typing"><span></span><span></span><span></span></div>
     <div class="rylem-input">

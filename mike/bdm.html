@@ -490,6 +490,12 @@ button,input,select{font-family:inherit}
 }
 .btn-ai-email:hover{background:rgba(168,85,247,.22);box-shadow:0 0 12px rgba(168,85,247,.2)}
 .btn-ai-email:disabled{opacity:.5;cursor:wait}
+.btn-ai-linkedin{
+  padding:6px 12px;background:rgba(0,119,181,.15);border:1px solid rgba(0,119,181,.35);border-radius:var(--radius-sm);
+  color:#6bb5e8;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap
+}
+.btn-ai-linkedin:hover{background:rgba(0,119,181,.25);box-shadow:0 0 12px rgba(0,119,181,.2)}
+.btn-ai-linkedin:disabled{opacity:.5;cursor:wait}
 .ai-email-result{
   margin-top:12px;padding:12px 14px;background:var(--surface3);border:1px solid rgba(168,85,247,.25);
   border-radius:var(--radius-sm);position:relative
@@ -1105,13 +1111,18 @@ function buildTaskCard(task, idx, tid, rep) {
 
 function buildActionBtn(task, tid) {
   const type = task.type;
+  const step = task.step || 0;
+  const isConnectStep = type === 'linkedin_connect' || (type === 'linkedin' && (step === 1 || step === 4 || step === 8));
   if (type === 'linkedin_connect' || type === 'linkedin_message' || type === 'linkedin') {
+    let btns = '';
     if (task.linkedin) {
-      return `<a class="btn btn-action linkedin" href="${esc(task.linkedin)}" target="_blank" rel="noopener">🔗 Open LinkedIn</a>`;
+      btns += `<a class="btn btn-action linkedin" href="${esc(task.linkedin)}" target="_blank" rel="noopener">🔗 Open LinkedIn</a>`;
     } else {
       const q = encodeURIComponent((task.contact || '') + ' ' + (task.company || ''));
-      return `<a class="btn btn-action linkedin" href="https://www.linkedin.com/search/results/people/?keywords=${q}" target="_blank" rel="noopener">🔍 Search LinkedIn</a>`;
+      btns += `<a class="btn btn-action linkedin" href="https://www.linkedin.com/search/results/people/?keywords=${q}" target="_blank" rel="noopener">🔍 Search LinkedIn</a>`;
     }
+    btns += `<button class="btn btn-ai-linkedin" onclick="generateAILinkedIn('${tid}',${JSON.stringify(esc(task.contact))},${JSON.stringify(esc(task.title||''))},${JSON.stringify(esc(task.company))},${isConnectStep?'true':'false'})">💬 AI Message</button>`;
+    return btns;
   }
   if (type === 'email') {
     const to = encodeURIComponent(task.email || '');
@@ -1281,6 +1292,100 @@ async function generateAIEmail(tid, contactName, contactTitle, company) {
     showToast('❌ AI email failed: ' + (err.message || 'Unknown error'));
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = '🤖 AI Email'; }
+  }
+}
+
+// ─── AI LINKEDIN MESSAGE GENERATION ──────────────────────
+async function generateAILinkedIn(tid, contactName, contactTitle, company, isConnectNote) {
+  const btns = document.querySelectorAll(`#ta_${tid} .btn-ai-linkedin`);
+  const btn = btns[0];
+  if (btn) { btn.disabled = true; btn.textContent = '💬 Generating...'; }
+
+  const connectSystemPrompt = `You are a staffing recruiter at Rylem writing LinkedIn connection notes. Rules:
+- Under 300 characters MAX (LinkedIn limit)
+- Lead with a measurable outcome or signal ("cut time-to-fill by half", "scaling your eng team")
+- Name their exact situation based on role/company
+- Close with a clear ask ("open to connecting?" or "worth a quick chat?")
+- NEVER use weak language like "happy to be a resource" or "looking to connect with leaders"
+- First name only sign-off`;
+
+  const messageSystemPrompt = `You are a staffing recruiter at Rylem writing LinkedIn messages (after connection accepted). Rules:
+- Under 500 characters, conversational
+- Thread back to the connection note or previous touch
+- Lead with a problem or signal (hiring pain, growth, turnover) — never generic intro
+- Name their exact situation based on role/company
+- Close with a specific timeline CTA ("15 min this Thursday?")
+- NEVER use weak language like "happy to be a resource"
+- Reference their role and company specifically`;
+
+  const systemPrompt = isConnectNote ? connectSystemPrompt : messageSystemPrompt;
+  const msgType = isConnectNote ? 'connection note' : 'LinkedIn follow-up message';
+  const userPrompt = `Write a personalized LinkedIn ${msgType} to ${contactName}, ${contactTitle} at ${company}. Use signal-based outreach — reference a plausible hiring signal or pain point for their role/industry.`;
+
+  try {
+    const resp = await fetch('https://rylem-ai-chat.rylem-ai.workers.dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mode: 'generate',
+        system_prompt: systemPrompt,
+        user_prompt: userPrompt,
+        max_tokens: 200
+      })
+    });
+    if (!resp.ok) throw new Error('AI service returned ' + resp.status);
+    const data = await resp.json();
+    const msgText = data.message || data.text || '';
+    if (!msgText) throw new Error('Empty response from AI');
+
+    // Show result in the message area
+    const msgWrap = document.getElementById('msg_' + tid);
+    const toggle = document.getElementById('toggle_' + tid);
+    if (msgWrap) {
+      msgWrap.classList.add('open');
+      if (toggle) toggle.classList.add('open');
+      let aiDiv = msgWrap.querySelector('.ai-linkedin-result');
+      if (!aiDiv) {
+        aiDiv = document.createElement('div');
+        aiDiv.className = 'ai-linkedin-result';
+        msgWrap.querySelector('.task-message-body').appendChild(aiDiv);
+      }
+      const charCount = msgText.length;
+      const charColor = (isConnectNote && charCount > 300) ? 'var(--red)' : (charCount > 500 ? 'var(--yellow)' : 'var(--green)');
+      aiDiv.innerHTML = `
+        <div class="ai-label">💬 AI-Generated LinkedIn ${isConnectNote ? 'Connection Note' : 'Message'}</div>
+        <div class="ai-text">${esc(msgText)}</div>
+        <div class="ai-email-actions">
+          <span style="font-size:11px;color:${charColor}">${charCount} chars${isConnectNote ? ' / 300 max' : ''}</span>
+          <button class="btn btn-copy" onclick="copyText(${JSON.stringify(msgText)}, this)">📋 Copy Message</button>
+        </div>`;
+    } else {
+      const card = document.getElementById('tc_' + tid);
+      if (card) {
+        const newWrap = document.createElement('div');
+        newWrap.className = 'task-message-wrap open';
+        newWrap.id = 'msg_' + tid;
+        const body = document.createElement('div');
+        body.className = 'task-message-body';
+        const charCount = msgText.length;
+        const charColor = (isConnectNote && charCount > 300) ? 'var(--red)' : (charCount > 500 ? 'var(--yellow)' : 'var(--green)');
+        body.innerHTML = `<div class="ai-linkedin-result">
+          <div class="ai-label">💬 AI-Generated LinkedIn ${isConnectNote ? 'Connection Note' : 'Message'}</div>
+          <div class="ai-text">${esc(msgText)}</div>
+          <div class="ai-email-actions">
+            <span style="font-size:11px;color:${charColor}">${charCount} chars${isConnectNote ? ' / 300 max' : ''}</span>
+            <button class="btn btn-copy" onclick="copyText(${JSON.stringify(msgText)}, this)">📋 Copy Message</button>
+          </div></div>`;
+        newWrap.appendChild(body);
+        card.appendChild(newWrap);
+      }
+    }
+    showToast('💬 LinkedIn message generated!', true);
+  } catch(err) {
+    console.error('AI LinkedIn error:', err);
+    showToast('❌ AI message failed: ' + (err.message || 'Unknown error'));
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '💬 AI Message'; }
   }
 }
 

@@ -1453,12 +1453,13 @@ const SMARTLEAD_ALIAS_MAP = {
 };
 
 async function sendViaSmartlead(tid, fromAlias) {
+  console.log('[Smartlead] Called with:', { tid, fromAlias });
   const taskEl = document.getElementById('ta_' + tid);
   const btn = taskEl?.querySelector('.btn-smartlead');
   if (btn) { btn.disabled = true; btn.textContent = '🚀 Sending...'; }
 
   // Get task data
-  const task = state.tasks.find(t => t.id === tid);
+  const task = (state.supabaseTasks || []).find(t => t.id === tid);
   if (!task) { showToast('❌ Task not found', false); if (btn) { btn.disabled = false; btn.textContent = '🚀 Send'; } return; }
 
   // Check if AI email was generated, otherwise use message_body or a default

@@ -1120,13 +1120,15 @@ function buildTaskCard(task, idx, tid, rep) {
     const body = document.createElement('div');
     body.className = 'task-message-body';
     if (task.type === 'call') {
+      const callScriptContent = msgBody || task.action || '';
       body.innerHTML = `
         <div class="task-message-label">📞 Call Script</div>
         ${task.phone ? `<div style="font-size:18px;font-weight:700;color:var(--green);margin-bottom:10px">${esc(task.phone)}</div>` : ''}
         ${task.mobile ? `<div style="font-size:14px;color:var(--blue);margin-bottom:10px">📱 ${esc(task.mobile)}</div>` : ''}
-        <div class="task-message-text">${esc(msgBody)}</div>
+        <div class="task-message-text">${esc(callScriptContent)}</div>
         <div class="message-actions">
-          <button class="btn btn-copy" onclick="copyText(${JSON.stringify(msgBody)}, this)">📋 Copy Script</button>
+          <button class="btn btn-ai-email" onclick="generateAICallScript('${tid}','${escAttr(task.contact)}','${escAttr(task.title||'')}','${escAttr(task.company)}','${escAttr(task.action||'')}')">🤖 AI Call Script</button>
+          <button class="btn btn-copy" onclick="copyText(${JSON.stringify(callScriptContent)}, this)">📋 Copy Script</button>
         </div>`;
     } else {
       body.innerHTML = `
@@ -1350,6 +1352,61 @@ async function generateAIEmail(tid, contactName, contactTitle, company) {
     return null; // Return null on failure
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = '🤖 AI Email'; }
+  }
+}
+
+// ─── AI LINKEDIN MESSAGE GENERATION ──────────────────────
+async function generateAICallScript(tid, contactName, contactTitle, company, callAction) {
+  const btns = document.querySelectorAll(`#ta_${tid} .btn-ai-email`);
+  const btn = btns[0];
+  if (btn) { btn.disabled = true; btn.textContent = '🤖 Generating...'; }
+  showToast('🤖 Generating call script...', true);
+
+  const task = (state.supabaseTasks || []).find(t => t.id === tid);
+  const senderAlias = task?.sent_from || '';
+  const senderFirstName = senderAlias.split('@')[0].split('.')[0].charAt(0).toUpperCase() + senderAlias.split('@')[0].split('.')[0].slice(1) || 'Mike';
+
+  const systemPrompt = `You are ${senderFirstName} from Rylem Staffing, a specialized staffing firm. Write a cold call talking points script following these rules:
+- Start with a specific signal or trigger (funding, hiring, growth)
+- 4-6 short bullet points, each 1-2 sentences
+- Reference the contact's role and company specifically
+- Include a clear ask/CTA ("15 minutes this week?")
+- End with a voicemail version (30 seconds max)
+- Sign off as ${senderFirstName} from Rylem Staffing`;
+  const userPrompt = `Write a cold call script for ${contactName}, ${contactTitle} at ${company}. Context: ${callAction || 'Cold call outreach'}. Sign as ${senderFirstName}.`;
+
+  try {
+    const resp = await fetch('https://rylem-ai-chat.rylem-ai.workers.dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'generate', system_prompt: systemPrompt, user_prompt: userPrompt, max_tokens: 1024 })
+    });
+    if (!resp.ok) throw new Error('AI service returned ' + resp.status);
+    const data = await resp.json();
+    const scriptText = data.message || data.text || '';
+    if (!scriptText) throw new Error('Empty response from AI');
+
+    // Show in the message area
+    const msgWrap = document.getElementById('msg_' + tid);
+    const toggle = document.getElementById('toggle_' + tid);
+    if (msgWrap) {
+      msgWrap.classList.add('open');
+      if (toggle) toggle.classList.add('open');
+      const textDiv = msgWrap.querySelector('.task-message-text');
+      if (textDiv) textDiv.textContent = scriptText;
+    }
+    // Store on dataset
+    const taskActionEl = document.getElementById('ta_' + tid);
+    if (taskActionEl) taskActionEl.dataset.generatedCallScript = scriptText;
+
+    showToast('🤖 Call script generated!', true);
+    return scriptText;
+  } catch(err) {
+    console.error('AI call script error:', err);
+    showToast('❌ AI call script failed: ' + (err.message || 'Unknown error'));
+    return null;
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '🤖 AI Call Script'; }
   }
 }
 

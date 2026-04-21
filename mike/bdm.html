@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>BDM Daily Execution — Rylem</title>
+<title>BDM Daily Execution - Rylem</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -150,7 +150,7 @@ button,input,select{font-family:inherit}
 .btn-add-contact:hover{background:var(--green-dim);border-color:rgba(16,217,135,.3)}
 .form-status{font-size:12px;margin-top:10px;min-height:18px;text-align:center}
 
-/* SEQUENCE SELECTOR — COLLAPSIBLE */
+/* SEQUENCE SELECTOR - COLLAPSIBLE */
 .seq-collapse-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;transition:all .15s;user-select:none}
 .seq-collapse-bar:hover{border-color:var(--border-hover);background:var(--surface3)}
 .seq-collapse-bar .seq-bar-left{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--text)}
@@ -575,14 +575,14 @@ button,input,select{font-family:inherit}
         <option value="jean">Jean</option>
         <option value="dee">Dee</option>
       </select>
-      <button class="btn-add-lead" onclick="openAddLead()">＋ Add Lead</button>
+      <button class="btn-add-lead" onclick="openAddLead()">+ Add Lead</button>
       <button class="btn-add-lead" style="background:var(--accent-dim);border-color:var(--accent-border);color:var(--accent)" onclick="openBulkAdd()">📋 Bulk Add</button>
       <a href="manager.html" class="btn-manager-intel" id="manager-intel-link" style="display:none;padding:7px 14px;background:var(--purple-dim);border:1px solid rgba(168,85,247,.3);border-radius:var(--radius-sm);color:var(--purple);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.3px;text-decoration:none">📊 Manager Intel</a>
       <button class="btn-logout" onclick="doLogout()">Sign Out</button>
     </div>
   </header>
   <div class="search-wrap">
-    <input type="text" id="global-search" class="search-input" placeholder="Search accounts, contacts, titles, cities…" autocomplete="off" oninput="handleSearch(this.value)">
+    <input type="text" id="global-search" class="search-input" placeholder="Search accounts, contacts, titles, cities..." autocomplete="off" oninput="handleSearch(this.value)">
     <div class="search-results" id="search-results"></div>
   </div>
 
@@ -590,7 +590,7 @@ button,input,select{font-family:inherit}
   <div class="modal-overlay" id="add-lead-modal" onclick="if(event.target===this)closeAddLead(false)">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>＋ Add Lead</h3>
+        <h3>+ Add Lead</h3>
         <button class="modal-close" onclick="closeAddLead(true)">✕</button>
       </div>
       <form id="add-lead-form">
@@ -690,7 +690,7 @@ button,input,select{font-family:inherit}
           <div class="form-group">
             <label>Assign BDM *</label>
             <select id="al-bdm" required>
-              <option value="">— Select —</option>
+              <option value="">- Select -</option>
               <option value="mike">Mike Dades</option>
               <option value="julia">Julia Dusseau</option>
               <option value="april">April Melton</option>
@@ -839,7 +839,7 @@ async function init(user) {
 
   // Role-based rep selector visibility
   if (user.role === 'admin') {
-    // Admin sees all options — keep as-is
+    // Admin sees all options - keep as-is
   } else if (user.role === 'manager' && user.allowedReps && user.allowedReps.length > 1) {
     // Managers see only themselves + their reports
     Array.from(repSelect.options).forEach(function(opt) {
@@ -905,7 +905,7 @@ async function markDone(repId, taskId) {
   if (taskId && taskId.match(/^[0-9a-f]{8}-/)) {
     const { error } = await db.from('tasks').update({ completed: true }).eq('id', taskId);
     if (error) { console.error('Supabase markDone error:', error); return; }
-    // Don't render here — handleDone() calls renderTasksOnly() after this returns
+    // Don't render here - handleDone() calls renderTasksOnly() after this returns
   }
 }
 function isTaskSkipped(repId, taskId) {
@@ -922,7 +922,7 @@ function taskId(task, idx) {
   return `${task.lead_id || idx}_${task.contact.replace(/\s+/g,'')}_${task.step}`;
 }
 
-// ─── MESSAGES (removed — now uses tasks.message_body from Supabase) ───
+// ─── MESSAGES (removed - now uses tasks.message_body from Supabase) ───
 
 // ─── FIX NULL REPS (one-time migration) ─────────────────────────
 async function fixNullReps(currentRep) {
@@ -949,7 +949,7 @@ async function fixNullReps(currentRep) {
 }
 
 // ─── RENDER ──────────────────────────────────────────────
-// Render ONLY the tasks section — never touches the accounts/contacts DOM
+// Render ONLY the tasks section - never touches the accounts/contacts DOM
 function renderTasksOnly() {
   const rep = state.rep;
   const tasks = (state.supabaseTasks || []).sort(sortTasks);
@@ -975,7 +975,7 @@ function renderTasksOnly() {
   } else if (doneCount === tasks.length) {
     const banner = document.createElement('div');
     banner.className = 'all-done-banner';
-    banner.innerHTML = '<h3>🎉 All done for today!</h3><p>Every task is complete. Nice work — check back tomorrow.</p>';
+    banner.innerHTML = '<h3>🎉 All done for today!</h3><p>Every task is complete. Nice work - check back tomorrow.</p>';
     tasksWrap.appendChild(banner);
   } else {
     const list = document.createElement('div');
@@ -1001,8 +1001,8 @@ function render() {
   document.getElementById('stat-accounts').textContent = activeAccounts;
   updateMeetingCounter();
 
-  // Body — full rebuild
-  console.log('[render] FULL RENDER called — accounts will rebuild. Stack:', new Error().stack.split('\n').slice(1,4).join(' | '));
+  // Body - full rebuild
+  console.log('[render] FULL RENDER called - accounts will rebuild. Stack:', new Error().stack.split('\n').slice(1,4).join(' | '));
   const wrap = document.getElementById('body-wrap');
   wrap.innerHTML = '';
 
@@ -1022,7 +1022,7 @@ function render() {
   } else if (doneCount === tasks.length) {
     const banner = document.createElement('div');
     banner.className = 'all-done-banner';
-    banner.innerHTML = '<h3>🎉 All done for today!</h3><p>Every task is complete. Nice work — check back tomorrow.</p>';
+    banner.innerHTML = '<h3>🎉 All done for today!</h3><p>Every task is complete. Nice work - check back tomorrow.</p>';
     tasksWrap.appendChild(banner);
   } else {
     const list = document.createElement('div');
@@ -1035,7 +1035,7 @@ function render() {
     tasksWrap.appendChild(list);
   }
 
-  // ── MEETING INSIGHTS (async — renders when data arrives) ──
+  // ── MEETING INSIGHTS (async - renders when data arrives) ──
   const miWrap = document.createElement('div');
   miWrap.id = 'meeting-insights-wrap';
   miWrap.style.marginTop = '36px';
@@ -1162,7 +1162,7 @@ function buildActionBtn(task, tid) {
   }
   if (type === 'email') {
     const to = encodeURIComponent(task.email || '');
-    const subj = encodeURIComponent('Quick intro — Rylem Staffing');
+    const subj = encodeURIComponent('Quick intro - Rylem Staffing');
     const body = encodeURIComponent(task.message_body || '');
     const alias = task.sent_from || '';
     const aliasLabel = alias ? `<div style="font-size:10px;color:var(--blue);margin-bottom:4px">📤 From: ${esc(alias)}</div>` : '';
@@ -1214,7 +1214,7 @@ async function handleDone(rep, tid, company) {
   // Write to Supabase (also refreshes accounts + tasks via markDone)
   await markDone(rep, tid);
 
-  // Refresh tasks only — do NOT rebuild the accounts section (would wipe bulk selection)
+  // Refresh tasks only - do NOT rebuild the accounts section (would wipe bulk selection)
   state.supabaseTasks = await fetchRepTasks(rep);
   renderTasksOnly();
 }
@@ -1270,15 +1270,15 @@ async function generateAIEmail(tid, contactName, contactTitle, company) {
   const senderFirstName = senderAlias.split('@')[0].split('.')[0].charAt(0).toUpperCase() + senderAlias.split('@')[0].split('.')[0].slice(1) || 'Mike';
 
   const systemPrompt = `You are a staffing recruiter at Rylem, a specialized staffing firm. Write signal-based cold outreach emails following these rules:
-- Lead with a PROBLEM or SIGNAL (hiring pain, growth, turnover) — never a generic intro
+- Lead with a PROBLEM or SIGNAL (hiring pain, growth, turnover) - never a generic intro
 - Under 150 words, conversational tone, no buzzwords
 - End with a specific timeline CTA (e.g. "15 min this Thursday or Friday?")
-- No subject line — just the email body
+- No subject line - just the email body
 - First name basis, professional but human
 - Reference the prospect's role and company specifically
-- Sign off as: ${senderFirstName} from Rylem Staffing — always use this exact first name, never make up a different name`;
+- Sign off as: ${senderFirstName} from Rylem Staffing - always use this exact first name, never make up a different name`;
 
-  const userPrompt = `Write a personalized cold outreach email to ${contactName}, ${contactTitle} at ${company}. You are ${senderFirstName} from Rylem Staffing. Use signal-based outreach — reference a plausible hiring signal or pain point for their role/industry. Sign off as ${senderFirstName}.`;
+  const userPrompt = `Write a personalized cold outreach email to ${contactName}, ${contactTitle} at ${company}. You are ${senderFirstName} from Rylem Staffing. Use signal-based outreach - reference a plausible hiring signal or pain point for their role/industry. Sign off as ${senderFirstName}.`;
 
   try {
     const resp = await fetch('https://rylem-ai-chat.rylem-ai.workers.dev', {
@@ -1319,7 +1319,7 @@ async function generateAIEmail(tid, contactName, contactTitle, company) {
           <button class="btn btn-action email" onclick="window.open('https://outlook.office.com/mail/deeplink/compose?body='+encodeURIComponent(${JSON.stringify(emailText)}),'_blank')">✉️ Use in Outlook</button>
         </div>`;
     } else {
-      // No message wrap exists — create one dynamically
+      // No message wrap exists - create one dynamically
       const card = document.getElementById('tc_' + tid);
       if (card) {
         const newWrap = document.createElement('div');
@@ -1343,7 +1343,7 @@ async function generateAIEmail(tid, contactName, contactTitle, company) {
     // Store on task element dataset so sendViaSmartlead can find it reliably
     const taskActionEl = document.getElementById('ta_' + tid);
     if (taskActionEl) taskActionEl.dataset.generatedEmail = emailText;
-    
+
     showToast('🤖 AI email generated!', true);
     return emailText; // Return the generated text so callers can use it directly
   } catch(err) {
@@ -1366,21 +1366,39 @@ async function generateAICallScript(tid, contactName, contactTitle, company, cal
   const senderAlias = task?.sent_from || '';
   const senderFirstName = senderAlias.split('@')[0].split('.')[0].charAt(0).toUpperCase() + senderAlias.split('@')[0].split('.')[0].slice(1) || 'Mike';
 
-  const systemPrompt = `You are ${senderFirstName} from Rylem Staffing. Write a cold call opening script. This is for a LIVE phone call, not an email.
+  const systemPrompt = `You generate cold call scripts for Rylem Staffing SDRs calling hiring managers at tech companies. Compliance with the rules below is not optional — a script that violates any rule is a failed generation.
 
-HARD RULES:
-- Max 2 sentences before the first pause where the prospect speaks
-- NO hedging language: never use "likely", "perhaps", "I understand that", "probably"
-- NO pitch about what Rylem specializes in — the prospect doesn't care yet
-- NO referencing emails sent or LinkedIn connections — they don't remember
-- Must include one specific, verifiable, CURRENT fact about the company (recent funding, IPO, product launch, expansion)
-- End with a disqualifying question ("is that a live problem right now?") NOT a meeting request
-- Total opening script under 75 words
-- After the opening, add a brief "if they engage" branch (2-3 bullets on what to say next)
-- After that, a voicemail version (30 seconds max, same rules: no hedging, no pitch, specific hook, disqualifying question)
+# WHO WE CALL
+Rylem sells contract and staff augmentation placements directly to HIRING MANAGERS in two functions:
+- Tech / IT / Engineering (CTO, VP Engineering, Director of Engineering, Eng Managers, Head of Platform/Infra/Data)
+- Accounting & Finance (CFO, VP Finance, Controller, Director of FP&A, Director of Accounting)
 
-TONE: Direct, conversational, like a sharp recruiter who actually knows their industry. Not corporate. Not scripted-sounding.`;
-  const userPrompt = `Write a cold call script for calling ${contactName}, ${contactTitle} at ${company}. Context: ${callAction || 'Cold call outreach'}. Use a current, accurate hook about ${company}. Sign as ${senderFirstName}.`;
+We DO NOT call, reference, or position to: HR, People Ops, Talent Acquisition, Head of Talent, Recruiters, CHROs, VMS/MSP programs, or Procurement. Never suggest the hiring manager "loop in their recruiter" or "coordinate with talent." The hiring manager IS the buyer. Speak to their pain (open reqs, missed deliverables, stalled projects, month-end close, audit readiness) — not hiring process pain.
+
+# RULES (enforced — violations = regenerate)
+1. Opener is MAX 15 words and MUST include a permission-based ask. Format: "Hi [Name], [rep] with Rylem — I know I'm calling cold, got 30 seconds?"
+2. FORBIDDEN WORDS AND PHRASES: "obviously", "likely", "perhaps", "I understand", "I hope", "touching base", "circling back", "reaching out", "checking in", "partner with", "synergy", "solutions", "value proposition", "I wanted to", "just wanted to", "quickly", "exciting opportunity", "world-class", "best-in-class", "talent", "talent acquisition", "TA team", "recruiting team", "HR", "People team"
+3. Hook MUST cite a specific fact. If no specific fact is provided, use a generic hook tied to the prospect's function (eng: stalled roadmap/on-call burnout; finance: month-end/audit/close cycles). Do NOT invent company-specific facts from training data.
+4. Pitch body is MAX 2 sentences. No bullet-point feature lists. Speak to operational pain, not "hiring" as a function.
+5. Call MUST end with a disqualifying question, NOT a meeting request. Format: "Is that a live problem right now, or are you covered?" Meeting ask only in the if_yes branch AFTER prospect confirms pain.
+6. Voice: contractions, fragments, direct. Write how people actually talk on the phone. No corporate voice. No adverbs unless necessary.
+7. Total live-call script (opener + hook + pitch + disqualifying question) MUST be under 75 words.
+8. Voicemail MUST be under 25 seconds spoken (~60 words). Voicemail ends with callback number placeholder [CALLBACK_NUMBER], never a meeting ask.
+
+# OUTPUT FORMAT
+Return plain text with this structure:
+LIVE CALL:
+[script]
+
+IF THEY ENGAGE:
+[2-3 bullet points on what to say next]
+
+IF YES (they confirm pain):
+[meeting ask — "Worth 15 minutes this Thursday or Friday?"]
+
+VOICEMAIL:
+[voicemail script]`;
+  const userPrompt = `Write a cold call script for calling ${contactName}, ${contactTitle} at ${company}. Context: ${callAction || 'Cold call outreach'}. Rep name: ${senderFirstName}.`; 
 
   try {
     const resp = await fetch('https://rylem-ai-chat.rylem-ai.workers.dev', {
@@ -1434,21 +1452,21 @@ async function generateAILinkedIn(tid, contactName, contactTitle, company, isCon
 - Name their exact situation based on role/company
 - Close with a clear ask ("open to connecting?" or "worth a quick chat?")
 - NEVER use weak language like "happy to be a resource" or "looking to connect with leaders"
-- First name only sign-off — sign as ${senderFirstName}`;
+- First name only sign-off - sign as ${senderFirstName}`;
 
   const messageSystemPrompt = `You are a staffing recruiter at Rylem writing LinkedIn messages (after connection accepted). Rules:
 - Under 500 characters, conversational
 - Thread back to the connection note or previous touch
-- Lead with a problem or signal (hiring pain, growth, turnover) — never generic intro
+- Lead with a problem or signal (hiring pain, growth, turnover) - never generic intro
 - Name their exact situation based on role/company
 - Close with a specific timeline CTA ("15 min this Thursday?")
 - NEVER use weak language like "happy to be a resource"
 - Reference their role and company specifically
-- Sign off as ${senderFirstName} — never use a different name`;
+- Sign off as ${senderFirstName} - never use a different name`;
 
   const systemPrompt = isConnectNote ? connectSystemPrompt : messageSystemPrompt;
   const msgType = isConnectNote ? 'connection note' : 'LinkedIn follow-up message';
-  const userPrompt = `Write a personalized LinkedIn ${msgType} to ${contactName}, ${contactTitle} at ${company}. You are ${senderFirstName} from Rylem Staffing. Use signal-based outreach — reference a plausible hiring signal or pain point for their role/industry. Sign off as ${senderFirstName}.`;
+  const userPrompt = `Write a personalized LinkedIn ${msgType} to ${contactName}, ${contactTitle} at ${company}. You are ${senderFirstName} from Rylem Staffing. Use signal-based outreach - reference a plausible hiring signal or pain point for their role/industry. Sign off as ${senderFirstName}.`;
 
   try {
     const resp = await fetch('https://rylem-ai-chat.rylem-ai.workers.dev', {
@@ -1575,7 +1593,7 @@ async function sendViaSmartlead(tid, fromAlias) {
     } catch(e) { console.error('[Smartlead] Contact lookup failed:', e); }
   }
 
-  // Check for email body — read from dataset (most reliable), then DOM, then task.message_body
+  // Check for email body - read from dataset (most reliable), then DOM, then task.message_body
   let emailBody =
     taskEl?.dataset.generatedEmail ||
     document.getElementById('msg_' + tid)?.querySelector('.ai-email-result .ai-text')?.textContent ||
@@ -1587,7 +1605,7 @@ async function sendViaSmartlead(tid, fromAlias) {
     fromTask: !!task.message_body,
     finalLength: emailBody.length
   });
-  
+
   if (!emailBody) {
     console.error('[sendViaSmartlead] no email body available', { tid });
     showToast('❌ Generate an email first by clicking 🤖 AI Email', false);
@@ -1614,7 +1632,7 @@ async function sendViaSmartlead(tid, fromAlias) {
         to_name: task.contact,
         from_alias: fromAlias,
         from_account_id: accountId,
-        subject: 'Quick intro — Rylem Staffing',
+        subject: 'Quick intro - Rylem Staffing',
         body: emailBody
       })
     });
@@ -1647,7 +1665,7 @@ async function smartleadSendContact(contactId, contactName, contactEmail, fromAl
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         mode: 'generate',
-        system_prompt: `You are ${fromAlias.split('@')[0].charAt(0).toUpperCase() + fromAlias.split('@')[0].slice(1)} from Rylem Staffing, a specialized staffing firm. Write signal-based cold outreach emails following these rules:\n- Lead with a PROBLEM or SIGNAL (hiring pain, growth, turnover) — never a generic intro\n- Under 150 words, conversational tone, no buzzwords\n- End with a specific timeline CTA (e.g. "15 min this Thursday or Friday?")\n- No subject line — just the email body\n- Sign off as ${fromAlias.split('@')[0].charAt(0).toUpperCase() + fromAlias.split('@')[0].slice(1)} from Rylem Staffing\n- Reference the prospect's role and company specifically`,
+        system_prompt: `You are ${fromAlias.split('@')[0].charAt(0).toUpperCase() + fromAlias.split('@')[0].slice(1)} from Rylem Staffing, a specialized staffing firm. Write signal-based cold outreach emails following these rules:\n- Lead with a PROBLEM or SIGNAL (hiring pain, growth, turnover) - never a generic intro\n- Under 150 words, conversational tone, no buzzwords\n- End with a specific timeline CTA (e.g. "15 min this Thursday or Friday?")\n- No subject line - just the email body\n- Sign off as ${fromAlias.split('@')[0].charAt(0).toUpperCase() + fromAlias.split('@')[0].slice(1)} from Rylem Staffing\n- Reference the prospect's role and company specifically`,
         user_prompt: `Write a personalized cold outreach email to ${contactName}. You are ${fromAlias.split('@')[0].charAt(0).toUpperCase() + fromAlias.split('@')[0].slice(1)} from Rylem Staffing. Use signal-based outreach. Sign off as ${fromAlias.split('@')[0].charAt(0).toUpperCase() + fromAlias.split('@')[0].slice(1)}.`,
         max_tokens: 512
       })
@@ -1667,7 +1685,7 @@ async function smartleadSendContact(contactId, contactName, contactEmail, fromAl
         to_name: contactName,
         from_alias: fromAlias,
         from_account_id: accountId,
-        subject: 'Quick intro — Rylem Staffing',
+        subject: 'Quick intro - Rylem Staffing',
         body: emailBody
       })
     });
@@ -1688,7 +1706,7 @@ async function fetchRepAccounts(rep) {
 
   let accounts, accErr;
   if (isSdr) {
-    // SDRs see ALL accounts — full visibility, claim by action
+    // SDRs see ALL accounts - full visibility, claim by action
     const res = await db.from('accounts').select('*').order('company');
     accounts = res.data; accErr = res.error;
   } else {
@@ -1705,7 +1723,7 @@ async function fetchRepAccounts(rep) {
     countMap[a.id] = count || 0;
   }));
 
-  // Build account objects — contacts loaded on expand (lazy)
+  // Build account objects - contacts loaded on expand (lazy)
   return accounts.map(a => {
     const daysSinceTouch = Math.floor((Date.now() - new Date(a.updated_at).getTime()) / 86400000);
     return {
@@ -1822,7 +1840,7 @@ function openAddLead(prefillCompany, prefillAccountId) {
     const acct = (state.supabaseAccounts || []).find(a => a.id === prefillAccountId);
     if (acct) { bdmSel.value = acct.assigned_rep || ''; }
   }
-  // SDRs don't change account ownership — hide that field
+  // SDRs don't change account ownership - hide that field
   const repRow = document.getElementById('al-rep').parentElement;
   repRow.style.display = (profile.role === 'sdr') ? 'none' : '';
   _dupeContact = null;
@@ -1978,7 +1996,7 @@ document.getElementById('bulk-add-form')?.addEventListener('submit', async (e) =
       if (existAcc) {
         if (existAcc.do_not_contact) {
           skipped++;
-          resultsDiv.innerHTML += `<div style="color:var(--red)">⏭ Line ${l.line}: ${l.company} — Do Not Contact, skipped</div>`;
+          resultsDiv.innerHTML += `<div style="color:var(--red)">⏭ Line ${l.line}: ${l.company} - Do Not Contact, skipped</div>`;
           continue;
         }
         accountId = existAcc.id;
@@ -1996,7 +2014,7 @@ document.getElementById('bulk-add-form')?.addEventListener('submit', async (e) =
       const { data: dupes } = await db.from('contacts').select('id,full_name').eq('account_id', accountId).ilike('full_name', l.contact);
       if (dupes && dupes.length > 0) {
         skipped++;
-        resultsDiv.innerHTML += `<div style="color:var(--yellow)">⏭ Line ${l.line}: ${l.contact} at ${l.company} — already exists, skipped</div>`;
+        resultsDiv.innerHTML += `<div style="color:var(--yellow)">⏭ Line ${l.line}: ${l.contact} at ${l.company} - already exists, skipped</div>`;
         continue;
       }
 
@@ -2055,14 +2073,14 @@ document.getElementById('bulk-add-form')?.addEventListener('submit', async (e) =
         sequence_id: seq.id,
         rep: rep,
         event_type: 'lead_added',
-        description: l.contact + ' (' + l.title + ') bulk-added to ' + l.company + ' — Cold Outbound by ' + rep
+        description: l.contact + ' (' + l.title + ') bulk-added to ' + l.company + ' - Cold Outbound by ' + rep
       });
 
       created++;
       resultsDiv.innerHTML += `<div style="color:var(--green)">✅ Line ${l.line}: ${l.contact} at ${l.company}</div>`;
     } catch(err) {
       errors++;
-      resultsDiv.innerHTML += `<div style="color:var(--red)">❌ Line ${l.line}: ${l.company} — ${err.message||'Error'}</div>`;
+      resultsDiv.innerHTML += `<div style="color:var(--red)">❌ Line ${l.line}: ${l.company} - ${err.message||'Error'}</div>`;
     }
   }
 
@@ -2234,7 +2252,7 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
       sequence_id: seq.id,
       rep: rep,
       event_type: 'lead_added',
-      description: contact + ' (' + title + ') added to ' + company + ' — ' + (tplNames[templateId]||'sequence') + ' by ' + rep
+      description: contact + ' (' + title + ') added to ' + company + ' - ' + (tplNames[templateId]||'sequence') + ' by ' + rep
     });
 
     status.style.color = 'var(--green)';
@@ -2246,7 +2264,7 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
     state.supabaseTasks = await fetchRepTasks(state.rep);
     render();
 
-    // Auto-close after 1.5s — clear notes on successful submit
+    // Auto-close after 1.5s - clear notes on successful submit
     _savedNotes = '';
     setTimeout(() => closeAddLead(true), 1500);
 
@@ -2299,7 +2317,7 @@ async function fetchRepTasks(rep) {
 }
 
 async function loadAccountContacts(accountId) {
-  // All roles see all contacts — SDRs claim by starting a sequence
+  // All roles see all contacts - SDRs claim by starting a sequence
   let query = db.from('contacts').select(
     'id,full_name,title,email,phone,mobile,linkedin_url,role_type,status,assigned_bdm,working_rep,' +
     'meeting_set_date,meeting_set_by,meeting_type,meeting_completed_date,meeting_completed_by,' +
@@ -2372,8 +2390,8 @@ function buildAccountCard(acc) {
   detail.dataset.acctStatus = acc.acct_status || '';
   detail.innerHTML = `<div class="account-detail-hd">All Contacts</div>
     <div class="select-all-wrap"><input type="checkbox" class="contact-cb" id="sa_${acc.id}" onchange="toggleSelectAll('${acc.id}', this.checked)"><label for="sa_${acc.id}">Select All</label></div>
-    <div class="contact-rows" id="cr_${acc.id}"><div style="padding:12px;color:var(--text-dim)">Loading contacts…</div></div>
-    <button class="btn btn-add-contact" onclick="event.stopPropagation(); openAddLead('${escAttr(acc.company)}', '${acc.id}')">＋ Add Contact</button>`;
+    <div class="contact-rows" id="cr_${acc.id}"><div style="padding:12px;color:var(--text-dim)">Loading contacts...</div></div>
+    <button class="btn btn-add-contact" onclick="event.stopPropagation(); openAddLead('${escAttr(acc.company)}', '${acc.id}')">+ Add Contact</button>`;
   detail.dataset.loaded = 'false';
   detail.onclick = e => e.stopPropagation();
   card.appendChild(detail);
@@ -2453,7 +2471,7 @@ async function toggleAccount(id) {
   if (row) row.classList.toggle('open', open);
   if (open) {
     if (detail.dataset.loaded === 'false') {
-      // First open — fetch contacts from Supabase
+      // First open - fetch contacts from Supabase
       detail.dataset.loaded = 'true';
       const contacts = await loadAccountContacts(id);
       const acctStatus = detail.dataset.acctStatus || '';
@@ -2764,7 +2782,7 @@ document.addEventListener('click', e => {
 });
 
 // ─── BULK SEQUENCE START ─────────────────────────────────
-// Persistent selection state — survives re-renders when accounts expand
+// Persistent selection state - survives re-renders when accounts expand
 const _bulkSel = new Map(); // contact_id → {contact_id, account_id, name}
 
 function getSelectedContacts() {
@@ -2895,7 +2913,7 @@ async function bulkStartSequences() {
     // Re-fetch contact to get assigned_alias (may have been set by trigger)
     const { data: ctUpdated } = await db.from('contacts').select('assigned_alias').eq('id', c.contact_id).single();
 
-    // Insert first task — rep = working_rep (SDR credit), sent_from = assigned_alias (BDM pool)
+    // Insert first task - rep = working_rep (SDR credit), sent_from = assigned_alias (BDM pool)
     if (step1) {
       await db.from('tasks').insert({
         sequence_id: seq.id,
@@ -2911,7 +2929,7 @@ async function bulkStartSequences() {
       });
     }
 
-    // Log activity — rep = working_rep (SDR gets credit)
+    // Log activity - rep = working_rep (SDR gets credit)
     await db.from('activity_log').insert({
       event_type: 'sequence_started',
       description: 'Started ' + tplName + ' sequence',
@@ -2947,7 +2965,7 @@ function nextBusinessDay(date) {
   return addBusinessDays(date, 1);
 }
 
-// Resolve the cold email alias for a BDM — used for sent_from on tasks
+// Resolve the cold email alias for a BDM - used for sent_from on tasks
 async function getBdmAlias(bdmKey) {
   if (!bdmKey) return null;
   try {
@@ -3093,14 +3111,14 @@ async function openStatusModal(contactId, accountId) {
   if (c.meeting_completed_date) {
     mc.innerHTML = `<div class="meeting-info">
       <div>📅 <strong>Meeting set:</strong> ${esc(c.meeting_set_date)}</div>
-      <div>👤 <strong>Set by:</strong> ${esc(repNames[c.meeting_set_by]||c.meeting_set_by||'—')}</div>
+      <div>👤 <strong>Set by:</strong> ${esc(repNames[c.meeting_set_by]||c.meeting_set_by||'-')}</div>
       <div>✅ <strong>Completed:</strong> ${esc(c.meeting_completed_date)} (${esc(c.meeting_type==='in_person'?'In Person':'Virtual')})</div>
-      <div>👤 <strong>Completed by:</strong> ${esc(repNames[c.meeting_completed_by]||c.meeting_completed_by||'—')}</div>
+      <div>👤 <strong>Completed by:</strong> ${esc(repNames[c.meeting_completed_by]||c.meeting_completed_by||'-')}</div>
     </div>`;
   } else if (c.meeting_set_date) {
     mc.innerHTML = `<div class="meeting-info">
       <div>📅 <strong>Meeting:</strong> ${esc(c.meeting_set_date)}</div>
-      <div>👤 <strong>Set by:</strong> ${esc(repNames[c.meeting_set_by]||c.meeting_set_by||'—')}</div>
+      <div>👤 <strong>Set by:</strong> ${esc(repNames[c.meeting_set_by]||c.meeting_set_by||'-')}</div>
     </div>
     <button class="btn btn-submit" style="margin-top:10px" onclick="showCompleteForm()">Mark Completed</button>
     <div class="meeting-form" id="csm-complete-form">
@@ -3277,15 +3295,15 @@ async function toggleStatusFlag(field, value) {
   // Logging with field-specific event_type and description
   let evtType, desc;
   if (field === 'replied' && value) {
-    evtType = 'replied'; desc = 'Contact replied — manual follow-up';
+    evtType = 'replied'; desc = 'Contact replied - manual follow-up';
   } else if (field === 'unsubscribed' && value) {
-    evtType = 'unsubscribed'; desc = 'Contact unsubscribed — marked DNC, sequence paused';
+    evtType = 'unsubscribed'; desc = 'Contact unsubscribed - marked DNC, sequence paused';
   } else if (field === 'not_interested' && value) {
-    evtType = 'not_interested'; desc = 'Contact not interested — sequence paused';
+    evtType = 'not_interested'; desc = 'Contact not interested - sequence paused';
   } else {
     evtType = value ? field + '_set' : field + '_cleared';
     const labels = { replied: '💬 Replied', unsubscribed: '🚫 Unsubscribed', not_interested: '👎 Not Interested' };
-    desc = (labels[field] || field) + (value ? ' — marked' : ' — cleared');
+    desc = (labels[field] || field) + (value ? ' - marked' : ' - cleared');
   }
   await db.from('activity_log').insert({
     event_type: evtType, description: desc,
@@ -3356,7 +3374,7 @@ async function _refreshContactRow(accountId) {
         <label class="toggle-switch"><input type="checkbox" id="csm-unsubscribed" onchange="toggleStatusFlag('unsubscribed',this.checked)"><span class="toggle-slider"></span></label>
       </div>
       <div class="toggle-row">
-        <div><div class="toggle-label">👎 Not Interested</div><div class="toggle-desc">Declined — do not pursue</div></div>
+        <div><div class="toggle-label">👎 Not Interested</div><div class="toggle-desc">Declined - do not pursue</div></div>
         <label class="toggle-switch"><input type="checkbox" id="csm-not_interested" onchange="toggleStatusFlag('not_interested',this.checked)"><span class="toggle-slider"></span></label>
       </div>
     </div>

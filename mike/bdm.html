@@ -1841,11 +1841,13 @@ document.getElementById('bulk-add-form')?.addEventListener('submit', async (e) =
         .eq('template_id', templateId).eq('step_number', 1).single();
       if (step1) {
         const dueDate = nextBusinessDay(new Date());
+        const bdmAlias = await getBdmAlias(bdmVal) || await getBdmAlias(rep);
         await db.from('tasks').insert({
           sequence_id: seq.id,
           contact_id: con.id,
           account_id: accountId,
           rep: rep,
+          sent_from: bdmAlias,
           step_number: 1,
           channel: step1.channel || 'linkedin',
           action: step1.instructions || 'Step 1',
@@ -2017,11 +2019,13 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
     // Create first task
     if (step1) {
       const dueDate = nextBusinessDay(new Date());
+      const bdmAlias = await getBdmAlias(bdm) || await getBdmAlias(rep);
       await db.from('tasks').insert({
         sequence_id: seq.id,
         contact_id: con.id,
         account_id: accountId,
         rep: rep,
+        sent_from: bdmAlias,
         step_number: 1,
         channel: step1.channel || 'linkedin',
         action: step1.instructions || 'Step 1',
@@ -2736,6 +2740,15 @@ function nextBusinessDay(date) {
   return addBusinessDays(date, 1);
 }
 
+// Resolve the cold email alias for a BDM — used for sent_from on tasks
+async function getBdmAlias(bdmKey) {
+  if (!bdmKey) return null;
+  try {
+    const { data } = await db.from('reps').select('default_alias').eq('id', bdmKey).single();
+    return data?.default_alias || null;
+  } catch(e) { return null; }
+}
+
 // BUG 4 FIX: Skip weekends + 11 US federal holidays for all due date calculations
 function addBusinessDays(startDate, days) {
   const holidays = _usHolidays();
@@ -2821,9 +2834,10 @@ async function bumpContactStep(contactId, accountId, currentStep, direction) {
   // 6. Delete pending tasks, insert new task
   await db.from('tasks').delete().eq('contact_id', contactId).eq('completed', false);
   if (stepTpl) {
+    const bumpAlias = await getBdmAlias(state.rep);
     await db.from('tasks').insert({
       sequence_id: seq.id, contact_id: contactId, account_id: accountId,
-      rep: state.rep, step_number: newStep,
+      rep: state.rep, sent_from: bumpAlias, step_number: newStep,
       channel: stepTpl.channel || 'linkedin',
       action: stepTpl.instructions || ('Step ' + newStep),
       due_date: nextBusinessDay(new Date()), completed: false
@@ -3016,9 +3030,10 @@ async function saveMeetingCompleted() {
       started_at: new Date().toISOString()
     }).select().single();
     if (newSeq && step1) {
+      const mtgAlias = await getBdmAlias(state.rep);
       await db.from('tasks').insert({
         sequence_id: newSeq.id, contact_id: _csmContactId, account_id: _csmAccountId,
-        rep: state.rep, step_number: 1, channel: step1.channel || 'email',
+        rep: state.rep, sent_from: mtgAlias, step_number: 1, channel: step1.channel || 'email',
         action: step1.instructions || 'Meeting Follow-Up Step 1',
         due_date: nextBusinessDay(new Date()), completed: false
       });

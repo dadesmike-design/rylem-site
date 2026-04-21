@@ -1366,14 +1366,21 @@ async function generateAICallScript(tid, contactName, contactTitle, company, cal
   const senderAlias = task?.sent_from || '';
   const senderFirstName = senderAlias.split('@')[0].split('.')[0].charAt(0).toUpperCase() + senderAlias.split('@')[0].split('.')[0].slice(1) || 'Mike';
 
-  const systemPrompt = `You are ${senderFirstName} from Rylem Staffing, a specialized staffing firm. Write a cold call talking points script following these rules:
-- Start with a specific signal or trigger (funding, hiring, growth)
-- 4-6 short bullet points, each 1-2 sentences
-- Reference the contact's role and company specifically
-- Include a clear ask/CTA ("15 minutes this week?")
-- End with a voicemail version (30 seconds max)
-- Sign off as ${senderFirstName} from Rylem Staffing`;
-  const userPrompt = `Write a cold call script for ${contactName}, ${contactTitle} at ${company}. Context: ${callAction || 'Cold call outreach'}. Sign as ${senderFirstName}.`;
+  const systemPrompt = `You are ${senderFirstName} from Rylem Staffing. Write a cold call opening script. This is for a LIVE phone call, not an email.
+
+HARD RULES:
+- Max 2 sentences before the first pause where the prospect speaks
+- NO hedging language: never use "likely", "perhaps", "I understand that", "probably"
+- NO pitch about what Rylem specializes in — the prospect doesn't care yet
+- NO referencing emails sent or LinkedIn connections — they don't remember
+- Must include one specific, verifiable, CURRENT fact about the company (recent funding, IPO, product launch, expansion)
+- End with a disqualifying question ("is that a live problem right now?") NOT a meeting request
+- Total opening script under 75 words
+- After the opening, add a brief "if they engage" branch (2-3 bullets on what to say next)
+- After that, a voicemail version (30 seconds max, same rules: no hedging, no pitch, specific hook, disqualifying question)
+
+TONE: Direct, conversational, like a sharp recruiter who actually knows their industry. Not corporate. Not scripted-sounding.`;
+  const userPrompt = `Write a cold call script for calling ${contactName}, ${contactTitle} at ${company}. Context: ${callAction || 'Cold call outreach'}. Use a current, accurate hook about ${company}. Sign as ${senderFirstName}.`;
 
   try {
     const resp = await fetch('https://rylem-ai-chat.rylem-ai.workers.dev', {

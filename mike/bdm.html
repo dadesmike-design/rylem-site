@@ -1153,10 +1153,13 @@ function buildActionBtn(task, tid) {
     const alias = task.sent_from || '';
     const aliasLabel = alias ? `<div style="font-size:10px;color:var(--blue);margin-bottom:4px">📤 From: ${esc(alias)}</div>` : '';
     let btns = aliasLabel;
-    btns += `<a class="btn btn-action email" href="https://outlook.office.com/mail/deeplink/compose?to=${to}&subject=${subj}&body=${body}" target="_blank" rel="noopener">✉️ Open Outlook</a>`;
     btns += `<button class="btn btn-ai-email" onclick="generateAIEmail('${tid}',${JSON.stringify(esc(task.contact))},${JSON.stringify(esc(task.title||''))},${JSON.stringify(esc(task.company))})">🤖 AI Email</button>`;
     if (alias) {
-      btns += `<button class="btn btn-smartlead" onclick="sendViaSmartlead('${tid}','${esc(alias)}')">🚀 Smartlead</button>`;
+      // When alias is set, Smartlead is the PRIMARY send method (sends from correct alias)
+      btns += `<button class="btn btn-smartlead" onclick="sendViaSmartlead('${tid}','${esc(alias)}')">🚀 Send from ${esc(alias.split('@')[0])}</button>`;
+      btns += `<a class="btn btn-action email" style="opacity:.6;font-size:11px" href="https://outlook.office.com/mail/deeplink/compose?to=${to}&subject=${subj}&body=${body}" target="_blank" rel="noopener" title="Opens with YOUR email, not the alias. Use Smartlead instead.">✉️ Outlook (your email)</a>`;
+    } else {
+      btns += `<a class="btn btn-action email" href="https://outlook.office.com/mail/deeplink/compose?to=${to}&subject=${subj}&body=${body}" target="_blank" rel="noopener">✉️ Open Outlook</a>`;
     }
     return btns;
   }

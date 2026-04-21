@@ -1472,11 +1472,13 @@ async function sendViaSmartlead(tid, fromAlias) {
 
   // Get task data
   const task = (state.supabaseTasks || []).find(t => t.id === tid);
+  console.log('[Smartlead] Task found:', task ? { id: task.id, email: task.email, sent_from: task.sent_from } : 'NOT FOUND');
   if (!task) { showToast('❌ Task not found', false); if (btn) { btn.disabled = false; btn.textContent = '🚀 Send'; } return; }
 
   // Check if AI email was generated, otherwise use message_body or a default
   const aiResult = taskEl?.querySelector('.ai-email-result .ai-text');
   let emailBody = aiResult ? aiResult.textContent : (task.message_body || '');
+  console.log('[Smartlead] Email body length:', emailBody.length, '| Has AI result:', !!aiResult, '| Has message_body:', !!task.message_body);
   if (!emailBody) {
     // Auto-generate AI email first, then send
     showToast('🤖 Generating email first...', true);

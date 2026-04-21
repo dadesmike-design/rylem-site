@@ -1522,6 +1522,7 @@ async function sendViaSmartlead(tid, fromAlias) {
         body: emailBody
       })
     });
+    console.log('[Smartlead] Sent payload:', { to_email: task.email, from_account_id: accountId, body_len: emailBody?.length, subject: 'Quick intro — Rylem Staffing' });
     if (!resp.ok) throw new Error('Smartlead proxy returned ' + resp.status);
     const data = await resp.json();
     if (data.error) throw new Error(data.error);

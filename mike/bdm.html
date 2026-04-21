@@ -1550,9 +1550,9 @@ async function sendViaSmartlead(tid, fromAlias) {
         body: emailBody
       })
     });
-    if (!resp.ok) throw new Error('Smartlead proxy returned ' + resp.status);
-    const data = await resp.json();
-    if (data.error) throw new Error(data.error);
+    const respData = await resp.json().catch(() => ({}));
+    if (!resp.ok) throw new Error(`Smartlead ${resp.status}: ${respData.error || respData.message || 'no detail'}`);
+    if (respData.error) throw new Error(respData.error);
     showToast('🚀 Email sent from ' + fromAlias + '!', true);
     // Mark task as done
     if (task) await handleDone(state.rep, tid, task.company);

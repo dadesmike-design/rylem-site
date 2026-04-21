@@ -1356,6 +1356,38 @@ async function generateAIEmail(tid, contactName, contactTitle, company) {
 }
 
 // ─── AI LINKEDIN MESSAGE GENERATION ──────────────────────
+// ─── CALL SCRIPT FORMATTING ──────────────────────────────
+function formatCallScriptJSON(s) {
+  const section = (label, text, color) => text ? `<div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;letter-spacing:1px;color:${color};text-transform:uppercase;margin-bottom:4px">${label}</div><div style="font-size:13px;line-height:1.7">${esc(text)}</div></div>` : '';
+  let html = '';
+  html += section('🎤 OPENER', s.opener, 'var(--accent)');
+  html += section('⏸️ WAIT', s.permission_check, 'var(--text2)');
+  html += section('🪝 HOOK', s.hook, 'var(--yellow)');
+  html += section('💬 PITCH', s.pitch, 'var(--text)');
+  html += section('❓ DISQUALIFYING QUESTION', s.disqualifying_question, 'var(--green)');
+  html += section('✅ IF YES', s.if_yes, 'var(--green)');
+  html += section('🙅 IF NOT INTERESTED', s.if_not_interested, 'var(--text2)');
+  html += section('📧 IF SEND INFO', s.if_send_info, 'var(--text2)');
+  html += section('📞 VOICEMAIL', s.if_voicemail, 'var(--purple)');
+  html += section('📅 MEETING ASK', s.meeting_ask, 'var(--green)');
+  return html;
+}
+
+function formatCallScriptPlain(s) {
+  const lines = [];
+  if (s.opener) lines.push('OPENER: ' + s.opener);
+  if (s.permission_check) lines.push('WAIT: ' + s.permission_check);
+  if (s.hook) lines.push('HOOK: ' + s.hook);
+  if (s.pitch) lines.push('PITCH: ' + s.pitch);
+  if (s.disqualifying_question) lines.push('QUESTION: ' + s.disqualifying_question);
+  if (s.if_yes) lines.push('\nIF YES: ' + s.if_yes);
+  if (s.if_not_interested) lines.push('IF NOT INTERESTED: ' + s.if_not_interested);
+  if (s.if_send_info) lines.push('IF SEND INFO: ' + s.if_send_info);
+  if (s.if_voicemail) lines.push('\nVOICEMAIL: ' + s.if_voicemail);
+  if (s.meeting_ask) lines.push('MEETING ASK: ' + s.meeting_ask);
+  return lines.join('\n');
+}
+
 async function generateAICallScript(tid, contactName, contactTitle, company, callAction) {
   const btns = document.querySelectorAll(`#ta_${tid} .btn-ai-email`);
   const btn = btns[0];
@@ -1366,7 +1398,7 @@ async function generateAICallScript(tid, contactName, contactTitle, company, cal
   const senderAlias = task?.sent_from || '';
   const senderFirstName = senderAlias.split('@')[0].split('.')[0].charAt(0).toUpperCase() + senderAlias.split('@')[0].split('.')[0].slice(1) || 'Mike';
 
-  const systemPrompt = `You generate cold call scripts for Rylem Staffing SDRs calling hiring managers at tech companies. Compliance with the rules below is not optional — a script that violates any rule is a failed generation.
+  const systemPrompt = `You generate cold call scripts for Rylem Staffing SDRs calling hiring managers at tech companies. You must produce output that matches the JSON schema provided. Compliance with the rules below is not optional — a script that violates any rule is a failed generation.
 
 # WHO WE CALL
 Rylem sells contract and staff augmentation placements directly to HIRING MANAGERS in two functions:
@@ -1378,27 +1410,39 @@ We DO NOT call, reference, or position to: HR, People Ops, Talent Acquisition, H
 # RULES (enforced — violations = regenerate)
 1. Opener is MAX 15 words and MUST include a permission-based ask. Format: "Hi [Name], [rep] with Rylem — I know I'm calling cold, got 30 seconds?"
 2. FORBIDDEN WORDS AND PHRASES: "obviously", "likely", "perhaps", "I understand", "I hope", "touching base", "circling back", "reaching out", "checking in", "partner with", "synergy", "solutions", "value proposition", "I wanted to", "just wanted to", "quickly", "exciting opportunity", "world-class", "best-in-class", "talent", "talent acquisition", "TA team", "recruiting team", "HR", "People team"
-3. Hook MUST cite a specific fact. If no specific fact is provided, use a generic hook tied to the prospect's function (eng: stalled roadmap/on-call burnout; finance: month-end/audit/close cycles). Do NOT invent company-specific facts from training data.
-4. Pitch body is MAX 2 sentences. No bullet-point feature lists. Speak to operational pain, not "hiring" as a function.
+3. Hook MUST cite a specific fact from the signals_payload provided. If signals_payload.recent_events is empty, use a generic hook tied to the prospect's function (eng: stalled roadmap/on-call burnout; finance: month-end/audit/close cycles). Do NOT invent company-specific facts from training data. You have no knowledge of this company outside what is in signals_payload.
+4. Pitch body is MAX 2 sentences. No bullet-point feature lists. Speak to the hiring manager's operational pain, not to "hiring" as a function.
 5. Call MUST end with a disqualifying question, NOT a meeting request. Format: "Is that a live problem right now, or are you covered?" Meeting ask only in the if_yes branch AFTER prospect confirms pain.
 6. Voice: contractions, fragments, direct. Write how people actually talk on the phone. No corporate voice. No adverbs unless necessary.
 7. Total live-call script (opener + hook + pitch + disqualifying question) MUST be under 75 words.
 8. Voicemail MUST be under 25 seconds spoken (~60 words). Voicemail ends with callback number placeholder [CALLBACK_NUMBER], never a meeting ask.
 
 # OUTPUT FORMAT
-Return plain text with this structure:
-LIVE CALL:
-[script]
+Respond with ONLY valid JSON matching this schema. No preamble. No markdown fences. No commentary.
+{
+  "opener": "Hi [Name], [rep] with Rylem — I know I'm calling cold, got 30 seconds?",
+  "permission_check": "[pause and wait for yes]",
+  "hook": "Reason I called — [specific fact from signals_payload]",
+  "pitch": "[max 2 sentences, operational pain]",
+  "disqualifying_question": "Is that a live problem, or are you covered?",
+  "if_yes": "[meeting ask with specific times]",
+  "if_not_interested": "[brief, respectful, asks why for calibration]",
+  "if_send_info": "[asks what specifically would be useful, no generic deck]",
+  "if_voicemail": "[voicemail script under 60 words, ends with [CALLBACK_NUMBER]]",
+  "meeting_ask": "[specific day/time options]"
+}`;
+  const userPrompt = `Generate a cold call script for this prospect:
 
-IF THEY ENGAGE:
-[2-3 bullet points on what to say next]
+signals_payload:
+{
+  "company": "${company}",
+  "contact": "${contactName}",
+  "title": "${contactTitle}",
+  "rep_name": "${senderFirstName}",
+  "call_context": "${callAction || 'Cold call outreach'}"
+}
 
-IF YES (they confirm pain):
-[meeting ask — "Worth 15 minutes this Thursday or Friday?"]
-
-VOICEMAIL:
-[voicemail script]`;
-  const userPrompt = `Write a cold call script for calling ${contactName}, ${contactTitle} at ${company}. Context: ${callAction || 'Cold call outreach'}. Rep name: ${senderFirstName}.`; 
+Respond with ONLY valid JSON. No preamble. No markdown fences.`; 
 
   try {
     const resp = await fetch('https://rylem-ai-chat.rylem-ai.workers.dev', {
@@ -1411,6 +1455,15 @@ VOICEMAIL:
     const scriptText = data.message || data.text || '';
     if (!scriptText) throw new Error('Empty response from AI');
 
+    // Try to parse as JSON (new format) — fall back to plain text
+    let scriptObj = null;
+    try {
+      const cleaned = scriptText.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim();
+      scriptObj = JSON.parse(cleaned);
+    } catch(e) {
+      // Not JSON, use as plain text
+    }
+
     // Show in the message area
     const msgWrap = document.getElementById('msg_' + tid);
     const toggle = document.getElementById('toggle_' + tid);
@@ -1418,11 +1471,17 @@ VOICEMAIL:
       msgWrap.classList.add('open');
       if (toggle) toggle.classList.add('open');
       const textDiv = msgWrap.querySelector('.task-message-text');
-      if (textDiv) textDiv.textContent = scriptText;
+      if (textDiv) {
+        if (scriptObj) {
+          textDiv.innerHTML = formatCallScriptJSON(scriptObj);
+        } else {
+          textDiv.textContent = scriptText;
+        }
+      }
     }
-    // Store on dataset
+    // Store on dataset (store raw text for copy)
     const taskActionEl = document.getElementById('ta_' + tid);
-    if (taskActionEl) taskActionEl.dataset.generatedCallScript = scriptText;
+    if (taskActionEl) taskActionEl.dataset.generatedCallScript = scriptObj ? formatCallScriptPlain(scriptObj) : scriptText;
 
     showToast('🤖 Call script generated!', true);
     return scriptText;

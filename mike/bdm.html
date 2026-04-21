@@ -1278,7 +1278,13 @@ async function generateAIEmail(tid, contactName, contactTitle, company) {
 - Reference the prospect's role and company specifically
 - Sign off as: ${senderFirstName} from Rylem Staffing - always use this exact first name, never make up a different name`;
 
-  const userPrompt = `Write a personalized cold outreach email to ${contactName}, ${contactTitle} at ${company}. You are ${senderFirstName} from Rylem Staffing. Use signal-based outreach - reference a plausible hiring signal or pain point for their role/industry. Sign off as ${senderFirstName}.`;
+  // Build signal context from task's account data
+  const signalCtx = [];
+  if (task?.trigger_event) signalCtx.push(task.trigger_event);
+  if (task?.open_roles_count) signalCtx.push(`${task.open_roles_count} open roles`);
+  const signalText = signalCtx.length ? signalCtx.join('. ') : '';
+
+  const userPrompt = `Write a personalized cold outreach email to ${contactName}, ${contactTitle} at ${company}. You are ${senderFirstName} from Rylem Staffing. ${signalText ? 'Use this signal: ' + signalText + '. ' : ''}Reference a plausible hiring signal or pain point for their role/industry. Sign off as ${senderFirstName}.`;
 
   try {
     const resp = await fetch('https://rylem-ai-chat.rylem-ai.workers.dev', {
@@ -1448,6 +1454,19 @@ Respond with ONLY valid JSON matching this schema. No preamble. No markdown fenc
   "if_voicemail": "[voicemail script under 60 words, ends with [CALLBACK_NUMBER]]",
   "meeting_ask": "[specific day/time options]"
 }`;
+  // Build signals_payload from account data on the task
+  const recentEvents = [];
+  if (task?.trigger_event) {
+    recentEvents.push({ date: task.trigger_date || '', type: 'trigger', summary: task.trigger_event });
+  }
+  const openRolesStale = [];
+  if (task?.open_roles_count) {
+    openRolesStale.push(`${task.open_roles_count} open roles`);
+  }
+  // Determine function based on contact title
+  const titleLower = (contactTitle || '').toLowerCase();
+  const func = (titleLower.includes('cfo') || titleLower.includes('finance') || titleLower.includes('controller') || titleLower.includes('accounting') || titleLower.includes('fp&a')) ? 'finance' : 'tech';
+
   const userPrompt = `Generate a cold call script for this prospect:
 
 signals_payload:
@@ -1455,7 +1474,10 @@ signals_payload:
   "company": "${company}",
   "contact": "${contactName}",
   "title": "${contactTitle}",
+  "function": "${func}",
   "rep_name": "${senderFirstName}",
+  "recent_events": ${JSON.stringify(recentEvents)},
+  "open_roles_stale": ${JSON.stringify(openRolesStale)},
   "call_context": "${callAction || 'Cold call outreach'}"
 }
 
@@ -2357,7 +2379,7 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
 async function fetchRepTasks(rep) {
   const { data: tasks, error } = await db
     .from('tasks')
-    .select('*, contacts(full_name, title, email, phone, mobile, linkedin_url, status), accounts(company, do_not_contact)')
+    .select('*, contacts(full_name, title, email, phone, mobile, linkedin_url, status), accounts(company, do_not_contact, trigger_event, trigger_date, open_roles_count)')
     .eq('rep', rep)
     .eq('completed', false)
     .lte('due_date', localDateStr())
@@ -2387,6 +2409,9 @@ async function fetchRepTasks(rep) {
     action: t.action || '',
     message_body: t.message_body || '',
     sent_from: t.sent_from || '',
+    trigger_event: t.accounts?.trigger_event || '',
+    trigger_date: t.accounts?.trigger_date || '',
+    open_roles_count: t.accounts?.open_roles_count || '',
     priority: 'normal',
     lead_id: t.account_id
   }));

@@ -1339,9 +1339,11 @@ async function generateAIEmail(tid, contactName, contactTitle, company) {
     }
 
     showToast('🤖 AI email generated!', true);
+    return emailText; // Return the generated text so callers can use it directly
   } catch(err) {
     console.error('AI email error:', err);
     showToast('❌ AI email failed: ' + (err.message || 'Unknown error'));
+    return null; // Return null on failure
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = '🤖 AI Email'; }
   }
@@ -1505,11 +1507,15 @@ async function sendViaSmartlead(tid, fromAlias) {
     // Auto-generate AI email first, then send
     showToast('🤖 Generating email first...', true);
     try {
-      await generateAIEmail(tid, task.contact, task.title || '', task.company);
-      // Wait a moment for the AI result to render
-      await new Promise(r => setTimeout(r, 500));
-      const newAiResult = taskEl?.querySelector('.ai-email-result .ai-text');
-      emailBody = newAiResult ? newAiResult.textContent : '';
+      const generatedText = await generateAIEmail(tid, task.contact, task.title || '', task.company);
+      if (generatedText) {
+        emailBody = generatedText;
+      } else {
+        // Fallback: try reading from DOM if generateAIEmail didn't return text
+        await new Promise(r => setTimeout(r, 500));
+        const newAiResult = taskEl?.querySelector('.ai-email-result .ai-text');
+        emailBody = newAiResult ? newAiResult.textContent : '';
+      }
       if (!emailBody) {
         showToast('❌ Could not generate email. Try AI Email first.', false);
         if (btn) { btn.disabled = false; btn.textContent = '🚀 Send'; }

@@ -1446,15 +1446,30 @@ async function sendViaSmartlead(tid, fromAlias) {
 
   // Get task data
   const task = state.tasks.find(t => t.id === tid);
-  if (!task) { showToast('❌ Task not found', false); return; }
+  if (!task) { showToast('❌ Task not found', false); if (btn) { btn.disabled = false; btn.textContent = '🚀 Send'; } return; }
 
-  // Check if AI email was generated
+  // Check if AI email was generated, otherwise use message_body or a default
   const aiResult = taskEl?.querySelector('.ai-email-result .ai-text');
-  const emailBody = aiResult ? aiResult.textContent : (task.message_body || '');
+  let emailBody = aiResult ? aiResult.textContent : (task.message_body || '');
   if (!emailBody) {
-    showToast('❌ Generate an AI email first', false);
-    if (btn) { btn.disabled = false; btn.textContent = '🚀 Smartlead'; }
-    return;
+    // Auto-generate AI email first, then send
+    showToast('🤖 Generating email first...', true);
+    try {
+      await generateAIEmail(tid, task.contact, task.title || '', task.company);
+      // Wait a moment for the AI result to render
+      await new Promise(r => setTimeout(r, 500));
+      const newAiResult = taskEl?.querySelector('.ai-email-result .ai-text');
+      emailBody = newAiResult ? newAiResult.textContent : '';
+      if (!emailBody) {
+        showToast('❌ Could not generate email. Try AI Email first.', false);
+        if (btn) { btn.disabled = false; btn.textContent = '🚀 Send'; }
+        return;
+      }
+    } catch(e) {
+      showToast('❌ AI generation failed. Try AI Email button first.', false);
+      if (btn) { btn.disabled = false; btn.textContent = '🚀 Send'; }
+      return;
+    }
   }
 
   const accountId = SMARTLEAD_ALIAS_MAP[fromAlias.toLowerCase()];

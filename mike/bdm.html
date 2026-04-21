@@ -801,7 +801,16 @@ Smartsheet, Bob Lee, CISO, bob@smartsheet.com"></textarea>
 <div id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="auth-check.js?v=20260421b"></script>
+<script src="auth-check.js?v=20260421c"></script>
+<script>
+// Global error catcher for debugging
+window.addEventListener('error', function(e) {
+  console.error('[GLOBAL ERROR]', e.message, e.filename, e.lineno);
+});
+window.addEventListener('unhandledrejection', function(e) {
+  console.error('[UNHANDLED PROMISE]', e.reason);
+});
+</script>
 <script>
 const db = window.rylemDb;
 
@@ -1247,6 +1256,7 @@ function copyText(text, btn) {
 
 // ─── AI EMAIL GENERATION ─────────────────────────────────
 async function generateAIEmail(tid, contactName, contactTitle, company) {
+  console.log('[AI Email] Called with:', { tid, contactName, contactTitle, company });
   // Find the button that triggered this
   const btns = document.querySelectorAll(`#ta_${tid} .btn-ai-email`);
   const btn = btns[0];

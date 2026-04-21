@@ -1472,7 +1472,7 @@ async function sendViaSmartlead(tid, fromAlias) {
 
   // Get task data
   const task = (state.supabaseTasks || []).find(t => t.id === tid);
-  console.log('[Smartlead] Task found:', task ? { id: task.id, email: task.email, sent_from: task.sent_from } : 'NOT FOUND');
+  console.log('[Smartlead] Task found:', JSON.stringify(task).substring(0, 300));
   if (!task) { showToast('❌ Task not found', false); if (btn) { btn.disabled = false; btn.textContent = '🚀 Send'; } return; }
 
   // Check if AI email was generated, otherwise use message_body or a default

@@ -1416,7 +1416,7 @@ We DO NOT call, reference, or position to: HR, People Ops, Talent Acquisition, H
 # RULES (enforced — violations = regenerate)
 1. Opener is MAX 15 words and MUST include a permission-based ask. Format: "Hi [Name], [rep] with Rylem — I know I'm calling cold, got 30 seconds?"
 2. FORBIDDEN WORDS AND PHRASES: "obviously", "likely", "perhaps", "I understand", "I hope", "touching base", "circling back", "reaching out", "checking in", "partner with", "synergy", "solutions", "value proposition", "I wanted to", "just wanted to", "quickly", "exciting opportunity", "world-class", "best-in-class", "talent", "talent acquisition", "TA team", "recruiting team", "HR", "People team"
-3. The hook MUST cite a specific fact from signals_payload.recent_events OR signals_payload.open_roles_stale. If BOTH are empty, you MUST use ONLY a function-level generic hook from the approved list below. You are FORBIDDEN from:
+3. The hook MUST cite a specific fact from signals_payload.recent_events OR signals_payload.open_roles_stale. recent_events MUST be filtered to events with date within the last 90 days — if the provided events are older than 90 days, IGNORE them in the hook (old events are background context only, not hook material). If BOTH recent_events (within 90 days) and open_roles_stale are empty, you MUST use ONLY a function-level generic hook from the approved list below. You are FORBIDDEN from:
    - Referencing LinkedIn posts, tweets, podcasts, interviews, articles, or any other content not explicitly in signals_payload
    - Referencing funding, acquisitions, product launches, or news not explicitly in signals_payload
    - Using the phrase "saw your post", "saw your announcement", "read that", "heard you on", or similar
@@ -1465,10 +1465,13 @@ Respond with ONLY valid JSON matching this schema. No preamble. No markdown fenc
   else if (titleLower.includes('director') || titleLower.includes('head')) seniority = 'director';
   else if (titleLower.includes('cfo') || titleLower.includes('cto') || titleLower.includes('coo')) seniority = 'c_suite';
 
-  // Recent events from trigger_event
+  // Recent events from trigger_event — only include events within 90 days
   const recentEvents = [];
+  const ninetyDaysAgo = new Date(); ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
   if (task?.trigger_event) {
-    recentEvents.push({ date: task.trigger_date || '', type: 'trigger', summary: task.trigger_event, confidence: 'high' });
+    const evtDate = task.trigger_date ? new Date(task.trigger_date) : null;
+    const isRecent = !evtDate || evtDate >= ninetyDaysAgo;
+    recentEvents.push({ date: task.trigger_date || '', type: 'trigger', summary: task.trigger_event, confidence: 'high', _within_90d: isRecent });
   }
 
   // Open roles

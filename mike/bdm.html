@@ -1245,6 +1245,7 @@ async function generateAIEmail(tid, contactName, contactTitle, company) {
   const btns = document.querySelectorAll(`#ta_${tid} .btn-ai-email`);
   const btn = btns[0];
   if (btn) { btn.disabled = true; btn.textContent = '🤖 Generating...'; }
+  showToast('🤖 Generating email...', true);
 
   const systemPrompt = `You are a staffing recruiter at Rylem, a specialized staffing firm. Write signal-based cold outreach emails following these rules:
 - Lead with a PROBLEM or SIGNAL (hiring pain, growth, turnover) — never a generic intro
@@ -2322,6 +2323,12 @@ async function loadMeetingInsights(container) {
       .ilike('event_type', '%meeting%')
       .gte('created_at', weekStartStr + 'T00:00:00');
 
+    // ALSO count meetings from contacts table (fallback if activity_log insert failed)
+    const { data: meetingContacts } = await db.from('contacts')
+      .select('meeting_set_by, meeting_set_date')
+      .not('meeting_set_date', 'is', null)
+      .gte('meeting_set_date', weekStartStr);
+
     // Query leads added this week
     const { data: leadsAdded } = await db.from('activity_log')
       .select('id')
@@ -2331,8 +2338,13 @@ async function loadMeetingInsights(container) {
     // Get active reps
     const { data: activeReps } = await db.from('reps').select('rep_key, name');
 
-    const meetings = meetingEvents || [];
-    const meetingCount = meetings.filter(e => e.event_type === 'meeting_set' || e.event_type === 'meeting_completed').length;
+    // Merge activity_log meetings + contacts meetings (dedup)
+    const logMeetings = (meetingEvents || []).filter(e => e.event_type === 'meeting_set' || e.event_type === 'meeting_completed');
+    const contactMeetings = (meetingContacts || []).map(c => ({ rep: c.meeting_set_by, created_at: c.meeting_set_date, event_type: 'meeting_set' }));
+    const logReps = new Set(logMeetings.map(m => m.rep + '|' + String(m.created_at).slice(0,10)));
+    const extraContactMeetings = contactMeetings.filter(c => !logReps.has((c.rep||'') + '|' + String(c.created_at||'').slice(0,10)));
+    const allMeetings = [...logMeetings, ...extraContactMeetings];
+    const meetingCount = allMeetings.length;
     const leadsCount = (leadsAdded || []).length;
     const conversionRate = leadsCount > 0 ? Math.round((meetingCount / leadsCount) * 100) : 0;
     const repsCount = (activeReps || []).length;
@@ -2340,7 +2352,7 @@ async function loadMeetingInsights(container) {
     // Per-rep breakdown
     const repMap = {};
     (activeReps || []).forEach(r => { repMap[r.rep_key] = { name: r.name, count: 0 }; });
-    meetings.forEach(m => {
+    allMeetings.forEach(m => {
       if (repMap[m.rep]) repMap[m.rep].count++;
       else repMap[m.rep] = { name: m.rep, count: 1 };
     });
@@ -3000,12 +3012,16 @@ function showCompleteForm() {
 async function saveMeetingSet() {
   const dt = document.getElementById('csm-meeting-date').value;
   if (!dt) { showToast('Date is required'); return; }
-  await db.from('contacts').update({ meeting_set_date: dt, meeting_set_by: state.rep }).eq('id', _csmContactId);
-  await db.from('activity_log').insert({
-    event_type: 'meeting_set',
-    description: `Meeting set for ${dt}`,
-    contact_id: _csmContactId, account_id: _csmAccountId, rep: state.rep
-  });
+  try {
+    await db.from('contacts').update({ meeting_set_date: dt, meeting_set_by: state.rep }).eq('id', _csmContactId);
+  } catch(e) { console.error('contact update error:', e); }
+  try {
+    await db.from('activity_log').insert({
+      event_type: 'meeting_set',
+      description: `Meeting set for ${dt}`,
+      contact_id: _csmContactId, account_id: _csmAccountId, rep: state.rep
+    });
+  } catch(e) { console.error('activity_log insert error:', e); }
   showToast('📅 Meeting set!', true);
   await _refreshContactRow(_csmAccountId);
   openStatusModal(_csmContactId, _csmAccountId); // refresh modal

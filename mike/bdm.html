@@ -1472,15 +1472,23 @@ function getDefaultAlias(rep) {
 }
 
 async function sendViaSmartlead(tid, fromAlias) {
-  
+  console.log('[sendViaSmartlead] start', { tid, fromAlias });
+  if (!tid) { console.error('[sendViaSmartlead] no tid'); return; }
+  if (!fromAlias) { console.error('[sendViaSmartlead] no fromAlias'); return; }
+  if (!state.supabaseTasks?.length) {
+    console.error('[sendViaSmartlead] state.supabaseTasks not loaded');
+    showToast('❌ Tasks not loaded yet, refresh the page', false);
+    return;
+  }
+
   const taskEl = document.getElementById('ta_' + tid);
   const btn = taskEl?.querySelector('.btn-smartlead');
   if (btn) { btn.disabled = true; btn.textContent = '🚀 Sending...'; }
 
   // Get task data
   const task = (state.supabaseTasks || []).find(t => t.id === tid);
-  
-  if (!task) { showToast('❌ Task not found', false); if (btn) { btn.disabled = false; btn.textContent = '🚀 Send'; } return; }
+  console.log('[sendViaSmartlead] task resolved', { id: task?.id, email: task?.email, sent_from: task?.sent_from });
+  if (!task) { console.error('[sendViaSmartlead] task not found for tid:', tid); showToast('❌ Task not found', false); if (btn) { btn.disabled = false; btn.textContent = '🚀 Send'; } return; }
 
   // Get email - try task.email first, then extract from DOM if missing
   let toEmail = task.email || '';
@@ -1537,6 +1545,7 @@ async function sendViaSmartlead(tid, fromAlias) {
 
   // Use the Cloudflare worker as proxy to avoid exposing API key
   try {
+    console.log('[sendViaSmartlead] POSTing to worker', { mode: 'smartlead_send', accountId, toEmail, bodyLength: emailBody?.length });
     const resp = await fetch('https://rylem-ai-chat.rylem-ai.workers.dev', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1550,6 +1559,7 @@ async function sendViaSmartlead(tid, fromAlias) {
         body: emailBody
       })
     });
+    console.log('[sendViaSmartlead] worker response', { status: resp.status, ok: resp.ok });
     const respData = await resp.json().catch(() => ({}));
     if (!resp.ok) throw new Error(`Smartlead ${resp.status}: ${respData.error || respData.message || 'no detail'}`);
     if (respData.error) throw new Error(respData.error);

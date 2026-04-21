@@ -1338,6 +1338,10 @@ async function generateAIEmail(tid, contactName, contactTitle, company) {
       }
     }
 
+    // Store on task element dataset so sendViaSmartlead can find it reliably
+    const taskActionEl = document.getElementById('ta_' + tid);
+    if (taskActionEl) taskActionEl.dataset.generatedEmail = emailText;
+    
     showToast('🤖 AI email generated!', true);
     return emailText; // Return the generated text so callers can use it directly
   } catch(err) {
@@ -1507,10 +1511,18 @@ async function sendViaSmartlead(tid, fromAlias) {
     } catch(e) { console.error('[Smartlead] Contact lookup failed:', e); }
   }
 
-  // Check for email body — only send what's already visible, never auto-generate
-  const aiResult = taskEl?.querySelector('.ai-email-result .ai-text');
-  let emailBody = aiResult ? aiResult.textContent : (task.message_body || '');
-  console.log('[sendViaSmartlead] emailBody length:', emailBody?.length, { fromAI: !!aiResult, fromMessageBody: !aiResult && !!task.message_body });
+  // Check for email body — read from dataset (most reliable), then DOM, then task.message_body
+  let emailBody =
+    taskEl?.dataset.generatedEmail ||
+    document.getElementById('msg_' + tid)?.querySelector('.ai-email-result .ai-text')?.textContent ||
+    task.message_body ||
+    '';
+  console.log('[sendViaSmartlead] emailBody sources:', {
+    fromDataset: !!taskEl?.dataset.generatedEmail,
+    fromDom: !!document.getElementById('msg_' + tid)?.querySelector('.ai-email-result .ai-text'),
+    fromTask: !!task.message_body,
+    finalLength: emailBody.length
+  });
   
   if (!emailBody) {
     console.error('[sendViaSmartlead] no email body available', { tid });

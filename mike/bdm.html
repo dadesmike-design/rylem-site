@@ -1404,7 +1404,9 @@ async function generateAICallScript(tid, contactName, contactTitle, company, cal
   const senderAlias = task?.sent_from || '';
   const senderFirstName = senderAlias.split('@')[0].split('.')[0].charAt(0).toUpperCase() + senderAlias.split('@')[0].split('.')[0].slice(1) || 'Mike';
 
-  const systemPrompt = `You generate cold call scripts for Rylem Staffing SDRs calling hiring managers at tech companies. You must produce output that matches the JSON schema provided. Compliance with the rules below is not optional — a script that violates any rule is a failed generation.
+  const systemPrompt = `CRITICAL: You MUST respond with EXACTLY the JSON schema below. No other format. No wrapper objects. No cold_call_script key. No markdown fences. Just the raw JSON object with these exact keys: opener, permission_check, hook, pitch, disqualifying_question, if_yes, if_not_interested, if_send_info, if_voicemail, meeting_ask.
+
+You generate cold call scripts for Rylem Staffing SDRs calling hiring managers at tech companies. You must produce output that matches the JSON schema provided. Compliance with the rules below is not optional — a script that violates any rule is a failed generation.
 
 # WHO WE CALL
 Rylem sells contract and staff augmentation placements directly to HIRING MANAGERS in two functions:
@@ -1556,8 +1558,48 @@ Respond with ONLY valid JSON. No preamble. No markdown fences.`;
     try {
       const cleaned = scriptText.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim();
       scriptObj = JSON.parse(cleaned);
+      // If model wrapped in an outer key, unwrap
+      if (scriptObj.cold_call_script) scriptObj = scriptObj.cold_call_script;
+      if (scriptObj.call_script) scriptObj = scriptObj.call_script;
     } catch(e) {
       // Not JSON, use as plain text
+    }
+
+    // Validate required fields and reject non-compliant output
+    if (scriptObj) {
+      const requiredFields = ['opener', 'hook', 'disqualifying_question', 'if_voicemail'];
+      const missing = requiredFields.filter(f => !scriptObj[f] || (typeof scriptObj[f] === 'string' && scriptObj[f].trim() === ''));
+      if (missing.length > 0) {
+        console.warn('[generateAICallScript] Missing required fields:', missing, 'Full output:', scriptObj);
+        // Map alternative field names the model might use
+        const fieldMap = {
+          'opening': 'opener', 'open': 'opener',
+          'value_proposition': 'pitch', 'value_prop': 'pitch',
+          'problem_qualification': null, // should not exist per rules
+          'close': 'disqualifying_question',
+          'objection_handling.response_no_need': 'if_not_interested',
+          'objection_handling.response_busy': null
+        };
+        for (const [from, to] of Object.entries(fieldMap)) {
+          if (to && scriptObj[from] && !scriptObj[to]) {
+            scriptObj[to] = scriptObj[from];
+          }
+        }
+        // Re-check after mapping
+        const stillMissing = requiredFields.filter(f => !scriptObj[f] || (typeof scriptObj[f] === 'string' && scriptObj[f].trim() === ''));
+        if (stillMissing.includes('if_voicemail')) {
+          scriptObj.if_voicemail = `Hi ${contactName.split(' ')[0]}, ${senderFirstName} with Rylem. ${scriptObj.hook || 'Reason for my call — we help teams like yours fill open seats fast.'} Give me a call back at [CALLBACK_NUMBER].`;
+        }
+        if (stillMissing.includes('opener')) {
+          scriptObj.opener = `Hi ${contactName.split(' ')[0]}, ${senderFirstName} with Rylem — I know I'm calling cold, got 30 seconds?`;
+        }
+        if (stillMissing.includes('disqualifying_question')) {
+          scriptObj.disqualifying_question = 'Is that a live problem right now, or are you covered?';
+        }
+        if (stillMissing.includes('hook')) {
+          scriptObj.hook = `Reason I called — the ${func === 'finance' ? 'controllers' : 'engineering managers'} we work with have one or two seats stuck open while the roadmap keeps moving.`;
+        }
+      }
     }
 
     // Show in the message area

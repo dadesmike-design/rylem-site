@@ -1454,32 +1454,84 @@ Respond with ONLY valid JSON matching this schema. No preamble. No markdown fenc
   "if_voicemail": "[voicemail script under 60 words, ends with [CALLBACK_NUMBER]]",
   "meeting_ask": "[specific day/time options]"
 }`;
-  // Build signals_payload from account data on the task
-  const recentEvents = [];
-  if (task?.trigger_event) {
-    recentEvents.push({ date: task.trigger_date || '', type: 'trigger', summary: task.trigger_event });
-  }
-  const openRolesStale = [];
-  if (task?.open_roles_count) {
-    openRolesStale.push(`${task.open_roles_count} open roles`);
-  }
-  // Determine function based on contact title
+  // Build full signals_payload from DB data
+  // Determine function from contact title
   const titleLower = (contactTitle || '').toLowerCase();
   const func = (titleLower.includes('cfo') || titleLower.includes('finance') || titleLower.includes('controller') || titleLower.includes('accounting') || titleLower.includes('fp&a')) ? 'finance' : 'tech';
+
+  // Seniority from title
+  let seniority = 'ic';
+  if (titleLower.includes('vp') || titleLower.includes('vice president')) seniority = 'vp';
+  else if (titleLower.includes('director') || titleLower.includes('head')) seniority = 'director';
+  else if (titleLower.includes('cfo') || titleLower.includes('cto') || titleLower.includes('coo')) seniority = 'c_suite';
+
+  // Recent events from trigger_event
+  const recentEvents = [];
+  if (task?.trigger_event) {
+    recentEvents.push({ date: task.trigger_date || '', type: 'trigger', summary: task.trigger_event, confidence: 'high' });
+  }
+
+  // Open roles
+  const openRolesStale = [];
+  if (task?.open_roles_count) {
+    openRolesStale.push({ title: `${task.open_roles_count} open roles`, days_open: null, location: '', source_url: '' });
+  }
+
+  // Prior touches from completed tasks in same sequence
+  const priorTouches = [];
+  if (task?.sequence_id) {
+    const seqTasks = (state.supabaseTasks || []).filter(t => t.sequence_id === task.sequence_id && t.id !== tid);
+    for (const st of seqTasks) {
+      if (st.completed) {
+        priorTouches.push({
+          step: st.step_number,
+          channel: st.channel || st.type,
+          action: st.action || '',
+          date: st.completed_at || '',
+          sent_from: st.sent_from || ''
+        });
+      }
+    }
+    priorTouches.sort((a,b) => a.step - b.step);
+  }
+
+  // Account status → land_or_expand
+  const acctStatus = task?.account_status || '';
+  const landOrExpand = (acctStatus === 'client' || acctStatus === 'active') ? 'expand' : 'cold';
+
+  const payload = {
+    company: {
+      name: company,
+      domain: task?.domain || '',
+      function_segment: func,
+      hq_city: task?.hq_city || '',
+      stage: task?.trigger_event?.toLowerCase().includes('ipo') ? 'public' : '',
+      land_or_expand: landOrExpand
+    },
+    contact: {
+      first_name: contactName.split(' ')[0],
+      last_name: contactName.split(' ').slice(1).join(' '),
+      title: contactTitle,
+      title_normalized: func === 'finance' ? contactTitle.toLowerCase().replace(/\s+/g,'_') : contactTitle.toLowerCase().replace(/\s+/g,'_'),
+      function: func,
+      seniority: seniority
+    },
+    recent_events: recentEvents,
+    open_roles_stale: openRolesStale,
+    sequence_context: {
+      prior_touches: priorTouches,
+      current_step: task?.step || 4,
+      current_step_type: 'call'
+    },
+    rep: {
+      name: senderFirstName
+    }
+  };
 
   const userPrompt = `Generate a cold call script for this prospect:
 
 signals_payload:
-{
-  "company": "${company}",
-  "contact": "${contactName}",
-  "title": "${contactTitle}",
-  "function": "${func}",
-  "rep_name": "${senderFirstName}",
-  "recent_events": ${JSON.stringify(recentEvents)},
-  "open_roles_stale": ${JSON.stringify(openRolesStale)},
-  "call_context": "${callAction || 'Cold call outreach'}"
-}
+${JSON.stringify(payload, null, 2)}
 
 Respond with ONLY valid JSON. No preamble. No markdown fences.`; 
 
@@ -2379,7 +2431,7 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
 async function fetchRepTasks(rep) {
   const { data: tasks, error } = await db
     .from('tasks')
-    .select('*, contacts(full_name, title, email, phone, mobile, linkedin_url, status), accounts(company, do_not_contact, trigger_event, trigger_date, open_roles_count)')
+    .select('*, contacts(full_name, title, email, phone, mobile, linkedin_url, status), accounts(company, do_not_contact, trigger_event, trigger_date, open_roles_count, domain, hq_city, status)')
     .eq('rep', rep)
     .eq('completed', false)
     .lte('due_date', localDateStr())
@@ -2409,9 +2461,14 @@ async function fetchRepTasks(rep) {
     action: t.action || '',
     message_body: t.message_body || '',
     sent_from: t.sent_from || '',
+    sequence_id: t.sequence_id || '',
+    completed_at: t.completed_at || '',
     trigger_event: t.accounts?.trigger_event || '',
     trigger_date: t.accounts?.trigger_date || '',
     open_roles_count: t.accounts?.open_roles_count || '',
+    domain: t.accounts?.domain || '',
+    hq_city: t.accounts?.hq_city || '',
+    account_status: t.accounts?.status || '',
     priority: 'normal',
     lead_id: t.account_id
   }));

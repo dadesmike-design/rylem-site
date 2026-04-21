@@ -1155,7 +1155,7 @@ function buildActionBtn(task, tid) {
       const q = encodeURIComponent((task.contact || '') + ' ' + (task.company || ''));
       btns += `<a class="btn btn-action linkedin" href="https://www.linkedin.com/search/results/people/?keywords=${q}" target="_blank" rel="noopener">🔍 Search LinkedIn</a>`;
     }
-    btns += `<button class="btn btn-ai-linkedin" onclick="generateAILinkedIn('${tid}',${JSON.stringify(esc(task.contact))},${JSON.stringify(esc(task.title||''))},${JSON.stringify(esc(task.company))},${isConnectStep?'true':'false'})">💬 AI Message</button>`;
+    btns += `<button class="btn btn-ai-linkedin" onclick="generateAILinkedIn('${tid}','${escAttr(task.contact)}','${escAttr(task.title||'')}','${escAttr(task.company)}',${isConnectStep?'true':'false'})">💬 AI Message</button>`;
     return btns;
   }
   if (type === 'email') {
@@ -1165,7 +1165,7 @@ function buildActionBtn(task, tid) {
     const alias = task.sent_from || '';
     const aliasLabel = alias ? `<div style="font-size:10px;color:var(--blue);margin-bottom:4px">📤 From: ${esc(alias)}</div>` : '';
     let btns = aliasLabel;
-    btns += `<button class="btn btn-ai-email" onclick="generateAIEmail('${tid}',${JSON.stringify(esc(task.contact))},${JSON.stringify(esc(task.title||''))},${JSON.stringify(esc(task.company))})">🤖 AI Email</button>`;
+    btns += `<button class="btn btn-ai-email" onclick="generateAIEmail('${tid}','${escAttr(task.contact)}','${escAttr(task.title||'')}','${escAttr(task.company)}')">🤖 AI Email</button>`;
     if (alias) {
       // When alias is set, Smartlead is the PRIMARY send method (sends from correct alias)
       btns += `<button class="btn btn-smartlead" onclick="sendViaSmartlead('${tid}','${esc(alias)}')">🚀 Send from ${esc(alias.split('@')[0])}</button>`;

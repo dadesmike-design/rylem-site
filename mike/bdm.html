@@ -1263,15 +1263,21 @@ async function generateAIEmail(tid, contactName, contactTitle, company) {
   if (btn) { btn.disabled = true; btn.textContent = '🤖 Generating...'; }
   showToast('🤖 Generating email...', true);
 
+  // Determine sender name from task's sent_from field
+  const task = (state.supabaseTasks || []).find(t => t.id === tid);
+  const senderAlias = task?.sent_from || '';
+  const senderFirstName = senderAlias.split('@')[0].split('.')[0].charAt(0).toUpperCase() + senderAlias.split('@')[0].split('.')[0].slice(1) || 'Mike';
+
   const systemPrompt = `You are a staffing recruiter at Rylem, a specialized staffing firm. Write signal-based cold outreach emails following these rules:
 - Lead with a PROBLEM or SIGNAL (hiring pain, growth, turnover) — never a generic intro
 - Under 150 words, conversational tone, no buzzwords
 - End with a specific timeline CTA (e.g. "15 min this Thursday or Friday?")
 - No subject line — just the email body
 - First name basis, professional but human
-- Reference the prospect's role and company specifically`;
+- Reference the prospect's role and company specifically
+- Sign off as: ${senderFirstName} from Rylem Staffing — always use this exact first name, never make up a different name`;
 
-  const userPrompt = `Write a personalized cold outreach email to ${contactName}, ${contactTitle} at ${company}. Use signal-based outreach — reference a plausible hiring signal or pain point for their role/industry.`;
+  const userPrompt = `Write a personalized cold outreach email to ${contactName}, ${contactTitle} at ${company}. You are ${senderFirstName} from Rylem Staffing. Use signal-based outreach — reference a plausible hiring signal or pain point for their role/industry. Sign off as ${senderFirstName}.`;
 
   try {
     const resp = await fetch('https://rylem-ai-chat.rylem-ai.workers.dev', {
@@ -1346,6 +1352,11 @@ async function generateAIEmail(tid, contactName, contactTitle, company) {
 async function generateAILinkedIn(tid, contactName, contactTitle, company, isConnectNote) {
   const btns = document.querySelectorAll(`#ta_${tid} .btn-ai-linkedin`);
   const btn = btns[0];
+
+  // Determine sender name
+  const task = (state.supabaseTasks || []).find(t => t.id === tid);
+  const senderAlias = task?.sent_from || '';
+  const senderFirstName = senderAlias.split('@')[0].split('.')[0].charAt(0).toUpperCase() + senderAlias.split('@')[0].split('.')[0].slice(1) || 'Mike';
   if (btn) { btn.disabled = true; btn.textContent = '💬 Generating...'; }
 
   const connectSystemPrompt = `You are a staffing recruiter at Rylem writing LinkedIn connection notes. Rules:
@@ -1354,7 +1365,7 @@ async function generateAILinkedIn(tid, contactName, contactTitle, company, isCon
 - Name their exact situation based on role/company
 - Close with a clear ask ("open to connecting?" or "worth a quick chat?")
 - NEVER use weak language like "happy to be a resource" or "looking to connect with leaders"
-- First name only sign-off`;
+- First name only sign-off — sign as ${senderFirstName}`;
 
   const messageSystemPrompt = `You are a staffing recruiter at Rylem writing LinkedIn messages (after connection accepted). Rules:
 - Under 500 characters, conversational
@@ -1363,11 +1374,12 @@ async function generateAILinkedIn(tid, contactName, contactTitle, company, isCon
 - Name their exact situation based on role/company
 - Close with a specific timeline CTA ("15 min this Thursday?")
 - NEVER use weak language like "happy to be a resource"
-- Reference their role and company specifically`;
+- Reference their role and company specifically
+- Sign off as ${senderFirstName} — never use a different name`;
 
   const systemPrompt = isConnectNote ? connectSystemPrompt : messageSystemPrompt;
   const msgType = isConnectNote ? 'connection note' : 'LinkedIn follow-up message';
-  const userPrompt = `Write a personalized LinkedIn ${msgType} to ${contactName}, ${contactTitle} at ${company}. Use signal-based outreach — reference a plausible hiring signal or pain point for their role/industry.`;
+  const userPrompt = `Write a personalized LinkedIn ${msgType} to ${contactName}, ${contactTitle} at ${company}. You are ${senderFirstName} from Rylem Staffing. Use signal-based outreach — reference a plausible hiring signal or pain point for their role/industry. Sign off as ${senderFirstName}.`;
 
   try {
     const resp = await fetch('https://rylem-ai-chat.rylem-ai.workers.dev', {

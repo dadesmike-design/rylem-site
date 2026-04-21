@@ -1438,7 +1438,9 @@ Use these VERBATIM or with minor tense adjustments. Do not embellish with fake s
 6. Voice: contractions, fragments, direct. Write how people actually talk on the phone. No corporate voice. No adverbs unless necessary.
 7. Total live-call script (opener + hook + pitch + disqualifying question) MUST be under 75 words.
 8. Voicemail MUST be under 25 seconds spoken (~60 words). Voicemail ends with callback number placeholder [CALLBACK_NUMBER], never a meeting ask.
+3b. When using a headcount or open-role count in the hook, round to a conversational number ("almost 300", "around 40") rather than a scraped-looking figure ("278+", "42"). Phone calls aren't spreadsheets.
 9. Do NOT ask a qualifying question in the hook or pitch. The ONLY qualifying question is the disqualifying_question at the end. Pre-qualifiers ("are you feeling strain?", "is that something you're dealing with?") weaken the disqualifying question and make the rep sound tentative.
+10. The if_not_interested branch MUST offer two specific off-ramps the prospect can choose between, not a single open question. Pattern: "Fair enough. Quick one — is it [specific reason A], or [specific reason B]? Just calibrating for next time." This makes it easier for the prospect to answer honestly, which gives the rep real intel instead of a polite brush-off.
 
 # OUTPUT FORMAT
 Respond with ONLY valid JSON matching this schema. No preamble. No markdown fences. No commentary.
@@ -1449,7 +1451,7 @@ Respond with ONLY valid JSON matching this schema. No preamble. No markdown fenc
   "pitch": "[max 2 sentences, operational pain]",
   "disqualifying_question": "Is that a live problem, or are you covered?",
   "if_yes": "[meeting ask with specific times]",
-  "if_not_interested": "[brief, respectful, asks why for calibration]",
+  "if_not_interested": "Fair enough. Quick one — is it [reason A], or [reason B]? Just calibrating for next time.",
   "if_send_info": "[asks what specifically would be useful, no generic deck]",
   "if_voicemail": "[voicemail script under 60 words, ends with [CALLBACK_NUMBER]]",
   "meeting_ask": "[specific day/time options]"

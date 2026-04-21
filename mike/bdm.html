@@ -1555,6 +1555,54 @@ async function sendViaSmartlead(tid, fromAlias) {
   }
 }
 
+// ─── SMARTLEAD SEND FROM CONTACT CARD (no task) ──────────
+async function smartleadSendContact(contactId, contactName, contactEmail, fromAlias) {
+  const accountId = SMARTLEAD_ALIAS_MAP[fromAlias.toLowerCase()];
+  if (!accountId) { showToast('❌ Unknown alias: ' + fromAlias, false); return; }
+  if (!contactEmail) { showToast('❌ No email on file for this contact', false); return; }
+
+  showToast('🤖 Generating email...', true);
+  try {
+    // Generate AI email
+    const genResp = await fetch('https://rylem-ai-chat.rylem-ai.workers.dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mode: 'generate',
+        system_prompt: `You are ${fromAlias.split('@')[0].charAt(0).toUpperCase() + fromAlias.split('@')[0].slice(1)} from Rylem Staffing, a specialized staffing firm. Write signal-based cold outreach emails following these rules:\n- Lead with a PROBLEM or SIGNAL (hiring pain, growth, turnover) — never a generic intro\n- Under 150 words, conversational tone, no buzzwords\n- End with a specific timeline CTA (e.g. "15 min this Thursday or Friday?")\n- No subject line — just the email body\n- Sign off as ${fromAlias.split('@')[0].charAt(0).toUpperCase() + fromAlias.split('@')[0].slice(1)} from Rylem Staffing\n- Reference the prospect's role and company specifically`,
+        user_prompt: `Write a personalized cold outreach email to ${contactName}. You are ${fromAlias.split('@')[0].charAt(0).toUpperCase() + fromAlias.split('@')[0].slice(1)} from Rylem Staffing. Use signal-based outreach. Sign off as ${fromAlias.split('@')[0].charAt(0).toUpperCase() + fromAlias.split('@')[0].slice(1)}.`,
+        max_tokens: 512
+      })
+    });
+    if (!genResp.ok) throw new Error('AI generation failed');
+    const genData = await genResp.json();
+    const emailBody = genData.message || '';
+    if (!emailBody) throw new Error('Empty AI response');
+
+    // Send via Smartlead
+    const sendResp = await fetch('https://rylem-ai-chat.rylem-ai.workers.dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mode: 'smartlead_send',
+        to_email: contactEmail,
+        to_name: contactName,
+        from_alias: fromAlias,
+        from_account_id: accountId,
+        subject: 'Quick intro — Rylem Staffing',
+        body: emailBody
+      })
+    });
+    if (!sendResp.ok) throw new Error('Smartlead proxy returned ' + sendResp.status);
+    const sendData = await sendResp.json();
+    if (sendData.error) throw new Error(sendData.error);
+    showToast('🚀 Email sent from ' + fromAlias + '!', true);
+  } catch(err) {
+    console.error('Smartlead contact send error:', err);
+    showToast('❌ Send failed: ' + (err.message || 'Unknown error'), false);
+  }
+}
+
 // ─── ACCOUNTS / SEQUENCE (SUPABASE) ──────────────────────
 async function fetchRepAccounts(rep) {
   const profile = window._rylemProfile || {};
@@ -2285,6 +2333,11 @@ function buildContactRow(c, accountId, acctStatus) {
   if (c.email) {
     const to = encodeURIComponent(c.email);
     actionBtns += `<a class="cbtn" href="https://outlook.office.com/mail/deeplink/compose?to=${to}" target="_blank" rel="noopener">✉️</a>`;
+    // Smartlead send button
+    const alias = c.assigned_alias || '';
+    if (alias) {
+      actionBtns += `<button class="cbtn" style="background:rgba(59,130,246,.12);color:#60a5fa" onclick="event.stopPropagation();smartleadSendContact('${escAttr(c.id)}','${escAttr(c.name)}','${escAttr(c.email)}','${escAttr(alias)}')" title="Send via Smartlead from ${esc(alias)}">🚀</button>`;
+    }
   }
   if (c.phone) {
     actionBtns += `<a class="cbtn" href="tel:${esc(c.phone)}">${esc(c.phone)}</a>`;

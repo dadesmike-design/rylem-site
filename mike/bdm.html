@@ -1475,6 +1475,24 @@ async function sendViaSmartlead(tid, fromAlias) {
   console.log('[Smartlead] Task found:', JSON.stringify(task).substring(0, 300));
   if (!task) { showToast('❌ Task not found', false); if (btn) { btn.disabled = false; btn.textContent = '🚀 Send'; } return; }
 
+  // Get email - try task.email first, then extract from DOM if missing
+  let toEmail = task.email || '';
+  if (!toEmail) {
+    // Try extracting from the task card's "From:" label or any email in the card
+    const emailEl = taskEl?.querySelector('.task-email, [data-email], a[href^="mailto:"]');
+    if (emailEl) {
+      toEmail = emailEl.textContent || emailEl.href?.replace('mailto:', '') || '';
+    }
+  }
+  if (!toEmail) {
+    // Last resort: re-query the contact from Supabase
+    try {
+      const { data: contactData } = await db.from('contacts').select('email').eq('full_name', task.contact).limit(1);
+      if (contactData?.[0]?.email) toEmail = contactData[0].email;
+    } catch(e) { console.error('[Smartlead] Contact lookup failed:', e); }
+  }
+  console.log('[Smartlead] toEmail:', toEmail || 'STILL EMPTY');
+
   // Check if AI email was generated, otherwise use message_body or a default
   const aiResult = taskEl?.querySelector('.ai-email-result .ai-text');
   let emailBody = aiResult ? aiResult.textContent : (task.message_body || '');
@@ -1514,7 +1532,7 @@ async function sendViaSmartlead(tid, fromAlias) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         mode: 'smartlead_send',
-        to_email: task.email,
+        to_email: toEmail,
         to_name: task.contact,
         from_alias: fromAlias,
         from_account_id: accountId,
@@ -1522,7 +1540,7 @@ async function sendViaSmartlead(tid, fromAlias) {
         body: emailBody
       })
     });
-    console.log('[Smartlead] Sent payload:', { to_email: task.email, from_account_id: accountId, body_len: emailBody?.length, subject: 'Quick intro — Rylem Staffing' });
+    console.log('[Smartlead] Sent payload:', { to_email: toEmail, from_account_id: accountId, body_len: emailBody?.length, subject: 'Quick intro — Rylem Staffing' });
     if (!resp.ok) throw new Error('Smartlead proxy returned ' + resp.status);
     const data = await resp.json();
     if (data.error) throw new Error(data.error);

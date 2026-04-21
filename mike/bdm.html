@@ -2109,6 +2109,7 @@ async function fetchRepTasks(rep) {
 
   // Convert to the JSON format the existing renderer expects
   return filtered.map(t => ({
+    id: t.id,
     _supabase_id: t.id,
     company: t.accounts?.company || '',
     contact: t.contacts?.full_name || '',

@@ -164,6 +164,7 @@ button,input,select{font-family:inherit}
 .days-silent.never{color:#ff2d55}
 .section-badge.pink{background:rgba(255,45,85,.12);color:#ff2d55;border:1px solid rgba(255,45,85,.25)}
 .section-badge.cyan{background:rgba(0,207,255,.12);color:#00cfff;border:1px solid rgba(0,207,255,.25)}
+.section-badge.amber{background:rgba(245,200,66,.12);color:#f5c842;border:1px solid rgba(245,200,66,.25)}
 
 /* ─── MODALS ─── */
 .modal-overlay {
@@ -337,6 +338,18 @@ button,input,select{font-family:inherit}
       <tbody id="focus-body"><tr><td colspan="4" class="loading-text">Loading...</td></tr></tbody>
     </table>
 
+    <!-- MISSING INDUSTRY -->
+    <div class="section-hd">
+      <h2>Missing Industry</h2>
+      <span class="section-badge amber" id="badge-no-industry">0</span>
+      <div style="font-size:11px;color:var(--text3);margin-top:2px;font-weight:400">These accounts need an industry tag for segmentation and reporting.</div>
+      <div class="section-line"></div>
+    </div>
+    <table class="data-table" id="tbl-no-industry">
+      <thead><tr><th>Company</th><th>Status</th><th>Rep</th><th></th></tr></thead>
+      <tbody id="no-industry-body"><tr><td colspan="4" class="loading-text">Loading...</td></tr></tbody>
+    </table>
+
     <!-- MEETINGS THIS MONTH -->
     <div class="section-hd">
       <h2>Meetings This Month</h2>
@@ -429,6 +442,7 @@ async function loadAll() {
   await Promise.all([
     loadMetrics(),
     loadAccountFocus(),
+    loadMissingIndustry(),
     loadMeetingsThisMonth(),
     loadGoingCold(),
     loadActivityFeed()
@@ -726,6 +740,37 @@ async function loadMeetingsThisMonth() {
       <td><a href="client.html?id=${m.account_id}" style="color:var(--text)">${esc(company)}</a></td>
       <td>${typeLabel}</td>
       <td><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--${ocColor}-dim,rgba(100,100,100,.1));color:var(--${ocColor},var(--text3))">${ocLabel}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── MISSING INDUSTRY ────────────────────────────────────
+async function loadMissingIndustry() {
+  const { data: accounts } = await db.from('accounts')
+    .select('id, company, status, assigned_rep, industry')
+    .is('industry', null)
+    .eq('do_not_contact', false);
+
+  const badge = document.getElementById('badge-no-industry');
+  const body = document.getElementById('no-industry-body');
+
+  if (!accounts || accounts.length === 0) {
+    badge.textContent = '0';
+    body.innerHTML = '<tr><td colspan="4" class="loading-text">All accounts have an industry set ✅</td></tr>';
+    return;
+  }
+
+  badge.textContent = accounts.length;
+
+  const REP_NAMES = { mike: 'Mike Dades', julia: 'Julia Dusseau', april: 'April Melton', liza: 'Liza Valencia', open: 'Unassigned' };
+
+  body.innerHTML = accounts.map(a => {
+    const repName = REP_NAMES[a.assigned_rep] || (a.assigned_rep ? a.assigned_rep.charAt(0).toUpperCase() + a.assigned_rep.slice(1) : 'Unassigned');
+    return `<tr>
+      <td class="company-name"><a href="client.html?id=${a.id}" style="color:var(--text);text-decoration:none">${escHtml(a.company || 'Unknown')}</a></td>
+      <td>${statusBadge(a.status || '')}</td>
+      <td>${escHtml(repName)}</td>
+      <td><a href="client.html?id=${a.id}" style="color:var(--accent);font-size:11px;font-weight:600;text-decoration:none">Set →</a></td>
     </tr>`;
   }).join('');
 }

@@ -52,6 +52,17 @@ button,input,select,textarea{font-family:inherit}
 .pill-city{border-color:var(--border);background:var(--surface2);color:var(--text2)}
 .pill-domain{border-color:var(--border);background:var(--surface2);color:var(--neon-cyan)}
 .pill-domain a{color:var(--neon-cyan);text-decoration:none}.pill-domain a:hover{text-decoration:underline}
+.pill-industry{position:relative;border-color:var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;user-select:none}
+.pill-industry:hover{border-color:var(--neon-cyan)}
+.pill-industry .industry-select{position:absolute;top:calc(100% + 6px);left:0;min-width:240px;background:var(--surface);border:1px solid var(--border-hover);border-radius:var(--radius-sm);overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.6);display:none;z-index:300;max-height:320px;overflow-y:auto}
+.pill-industry .industry-select.open{display:block}
+.pill-industry .industry-opt{padding:9px 14px;font-size:12px;font-weight:500;cursor:pointer;transition:.1s;color:var(--text2)}
+.pill-industry .industry-opt:hover{background:var(--surface2);color:var(--text)}
+.pill-industry .industry-opt.active{background:rgba(0,229,255,.08);color:var(--neon-cyan);font-weight:700}
+.industry-notes-row{padding:10px 14px;border-top:1px solid var(--border)}
+.industry-notes-row input{width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:11px;outline:none}
+.industry-notes-row input:focus{border-color:var(--neon-cyan)}
+.industry-notes-row label{display:block;font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600}
 
 /* REP SWITCHER */
 .rep-pill{position:relative;cursor:pointer;user-select:none;border-color:var(--border);background:var(--surface2)}
@@ -348,6 +359,16 @@ function renderHeader(){
       ${loc?`<span class="pill pill-city">📍 ${esc(loc)}</span>`:''}
       ${a.domain?`<span class="pill pill-domain">🌐 <a href="https://${esc(a.domain)}" target="_blank" rel="noopener">${esc(a.domain)}</a></span>`:''}
       ${a.open_roles_count?`<span class="pill pill-city">📋 ${a.open_roles_count} open roles</span>`:''}
+      <span class="pill pill-industry" id="industry-pill" onclick="toggleIndustryDD(event)">
+        🏭 <span id="industry-label">${esc(a.industry||'Set Industry')}</span> <span class="chevron" style="margin-left:2px">▼</span>
+        <div class="industry-select" id="industry-dd">
+          ${INDUSTRY_OPTIONS.map(opt=>`<div class="industry-opt${a.industry===opt?' active':''}" onclick="selectIndustry('${opt.replace(/'/g,"\\'")}',event)">${opt}</div>`).join('')}
+          <div class="industry-notes-row" id="industry-notes-row" style="display:${a.industry==='Other'?'block':'none'}">
+            <label>What industry?</label>
+            <input id="industry-notes-input" placeholder="e.g. Nuclear Energy" value="${esc(a.industry_notes||'')}" onblur="saveIndustryNotes()">
+          </div>
+        </div>
+      </span>
     </div>
     ${a.trigger_event?`<div class="signal-bar">⚡ <strong>Signal:</strong> ${esc(a.trigger_event)}${a.trigger_date?' <span style="color:var(--text3)">('+esc(a.trigger_date)+')</span>':''}</div>`:''}
     <button id="dnc-toggle" onclick="toggleDNC()" style="margin-top:10px;padding:6px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid ${a.do_not_contact?'var(--neon-green)':'var(--neon-red)'};background:${a.do_not_contact?'rgba(57,255,20,.08)':'rgba(255,23,68,.08)'};color:${a.do_not_contact?'var(--neon-green)':'var(--neon-red)'}">${a.do_not_contact?'✅ Remove DNC':'🚫 Mark DNC'}</button>
@@ -960,6 +981,60 @@ async function saveAccountEdit(){
     console.error('[saveAccountEdit] error',e);
     if(errEl){errEl.textContent=e.message||'Save failed';errEl.style.display='block';}
   }
+}
+
+// ─── INDUSTRY DROPDOWN ────────────────────────────────────
+const INDUSTRY_OPTIONS = [
+  'Software / SaaS',
+  'Gaming / Interactive Media',
+  'Healthcare Provider',
+  'Health Tech / Digital Health',
+  'Accounting / Advisory',
+  'Financial Services',
+  'Insurance',
+  'Manufacturing',
+  'Retail / E-commerce',
+  'Food & Beverage / CPG',
+  'Logistics / Supply Chain',
+  'Legal Services',
+  'Professional Services',
+  'Government / Public Sector',
+  'Nonprofit',
+  'Construction / Real Estate',
+  'Hospitality / Travel',
+  'Telecommunications',
+  'Education / EdTech',
+  'Defense / Aerospace',
+  'Energy / Utilities',
+  'Media / Entertainment',
+  'Staffing / HR Services',
+  'Pharma / Biotech',
+  'Other'
+];
+
+function toggleIndustryDD(e){e.stopPropagation();document.getElementById('industry-dd').classList.toggle('open');}
+document.addEventListener('click',()=>{const dd=document.getElementById('industry-dd');if(dd)dd.classList.remove('open');});
+
+async function selectIndustry(val,e){
+  e.stopPropagation();
+  document.getElementById('industry-dd').classList.remove('open');
+  const {error}=await db.from('accounts').update({industry:val,updated_at:new Date().toISOString()}).eq('id',account.id);
+  if(error){alert('Error saving industry: '+error.message);return;}
+  account.industry=val;
+  document.getElementById('industry-label').textContent=val;
+  document.getElementById('industry-notes-row').style.display=val==='Other'?'block':'none';
+  document.querySelectorAll('#industry-dd .industry-opt').forEach(el=>{
+    el.classList.toggle('active',el.textContent===val);
+  });
+  await db.from('activity_log').insert({account_id:account.id,rep:account.assigned_rep||'system',event_type:'industry_set',description:account.company+' industry set to '+val});
+}
+
+async function saveIndustryNotes(){
+  const val=document.getElementById('industry-notes-input').value.trim();
+  if(val===account.industry_notes)return;
+  const {error}=await db.from('accounts').update({industry_notes:val,updated_at:new Date().toISOString()}).eq('id',account.id);
+  if(error)return;
+  account.industry_notes=val;
 }
 </script>
 </body>

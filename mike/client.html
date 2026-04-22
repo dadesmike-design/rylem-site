@@ -193,6 +193,8 @@ button,input,select,textarea{font-family:inherit}
   .ct-step,.ct-li{display:none}
   .hdr-top{flex-direction:column;align-items:flex-start}
 }
+.cedit-row{animation:fadeSlide .2s ease}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
@@ -331,7 +333,7 @@ function renderHeader(){
       <div>
         <div class="hdr-name">${esc(a.company)}</div>
       </div>
-      <div style="margin-left:auto"><button onclick="showAddContactModal()" style="padding:8px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;border:1px solid rgba(0,229,255,.3);background:rgba(0,229,255,.08);color:var(--neon-cyan);transition:.15s" onmouseover="this.style.background='rgba(0,229,255,.18)'" onmouseout="this.style.background='rgba(0,229,255,.08)'">＋ Add Contact</button></div>
+      <div style="margin-left:auto;display:flex;gap:8px"><button onclick="editAccountInline()" style="padding:8px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--border-hover);background:var(--surface2);color:var(--text2);transition:.15s" onmouseover="this.style.borderColor='var(--neon-purple)';this.style.color='var(--neon-purple)'" onmouseout="this.style.borderColor='var(--border-hover)';this.style.color='var(--text2)'">✏️ Edit Account</button><button onclick="showAddContactModal()" style="padding:8px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;border:1px solid rgba(0,229,255,.3);background:rgba(0,229,255,.08);color:var(--neon-cyan);transition:.15s" onmouseover="this.style.background='rgba(0,229,255,.18)'" onmouseout="this.style.background='rgba(0,229,255,.08)'">＋ Add Contact</button></div>
     </div>
     <div class="hdr-pills">
       <span class="pill pill-status ${statusClass}">${esc(a.status||'unknown')}</span>
@@ -449,7 +451,9 @@ function renderContacts(){
       <div class="ct-li">${li}</div>
       <div class="ct-li">${c.phone?`<a href="rcapp://r/call?number=${stripPhone(c.phone)}" onclick="logCallFor('${c.id}','${c.account_id}','${esc(c.full_name)}')" title="Call via RingCentral" style="color:var(--neon-green);font-size:16px">📲</a>`:'<span style="opacity:.3;font-size:16px" title="No phone number on file">📲</span>'}</div>
       <div class="ct-li">${seq&&seq.status==='active'?'<span style="opacity:.4;font-size:11px" title="Already in sequence">✓</span>':`<button onclick="startSequence('${c.id}')" style="background:none;border:1px solid var(--neon-cyan);color:var(--neon-cyan);border-radius:6px;padding:2px 8px;font-size:11px;cursor:pointer;white-space:nowrap" title="Start sequence">▶ Start</button>`}</div>
-    </div>${c.intel_summary?`<div class="history-tooltip" style="display:none;padding:6px 0 10px 50px;font-size:12px;color:#999;line-height:1.5;border-bottom:1px solid rgba(42,42,42,.5)">${esc(c.intel_summary)}</div>`:''}`;
+      <div class="ct-li"><button onclick="editContactInline('${c.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:2px 4px" title="Edit contact">✏️</button></div>
+    </div>
+    <div id="cedit_${c.id}" style="display:none" class="cedit-row"></div>${c.intel_summary?`<div class="history-tooltip" style="display:none;padding:6px 0 10px 50px;font-size:12px;color:#999;line-height:1.5;border-bottom:1px solid rgba(42,42,42,.5)">${esc(c.intel_summary)}</div>`:''}`;
   }).join('');
 
   if(allStep1 && contacts.length>0 && engaged===0){
@@ -846,6 +850,116 @@ async function submitAddContact(){
   await db.from('activity_log').insert({account_id:account.id,contact_id:data.id,rep_id:loggedInRep,rep:loggedInRep,event_type:'contact_added',description:'Added contact: '+name+(title?' ('+title+')':'')+' by '+loggedInRep});
   document.getElementById('add-contact-modal').remove();
   loadContacts(account.id);
+}
+
+// ─── INLINE CONTACT EDIT ─────────────────────────────────
+function editContactInline(cid){
+  const c=contacts.find(x=>x.id===cid);
+  if(!c)return;
+  const wrap=document.getElementById('cedit_'+cid);
+  if(!wrap)return;
+  if(wrap.style.display!=='none'&&wrap.innerHTML){wrap.style.display='none';wrap.innerHTML='';return;}
+  const statuses=['new','engaging','warm','meeting_set','won','lost','do_not_contact'];
+  const roles=['champion','budget_holder','influencer','other'];
+  wrap.innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border-hover);border-radius:var(--radius-sm);margin:4px 0">
+      <div><label style="font-size:11px;color:var(--text3)">Name *</label><input class="cedit-name" value="${esc(c.full_name||'')}" style="width:100%;padding:6px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"></div>
+      <div><label style="font-size:11px;color:var(--text3)">Title</label><input class="cedit-title" value="${esc(c.title||'')}" style="width:100%;padding:6px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"></div>
+      <div><label style="font-size:11px;color:var(--text3)">Email</label><input class="cedit-email" value="${esc(c.email||'')}" style="width:100%;padding:6px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"></div>
+      <div><label style="font-size:11px;color:var(--text3)">Phone</label><input class="cedit-phone" value="${esc(c.phone||'')}" style="width:100%;padding:6px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"></div>
+      <div><label style="font-size:11px;color:var(--text3)">Mobile</label><input class="cedit-mobile" value="${esc(c.mobile||'')}" style="width:100%;padding:6px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"></div>
+      <div><label style="font-size:11px;color:var(--text3)">LinkedIn</label><input class="cedit-linkedin" value="${esc(c.linkedin_url||'')}" style="width:100%;padding:6px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"></div>
+      <div><label style="font-size:11px;color:var(--text3)">Status</label><select class="cedit-status" style="width:100%;padding:6px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px">${statuses.map(s=>`<option value="${s}"${c.status===s?' selected':''}>${s}</option>`).join('')}</select></div>
+      <div><label style="font-size:11px;color:var(--text3)">Role</label><select class="cedit-role" style="width:100%;padding:6px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px">${roles.map(r=>`<option value="${r}"${c.role_type===r?' selected':''}>${r}</option>`).join('')}</select></div>
+      <div style="grid-column:1/-1;display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
+        <button onclick="document.getElementById('cedit_${cid}').style.display='none'" style="padding:6px 14px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text2);cursor:pointer;font-size:12px">Cancel</button>
+        <button onclick="saveContactEdit('${cid}')" style="padding:6px 14px;background:var(--neon-cyan);border:none;border-radius:6px;color:#000;cursor:pointer;font-weight:600;font-size:12px">Save</button>
+      </div>
+      <div id="cedit_err_${cid}" style="grid-column:1/-1;display:none;color:var(--neon-red);font-size:12px"></div>
+    </div>`;
+  wrap.style.display='block';
+}
+
+async function saveContactEdit(cid){
+  const wrap=document.getElementById('cedit_'+cid);
+  const errEl=document.getElementById('cedit_err_'+cid);
+  const name=wrap.querySelector('.cedit-name').value.trim();
+  const title=wrap.querySelector('.cedit-title').value.trim();
+  const email=wrap.querySelector('.cedit-email').value.trim();
+  const phone=wrap.querySelector('.cedit-phone').value.trim();
+  const mobile=wrap.querySelector('.cedit-mobile').value.trim();
+  const linkedin=wrap.querySelector('.cedit-linkedin').value.trim();
+  const status=wrap.querySelector('.cedit-status').value;
+  const roleType=wrap.querySelector('.cedit-role').value;
+  if(!name){if(errEl){errEl.textContent='Name is required';errEl.style.display='block';}return;}
+  const db=getDB();
+  const update={full_name:name,title:title||null,email:email||null,phone:phone||null,mobile:mobile||null,linkedin_url:linkedin||null,status:status,role_type:roleType};
+  try{
+    const{error}=await db.from('contacts').update(update).eq('id',cid);
+    if(error)throw error;
+    // Log edit
+    const loggedInRep=(window.currentUser&&window.currentUser.rep_name)||account.assigned_rep||'system';
+    await db.from('activity_log').insert({account_id:account.id,contact_id:cid,rep_id:loggedInRep,rep:loggedInRep,event_type:'contact_edited',description:'Edited contact: '+name+' by '+loggedInRep});
+    wrap.style.display='none';
+    await loadContacts(account.id);
+  }catch(e){
+    console.error('[saveContactEdit] error',e);
+    if(errEl){errEl.textContent=e.message||'Save failed';errEl.style.display='block';}
+  }
+}
+
+// ─── ACCOUNT EDIT ────────────────────────────────────────
+function editAccountInline(){
+  let existing=document.getElementById('aedit-wrap');
+  if(existing){existing.remove();return;}
+  const a=account;
+  const statuses=['prospecting','active','client','dormant'];
+  const wrap=document.createElement('div');
+  wrap.id='aedit-wrap';
+  wrap.style.cssText='padding:14px;background:var(--surface2);border:1px solid var(--border-hover);border-radius:var(--radius-sm);margin:10px 0';
+  wrap.innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div><label style="font-size:11px;color:var(--text3)">Company *</label><input id="ae-company" value="${esc(a.company||'')}" style="width:100%;padding:6px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"></div>
+      <div><label style="font-size:11px;color:var(--text3)">Domain</label><input id="ae-domain" value="${esc(a.domain||'')}" style="width:100%;padding:6px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"></div>
+      <div><label style="font-size:11px;color:var(--text3)">Location</label><input id="ae-city" value="${esc(a.city||'')}" style="width:100%;padding:6px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"></div>
+      <div><label style="font-size:11px;color:var(--text3)">Status</label><select id="ae-status" style="width:100%;padding:6px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px">${statuses.map(s=>`<option value="${s}"${a.status===s?' selected':''}>${s}</option>`).join('')}</select></div>
+      <div><label style="font-size:11px;color:var(--text3)">Open Roles</label><input id="ae-open_roles_count" type="number" value="${a.open_roles_count||''}" style="width:100%;padding:6px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"></div>
+      <div><label style="font-size:11px;color:var(--text3)">Trigger Event</label><input id="ae-trigger_event" value="${esc(a.trigger_event||'')}" style="width:100%;padding:6px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"></div>
+      <div style="grid-column:1/-1;display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
+        <button onclick="document.getElementById('aedit-wrap').remove()" style="padding:6px 14px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text2);cursor:pointer;font-size:12px">Cancel</button>
+        <button onclick="saveAccountEdit()" style="padding:6px 14px;background:var(--neon-purple);border:none;border-radius:6px;color:#fff;cursor:pointer;font-weight:600;font-size:12px">Save</button>
+      </div>
+      <div id="ae_err" style="grid-column:1/-1;display:none;color:var(--neon-red);font-size:12px"></div>
+    </div>`;
+  document.getElementById('hdr-card').after(wrap);
+}
+
+async function saveAccountEdit(){
+  const company=document.getElementById('ae-company').value.trim();
+  const errEl=document.getElementById('ae_err');
+  if(!company){if(errEl){errEl.textContent='Company name is required';errEl.style.display='block';}return;}
+  const db=getDB();
+  const update={
+    company,
+    domain:document.getElementById('ae-domain').value.trim()||null,
+    city:document.getElementById('ae-city').value.trim()||null,
+    status:document.getElementById('ae-status').value,
+    open_roles_count:parseInt(document.getElementById('ae-open_roles_count').value)||null,
+    trigger_event:document.getElementById('ae-trigger_event').value.trim()||null
+  };
+  try{
+    const{error}=await db.from('accounts').update(update).eq('id',account.id);
+    if(error)throw error;
+    // Update local state
+    Object.assign(account,update);
+    const loggedInRep=(window.currentUser&&window.currentUser.rep_name)||account.assigned_rep||'system';
+    await db.from('activity_log').insert({account_id:account.id,rep_id:loggedInRep,rep:loggedInRep,event_type:'account_edited',description:'Account edited: '+company+' by '+loggedInRep});
+    document.getElementById('aedit-wrap').remove();
+    renderHeader();
+  }catch(e){
+    console.error('[saveAccountEdit] error',e);
+    if(errEl){errEl.textContent=e.message||'Save failed';errEl.style.display='block';}
+  }
 }
 </script>
 </body>

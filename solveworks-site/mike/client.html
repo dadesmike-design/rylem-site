@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Client Account — Rylem</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0d0d0d;--surface:#111;--surface2:#1a1a1a;--surface3:#222;
+  --border:#2a2a2a;--border-hover:#3a3a3a;
+  --text:#f0f0f0;--text2:#888;--text3:#555;
+  --neon-green:#39ff14;--neon-cyan:#00e5ff;--neon-purple:#bf5af2;
+  --neon-pink:#ff2d78;--neon-orange:#ff2d55;--neon-amber:#a855f7;
+  --neon-blue:#2979ff;--neon-red:#ff1744;--neon-yellow:#eeff41;
+  --neon-lime:#76ff03;
+  --rep-mike:#00e5ff;--rep-julia:#bf5af2;--rep-april:#ff2d78;--rep-liza:#a855f7;--rep-open:#888;
+  --radius:14px;--radius-sm:8px;
+}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
+a{color:var(--neon-cyan);text-decoration:none}a:hover{text-decoration:underline}
+button,input,select,textarea{font-family:inherit}
+
+/* ─── EDIT BUTTONS ─── */
+.btn-edit-account{
+  background:none;border:1px solid rgba(0,229,255,.3);border-radius:8px;
+  color:var(--neon-cyan);font-size:12px;padding:6px 14px;cursor:pointer;
+  transition:all .15s;flex-shrink:0;font-weight:600;
+}
+.btn-edit-account:hover{background:rgba(0,229,255,.12)}
+.ct-edit-btn{
+  background:none;border:1px solid rgba(255,255,255,.15);border-radius:5px;
+  color:rgba(255,255,255,.4);font-size:11px;padding:2px 7px;cursor:pointer;
+  transition:all .15s;
+}
+.ct-edit-btn:hover{border-color:var(--neon-cyan);color:var(--neon-cyan)}
+.edit-modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);
+  z-index:1000;align-items:center;justify-content:center;
+}
+.edit-modal-overlay.open{display:flex}
+.edit-modal-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:28px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;
+}
+.edit-modal-card h2{font-size:18px;font-weight:700;margin:0 0 20px;color:var(--text)}
+.edit-modal-card .form-row{display:flex;gap:12px;margin-bottom:14px}
+.edit-modal-card .form-row .form-group{flex:1;display:flex;flex-direction:column;gap:4px}
+.edit-modal-card .form-group label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+.edit-modal-card .form-group input,.edit-modal-card .form-group select,.edit-modal-card .form-group textarea{
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:8px;
+  color:var(--text);padding:8px 12px;font-size:14px;outline:none;width:100%;box-sizing:border-box;
+}
+.edit-modal-card .form-group input:focus,.edit-modal-card .form-group select:focus{border-color:var(--neon-cyan)}
+.edit-modal-card .form-group textarea{resize:vertical;min-height:60px}
+.edit-modal-card .form-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+.edit-modal-card .btn-cancel{
+  padding:9px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;
+  border:1px solid var(--border);background:none;color:var(--text2);transition:.15s;
+}
+.edit-modal-card .btn-cancel:hover{background:rgba(255,255,255,.05)}
+.edit-modal-card .btn-save{
+  padding:9px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;
+  border:none;background:var(--neon-cyan);color:#000;transition:.15s;
+}
+.edit-modal-card .btn-save:hover{background:#33eeff}
+.edit-modal-card .btn-save:disabled{opacity:.5;cursor:not-allowed}
+
+
+/* LOGOUT */
+.btn-logout{padding:6px 12px;background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text3);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-logout:hover{border-color:var(--neon-red);color:var(--neon-red);background:rgba(255,23,68,.08)}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;gap:14px;padding:12px 28px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200}
+.back-btn{font-size:13px;color:var(--neon-cyan);cursor:pointer;padding:6px 14px;border:1px solid rgba(0,229,255,.25);border-radius:var(--radius-sm);background:rgba(0,229,255,.06);transition:.15s;text-decoration:none}
+.back-btn:hover{background:rgba(0,229,255,.15);text-decoration:none}
+.topbar-fill{flex:1}
+
+/* PAGE */
+.page{max-width:980px;margin:0 auto;padding:28px 24px 80px}
+
+/* HEADER CARD */
+.hdr{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:16px}
+.hdr-top{display:flex;align-items:center;gap:18px;margin-bottom:14px}
+.hdr-avatar{width:56px;height:56px;border-radius:14px;background:var(--surface2);border:2px solid var(--neon-purple);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:var(--neon-purple);flex-shrink:0}
+.hdr-name{font-size:28px;font-weight:800;line-height:1.1}
+.hdr-pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:0}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid}
+.pill-status{border-color:rgba(57,255,20,.3);background:rgba(57,255,20,.08);color:var(--neon-green)}
+.pill-status.active{border-color:rgba(57,255,20,.3);background:rgba(57,255,20,.08);color:var(--neon-green)}
+.pill-status.prospecting{border-color:rgba(168,85,247,.3);background:rgba(168,85,247,.08);color:var(--neon-amber)}
+.pill-status.researching{border-color:rgba(41,121,255,.3);background:rgba(41,121,255,.08);color:var(--neon-blue)}
+.pill-status.won{border-color:rgba(57,255,20,.3);background:rgba(57,255,20,.08);color:var(--neon-green)}
+.pill-status.lost{border-color:rgba(255,23,68,.3);background:rgba(255,23,68,.08);color:var(--neon-red)}
+.pill-status.churned{border-color:rgba(255,23,68,.3);background:rgba(255,23,68,.08);color:var(--neon-red)}
+.pill-city{border-color:var(--border);background:var(--surface2);color:var(--text2)}
+.pill-domain{border-color:var(--border);background:var(--surface2);color:var(--neon-cyan)}
+.pill-domain a{color:var(--neon-cyan);text-decoration:none}.pill-domain a:hover{text-decoration:underline}
+
+/* REP SWITCHER */
+.rep-pill{position:relative;cursor:pointer;user-select:none;border-color:var(--border);background:var(--surface2)}
+.rep-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.rep-dd{position:absolute;top:calc(100% + 6px);left:0;min-width:160px;background:var(--surface);border:1px solid var(--border-hover);border-radius:var(--radius-sm);overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.6);display:none;z-index:300}
+.rep-dd.open{display:block}
+.rep-opt{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:.1s}
+.rep-opt:hover{background:var(--surface2)}
+
+/* SIGNAL BAR */
+.signal-bar{border-left:3px solid var(--neon-amber);background:rgba(13,0,26,.6);padding:12px 18px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;font-size:13px;color:var(--neon-amber);margin-top:14px}
+.signal-bar strong{color:var(--text)}
+
+/* ALERT BAR */
+.alert-bar{border:1px solid;border-radius:var(--radius-sm);padding:14px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600}
+.alert-bar.good{border-color:rgba(57,255,20,.25);background:rgba(57,255,20,.06);color:var(--neon-green)}
+.alert-bar.warn{border-color:rgba(255,45,85,.25);background:rgba(26,0,16,.6);color:var(--neon-orange)}
+.alert-bar.danger{border-color:rgba(255,45,120,.25);background:rgba(255,45,120,.06);color:var(--neon-pink)}
+.alert-action{padding:5px 12px;border-radius:var(--radius-sm);border:1px solid currentColor;background:transparent;color:inherit;font-size:11px;font-weight:700;cursor:pointer;transition:.15s}
+.alert-action:hover{filter:brightness(1.3)}
+
+/* METRICS */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.m-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center}
+.m-card.clickable{cursor:pointer;transition:border-color .2s,background .2s,box-shadow .2s}
+.m-card.clickable:hover{border-color:rgba(0,212,255,.35);background:rgba(0,212,255,.04);box-shadow:0 0 12px rgba(0,212,255,.08)}
+.m-val{font-size:36px;font-weight:800;line-height:1}
+.m-label{font-size:11px;color:var(--text3);margin-top:6px;text-transform:uppercase;letter-spacing:.5px}
+.m-good{color:var(--neon-green)}.m-warn{color:var(--neon-orange)}.m-danger{color:var(--neon-pink)}.m-info{color:var(--neon-cyan)}.m-purple{color:var(--neon-purple)}
+
+/* SECTIONS */
+.section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden}
+.sec-hd{display:flex;align-items:center;gap:10px;padding:16px 20px;cursor:pointer;user-select:none;transition:.1s}
+.sec-hd:hover{background:var(--surface2)}
+.sec-hd.no-collapse{cursor:default}.sec-hd.no-collapse:hover{background:transparent}
+.sec-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;flex:1}
+.sec-badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px}
+.chevron{font-size:10px;color:var(--text3);transition:transform .2s}
+.sec-hd.open .chevron{transform:rotate(180deg)}
+.sec-body{display:none;padding:0 20px 20px}
+.sec-body.open{display:block}
+.sec-body.default-open{display:block}
+
+/* CONTACTS */
+.ct-header{display:grid;grid-template-columns:40px 1.2fr 1.2fr auto auto auto auto;gap:10px;padding:8px 0;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+.ct-row{position:relative;display:grid;grid-template-columns:40px 1.2fr 1.2fr auto auto auto auto auto;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid rgba(42,42,42,.5);transition:.1s;font-size:13px}
+.ct-row:last-child{border-bottom:none}
+.ct-row:hover{background:rgba(255,255,255,.02);border-radius:var(--radius-sm)}
+.badge-history{display:inline-block;font-size:9px;font-weight:700;color:#00cfff;background:rgba(0,207,255,.1);border:1px solid rgba(0,207,255,.25);padding:1px 5px;border-radius:3px;margin-left:6px;cursor:pointer;vertical-align:middle;letter-spacing:.3px}
+.history-tooltip{display:none;font-size:12px;color:#bbb;line-height:1.5;padding:8px 0 0;grid-column:2/span 6}
+.ct-avatar{width:34px;height:34px;border-radius:10px;background:rgba(191,90,242,.12);border:1px solid rgba(191,90,242,.25);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--neon-purple)}
+.ct-name{font-weight:600}.ct-title{color:var(--text2)}
+.ct-step{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;background:var(--surface2);border:1px solid var(--border);color:var(--text2)}
+.ct-step.active{border-color:rgba(0,229,255,.3);color:var(--neon-cyan);background:rgba(0,229,255,.08)}
+.ct-li a{color:var(--neon-blue);font-size:16px;text-decoration:none;transition:.1s}.ct-li a:hover{filter:brightness(1.4)}
+.ct-li .no-li{color:var(--text3);font-size:13px}
+.ct-warn{padding:12px 16px;background:rgba(0,26,26,.6);border:1px solid rgba(0,207,255,.15);border-radius:var(--radius-sm);font-size:12px;color:#00cfff;margin-top:12px}
+.ct-add{margin-top:12px;padding:8px 16px;border:1px dashed var(--border);border-radius:var(--radius-sm);background:transparent;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;transition:.15s;width:100%}
+.ct-add:hover{border-color:var(--neon-cyan);color:var(--neon-cyan)}
+
+/* AI SUMMARY */
+.ai-text{font-size:14px;line-height:1.8;color:var(--text)}
+.ai-loading{color:var(--text3);font-style:italic}
+.ai-refresh{padding:5px 12px;border-radius:var(--radius-sm);border:1px solid rgba(0,229,255,.25);background:rgba(0,229,255,.06);color:var(--neon-cyan);font-size:11px;font-weight:700;cursor:pointer;transition:.15s}
+.ai-refresh:hover{background:rgba(0,229,255,.15)}
+
+/* ACTIVITY */
+.act-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(42,42,42,.4);font-size:13px;align-items:flex-start}
+.act-item:last-child{border-bottom:none}
+.act-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.act-dot.linkedin,.act-dot.lead_added{background:var(--neon-blue)}
+.act-dot.email,.act-dot.sequence_advanced{background:var(--neon-purple)}
+.act-dot.call,.act-dot.task_completed{background:var(--neon-green)}
+.act-dot.note{background:var(--neon-purple)}
+.act-dot.default{background:var(--text3)}
+.act-time{color:var(--text3);font-size:11px;min-width:90px;flex-shrink:0}
+.act-desc{color:var(--text2);flex:1}
+
+/* NOTES */
+.notes-area{width:100%;min-height:130px;padding:14px 16px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px;font-family:inherit;resize:vertical;outline:none;line-height:1.6}
+.notes-area:focus{border-color:var(--neon-cyan)}
+.notes-status{font-size:12px;color:var(--text3);margin-top:6px;min-height:18px}
+
+/* LOADING */
+.page-loading{text-align:center;padding:120px 20px;color:var(--text3)}.page-loading .spin{font-size:40px;margin-bottom:12px}
+
+@media(max-width:700px){
+  .metrics{grid-template-columns:repeat(2,1fr)}
+  .ct-row,.ct-header{grid-template-columns:34px 1fr 1fr auto auto}
+  .ct-step,.ct-li{display:none}
+  .hdr-top{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar" id="topbar" style="display:none">
+  <a class="back-btn" href="bdm.html">← Dashboard</a>
+  <div class="topbar-fill"></div>
+  <button class="btn-logout" onclick="doLogout()">Sign Out</button>
+</header>
+
+<div class="page" id="page" style="display:none">
+  <div id="dnc-banner" style="display:none;background:#ff1744;color:#fff;text-align:center;padding:12px 20px;font-weight:700;font-size:14px;border-radius:var(--radius);margin-bottom:12px;letter-spacing:.5px">🚫 DO NOT CONTACT — This account is hands off</div>
+  <div class="hdr" id="hdr-card"></div>
+  <div id="alert-slot"></div>
+  <div class="metrics" id="metrics"></div>
+
+  <!-- CONTACTS -->
+  <div class="section" id="sec-contacts">
+    <div class="sec-hd" onclick="toggleSec('contacts')">
+      <span class="chevron" id="chev-contacts">▼</span>
+      <span class="sec-title">Contacts</span>
+      <span class="sec-badge" id="ct-badge" style="background:rgba(0,229,255,.1);color:var(--neon-cyan)">0</span>
+    </div>
+    <div style="padding:8px 16px;">
+      <input id="contact-search" type="text" placeholder="Search contacts..." oninput="filterAll(this.value)" style="width:100%;padding:8px 12px;background:rgba(255,255,255,0.05);border:1px solid rgba(0,229,255,0.2);border-radius:8px;color:#fff;font-size:14px;outline:none;" />
+    </div>
+    <div class="sec-body" id="body-contacts"></div>
+  </div>
+
+  <!-- AI SUMMARY -->
+  <div class="section">
+    <div class="sec-hd no-collapse">
+      <span class="sec-title">AI Summary</span>
+      <button class="ai-refresh" onclick="generateSummary()">🔄 Refresh</button>
+    </div>
+    <div class="sec-body default-open" id="body-ai"><span class="ai-loading">Generating…</span></div>
+  </div>
+
+  <!-- ACTIVITY -->
+  <div class="section" id="sec-activity">
+    <div class="sec-hd" onclick="toggleSec('activity')">
+      <span class="chevron" id="chev-activity">▼</span>
+      <span class="sec-title">Activity</span>
+      <span class="sec-badge" id="act-badge" style="background:rgba(191,90,242,.1);color:var(--neon-purple)">0</span>
+    </div>
+    <div class="sec-body" id="body-activity"></div>
+  </div>
+
+  <!-- NOTES -->
+  <div class="section">
+    <div class="sec-hd no-collapse">
+      <span class="sec-title">Notes</span>
+    </div>
+    <div class="sec-body default-open">
+      <textarea class="notes-area" id="notes-area" placeholder="Add notes about this account…"></textarea>
+      <div class="notes-status" id="notes-status"></div>
+    </div>
+  </div>
+</div>
+
+<div class="page-loading" id="page-loading" style="display:none"><div class="spin">⏳</div><p>Loading account…</p></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js">
+// ─── EDIT ACCOUNT ─────────────────────────────────────────────────────────────
+function openEditAccountModal() {
+  const a = account;
+  document.getElementById('ea-id').value = a.id;
+  document.getElementById('ea-company').value = a.company || '';
+  document.getElementById('ea-domain').value = a.domain || '';
+  document.getElementById('ea-status').value = a.status || 'prospecting';
+  document.getElementById('ea-vertical').value = a.vertical || '';
+  document.getElementById('ea-city').value = a.hq_city || '';
+  document.getElementById('ea-state').value = a.hq_state || '';
+  document.getElementById('ea-signal').value = a.trigger_event || '';
+  document.getElementById('ea-error').style.display = 'none';
+  document.getElementById('ea-submit').disabled = false;
+  document.getElementById('ea-submit').textContent = 'Save Changes';
+  document.getElementById('edit-account-overlay').classList.add('open');
+}
+
+function closeEditAccountModal() {
+  document.getElementById('edit-account-overlay').classList.remove('open');
+}
+
+document.getElementById('edit-account-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('ea-submit');
+  const err = document.getElementById('ea-error');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  err.style.display = 'none';
+  try {
+    const { error } = await db.from('accounts').update({
+      company: document.getElementById('ea-company').value.trim(),
+      domain: document.getElementById('ea-domain').value.trim() || null,
+      status: document.getElementById('ea-status').value,
+      vertical: document.getElementById('ea-vertical').value.trim() || null,
+      hq_city: document.getElementById('ea-city').value.trim() || null,
+      hq_state: document.getElementById('ea-state').value.trim() || null,
+      trigger_event: document.getElementById('ea-signal').value.trim() || null,
+      updated_at: new Date().toISOString()
+    }).eq('id', document.getElementById('ea-id').value);
+    if (error) throw error;
+    closeEditAccountModal();
+    // Refresh account data
+    const { data: acc } = await db.from('accounts').select('*').eq('id', account.id).single();
+    if (acc) { account = acc; renderHeader(); renderDNCBanner(); }
+    showToast('✅ Account updated');
+  } catch(e) {
+    err.textContent = 'Save failed: ' + (e.message || e);
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Save Changes';
+  }
+});
+
+// ─── EDIT CONTACT ─────────────────────────────────────────────────────────────
+let _editContactCache = {};
+
+function openEditContactModal(contactId) {
+  const c = contacts.find(x => x.id === contactId);
+  if (!c) { showToast('Contact not found'); return; }
+  _editContactCache[contactId] = c;
+  document.getElementById('ec-id').value = contactId;
+  document.getElementById('ec-name').value = c.full_name || '';
+  document.getElementById('ec-title').value = c.title || '';
+  document.getElementById('ec-email').value = c.email || '';
+  document.getElementById('ec-phone').value = c.phone || '';
+  document.getElementById('ec-linkedin').value = c.linkedin_url || '';
+  document.getElementById('ec-role').value = c.role_type || 'other';
+  document.getElementById('ec-status').value = c.status || 'new';
+  document.getElementById('ec-notes').value = c.notes || '';
+  document.getElementById('ec-error').style.display = 'none';
+  document.getElementById('ec-submit').disabled = false;
+  document.getElementById('ec-submit').textContent = 'Save Changes';
+  document.getElementById('edit-contact-overlay').classList.add('open');
+}
+
+function closeEditContactModal() {
+  document.getElementById('edit-contact-overlay').classList.remove('open');
+}
+
+document.getElementById('edit-contact-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('ec-submit');
+  const err = document.getElementById('ec-error');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  err.style.display = 'none';
+  try {
+    const { error } = await db.from('contacts').update({
+      full_name: document.getElementById('ec-name').value.trim(),
+      title: document.getElementById('ec-title').value.trim() || null,
+      email: document.getElementById('ec-email').value.trim() || null,
+      phone: document.getElementById('ec-phone').value.trim() || null,
+      linkedin_url: document.getElementById('ec-linkedin').value.trim() || null,
+      role_type: document.getElementById('ec-role').value,
+      status: document.getElementById('ec-status').value,
+      notes: document.getElementById('ec-notes').value.trim() || null,
+      updated_at: new Date().toISOString()
+    }).eq('id', document.getElementById('ec-id').value);
+    if (error) throw error;
+    closeEditContactModal();
+    // Refresh contacts list
+    const { data: cts } = await db.from('contacts').select('*').eq('account_id', account.id).order('created_at');
+    contacts = cts || [];
+    renderContacts();
+    showToast('✅ Contact updated');
+  } catch(e) {
+    err.textContent = 'Save failed: ' + (e.message || e);
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Save Changes';
+  }
+});
+
+function showToast(msg) {
+  const t = document.getElementById('toast') || (() => {
+    const el = document.createElement('div');
+    el.id = 'toast';
+    el.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1a1a2e;border:1px solid rgba(0,229,255,.3);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;display:none';
+    document.body.appendChild(el);
+    return el;
+  })();
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 2500);
+}
+
+</script>
+<script src="auth-guard.js">
+// ─── EDIT ACCOUNT ─────────────────────────────────────────────────────────────
+function openEditAccountModal() {
+  const a = account;
+  document.getElementById('ea-id').value = a.id;
+  document.getElementById('ea-company').value = a.company || '';
+  document.getElementById('ea-domain').value = a.domain || '';
+  document.getElementById('ea-status').value = a.status || 'prospecting';
+  document.getElementById('ea-vertical').value = a.vertical || '';
+  document.getElementById('ea-city').value = a.hq_city || '';
+  document.getElementById('ea-state').value = a.hq_state || '';
+  document.getElementById('ea-signal').value = a.trigger_event || '';
+  document.getElementById('ea-error').style.display = 'none';
+  document.getElementById('ea-submit').disabled = false;
+  document.getElementById('ea-submit').textContent = 'Save Changes';
+  document.getElementById('edit-account-overlay').classList.add('open');
+}
+
+function closeEditAccountModal() {
+  document.getElementById('edit-account-overlay').classList.remove('open');
+}
+
+document.getElementById('edit-account-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('ea-submit');
+  const err = document.getElementById('ea-error');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  err.style.display = 'none';
+  try {
+    const { error } = await db.from('accounts').update({
+      company: document.getElementById('ea-company').value.trim(),
+      domain: document.getElementById('ea-domain').value.trim() || null,
+      status: document.getElementById('ea-status').value,
+      vertical: document.getElementById('ea-vertical').value.trim() || null,
+      hq_city: document.getElementById('ea-city').value.trim() || null,
+      hq_state: document.getElementById('ea-state').value.trim() || null,
+      trigger_event: document.getElementById('ea-signal').value.trim() || null,
+      updated_at: new Date().toISOString()
+    }).eq('id', document.getElementById('ea-id').value);
+    if (error) throw error;
+    closeEditAccountModal();
+    // Refresh account data
+    const { data: acc } = await db.from('accounts').select('*').eq('id', account.id).single();
+    if (acc) { account = acc; renderHeader(); renderDNCBanner(); }
+    showToast('✅ Account updated');
+  } catch(e) {
+    err.textContent = 'Save failed: ' + (e.message || e);
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Save Changes';
+  }
+});
+
+// ─── EDIT CONTACT ─────────────────────────────────────────────────────────────
+let _editContactCache = {};
+
+function openEditContactModal(contactId) {
+  const c = contacts.find(x => x.id === contactId);
+  if (!c) { showToast('Contact not found'); return; }
+  _editContactCache[contactId] = c;
+  document.getElementById('ec-id').value = contactId;
+  document.getElementById('ec-name').value = c.full_name || '';
+  document.getElementById('ec-title').value = c.title || '';
+  document.getElementById('ec-email').value = c.email || '';
+  document.getElementById('ec-phone').value = c.phone || '';
+  document.getElementById('ec-linkedin').value = c.linkedin_url || '';
+  document.getElementById('ec-role').value = c.role_type || 'other';
+  document.getElementById('ec-status').value = c.status || 'new';
+  document.getElementById('ec-notes').value = c.notes || '';
+  document.getElementById('ec-error').style.display = 'none';
+  document.getElementById('ec-submit').disabled = false;
+  document.getElementById('ec-submit').textContent = 'Save Changes';
+  document.getElementById('edit-contact-overlay').classList.add('open');
+}
+
+function closeEditContactModal() {
+  document.getElementById('edit-contact-overlay').classList.remove('open');
+}
+
+document.getElementById('edit-contact-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('ec-submit');
+  const err = document.getElementById('ec-error');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  err.style.display = 'none';
+  try {
+    const { error } = await db.from('contacts').update({
+      full_name: document.getElementById('ec-name').value.trim(),
+      title: document.getElementById('ec-title').value.trim() || null,
+      email: document.getElementById('ec-email').value.trim() || null,
+      phone: document.getElementById('ec-phone').value.trim() || null,
+      linkedin_url: document.getElementById('ec-linkedin').value.trim() || null,
+      role_type: document.getElementById('ec-role').value,
+      status: document.getElementById('ec-status').value,
+      notes: document.getElementById('ec-notes').value.trim() || null,
+      updated_at: new Date().toISOString()
+    }).eq('id', document.getElementById('ec-id').value);
+    if (error) throw error;
+    closeEditContactModal();
+    // Refresh contacts list
+    const { data: cts } = await db.from('contacts').select('*').eq('account_id', account.id).order('created_at');
+    contacts = cts || [];
+    renderContacts();
+    showToast('✅ Contact updated');
+  } catch(e) {
+    err.textContent = 'Save failed: ' + (e.message || e);
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Save Changes';
+  }
+});
+
+function showToast(msg) {
+  const t = document.getElementById('toast') || (() => {
+    const el = document.createElement('div');
+    el.id = 'toast';
+    el.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1a1a2e;border:1px solid rgba(0,229,255,.3);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;display:none';
+    document.body.appendChild(el);
+    return el;
+  })();
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 2500);
+}
+
+</script>
+<script>
+const db = window._authDb;
+
+// Boot after auth
+window.authReady.then(() => boot());
+
+const REP_COLORS={mike:'var(--rep-mike)',julia:'var(--rep-julia)',april:'var(--rep-april)',liza:'var(--rep-liza)',open:'var(--rep-open)'};
+const REP_NAMES={mike:'Mike Dades',julia:'Julia Dusseau',april:'April Melton',liza:'Liza Valencia',open:'Unassigned'};
+
+let account=null,contacts=[],sequences=[],activity=[],accountMeetings=[];
+
+async function boot(){
+  const id=new URLSearchParams(location.search).get('id');
+  if(!id){showError('No account ID.');return;}
+  document.getElementById('page-loading').style.display='block';
+
+  const [{data:acc,error:ae},{data:cts},{data:seqs},{data:acts},{data:mtgs}] = await Promise.all([
+    db.from('accounts').select('*').eq('id',id).single(),
+    db.from('contacts').select('*').eq('account_id',id).order('created_at'),
+    db.from('sequences').select('*').eq('account_id',id),
+    db.from('activity_log').select('*').eq('account_id',id).order('created_at',{ascending:false}).limit(50),
+    db.from('meetings').select('*').eq('account_id',id).order('meeting_date',{ascending:false})
+  ]);
+  if(ae||!acc){showError('Account not found.');return;}
+  account=acc; contacts=cts||[]; sequences=seqs||[]; activity=acts||[]; accountMeetings=mtgs||[];
+
+  document.getElementById('page-loading').style.display='none';
+  document.getElementById('topbar').style.display='flex';
+  document.getElementById('page').style.display='block';
+  document.title=account.company+' — Rylem';
+
+  renderHeader();
+  renderDNCBanner();
+  renderAlert();
+  renderMetrics();
+  renderContacts();
+  renderActivity();
+  renderNotes();
+  generateSummary();
+}
+
+function showError(msg){
+  const el=document.getElementById('page-loading');
+  el.style.display='block';
+  el.innerHTML=`<div class="spin">❌</div><p>${msg} <a href="bdm.html">Go back</a></p>`;
+}
+
+// ─── HEADER ───
+function renderHeader(){
+  const a=account;
+  const initial=(a.company||'?')[0].toUpperCase();
+  const loc=[a.hq_city,a.hq_state].filter(Boolean).join(', ');
+  const rep=a.assigned_rep||'open';
+  const repColor=REP_COLORS[rep]||'var(--rep-open)';
+  const repName=REP_NAMES[rep]||(rep.charAt(0).toUpperCase()+rep.slice(1));
+  const statusClass=a.status||'prospecting';
+
+  let html=`
+    <div class="hdr-top">
+      <div class="hdr-avatar">${initial}</div>
+      <div>
+        <div class="hdr-name">${esc(a.company)}</div>
+      </div>
+      <div style="margin-left:auto"><button onclick="showAddContactModal()" style="padding:8px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;border:1px solid rgba(0,229,255,.3);background:rgba(0,229,255,.08);color:var(--neon-cyan);transition:.15s" onmouseover="this.style.background='rgba(0,229,255,.18)'" onmouseout="this.style.background='rgba(0,229,255,.08)'">＋ Add Contact</button></div>
+    </div>
+    <div class="hdr-pills">
+      <span class="pill pill-status ${statusClass}">${esc(a.status||'unknown')}</span>
+      <span class="pill rep-pill" id="rep-pill" onclick="toggleRepDD(event)">
+        <span class="rep-dot" style="background:${repColor}"></span>
+        <span style="color:${repColor}">${esc(repName)}</span>
+        <span class="chevron" style="margin-left:2px">▼</span>
+        <div class="rep-dd" id="rep-dd">
+          ${Object.keys(REP_NAMES).map(k=>`<div class="rep-opt" onclick="selectRep('${k}',event)"><span class="rep-dot" style="background:${REP_COLORS[k]}"></span><span style="color:${REP_COLORS[k]}">${REP_NAMES[k]}</span></div>`).join('')}
+        </div>
+      </span>
+      ${loc?`<span class="pill pill-city">📍 ${esc(loc)}</span>`:''}
+      ${a.domain?`<span class="pill pill-domain">🌐 <a href="https://${esc(a.domain)}" target="_blank" rel="noopener">${esc(a.domain)}</a></span>`:''}
+      ${a.open_roles_count?`<span class="pill pill-city">📋 ${a.open_roles_count} open roles</span>`:''}
+    </div>
+    ${a.trigger_event?`<div class="signal-bar">⚡ <strong>Signal:</strong> ${esc(a.trigger_event)}${a.trigger_date?' <span style="color:var(--text3)">('+esc(a.trigger_date)+')</span>':''}</div>`:''}
+    <button id="dnc-toggle" onclick="toggleDNC()" style="margin-top:10px;padding:6px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid ${a.do_not_contact?'var(--neon-green)':'var(--neon-red)'};background:${a.do_not_contact?'rgba(57,255,20,.08)':'rgba(255,23,68,.08)'};color:${a.do_not_contact?'var(--neon-green)':'var(--neon-red)'}">${a.do_not_contact?'✅ Remove DNC':'🚫 Mark DNC'}</button>
+  `;
+  document.getElementById('hdr-card').innerHTML=html;
+}
+
+function renderDNCBanner(){
+  document.getElementById('dnc-banner').style.display=account.do_not_contact?'block':'none';
+}
+
+async function toggleDNC(){
+  const newVal=!account.do_not_contact;
+  const {error}=await db.from('accounts').update({do_not_contact:newVal}).eq('id',account.id);
+  if(error){alert('Error: '+error.message);return;}
+  account.do_not_contact=newVal;
+  renderHeader();
+  renderDNCBanner();
+  // Also log it
+  await db.from('activity_log').insert({account_id:account.id,rep:account.assigned_rep||'system',event_type:newVal?'dnc_flagged':'dnc_removed',description:account.company+(newVal?' marked Do Not Contact':' DNC flag removed')});
+}
+
+function toggleRepDD(e){e.stopPropagation();document.getElementById('rep-dd').classList.toggle('open');}
+document.addEventListener('click',()=>{const dd=document.getElementById('rep-dd');if(dd)dd.classList.remove('open');});
+
+async function selectRep(rep,e){
+  e.stopPropagation();
+  document.getElementById('rep-dd').classList.remove('open');
+  const {error}=await db.from('accounts').update({assigned_rep:rep,updated_at:new Date().toISOString()}).eq('id',account.id);
+  if(!error){account.assigned_rep=rep;renderHeader();}
+}
+
+// ─── ALERT ───
+function renderAlert(){
+  const el=document.getElementById('alert-slot');
+  const engaged=contacts.filter(c=>c.status&&c.status!=='new').length;
+  const meetingSet=contacts.filter(c=>c.status==='meeting_set').length;
+  const daysSinceCreated=Math.floor((Date.now()-new Date(account.created_at).getTime())/86400000);
+
+  if(meetingSet>0){
+    el.innerHTML=`<div class="alert-bar good">🎯 Meeting set with ${meetingSet} contact${meetingSet>1?'s':''}. Keep momentum — prep the brief.<button class="alert-action" onclick="toggleSec('contacts')">View Contacts</button></div>`;
+  } else if(engaged===0 && contacts.length>0 && daysSinceCreated>=14){
+    el.innerHTML=`<div class="alert-bar danger">🚨 ${contacts.length} contacts loaded, zero engaged after ${daysSinceCreated} days. Outreach stalled.<button class="alert-action" onclick="toggleSec('contacts')">Check Contacts</button></div>`;
+  } else if(engaged===0 && contacts.length>0){
+    el.innerHTML=`<div class="alert-bar warn">⚠️ ${contacts.length} contacts loaded but none engaged yet. Start outreach.<button class="alert-action" onclick="toggleSec('contacts')">View Contacts</button></div>`;
+  } else if(contacts.length===0){
+    el.innerHTML=`<div class="alert-bar warn">⚠️ No contacts loaded. Add decision makers to start outreach.<button class="alert-action" onclick="toggleSec('contacts')">Add Contact</button></div>`;
+  } else if(daysSinceCreated>=14 && meetingSet===0){
+    el.innerHTML=`<div class="alert-bar danger">🚨 ${daysSinceCreated} days in pipeline, no meeting set. Escalate or reassess.<button class="alert-action" onclick="toggleSec('activity')">View Activity</button></div>`;
+  } else {
+    el.innerHTML='';
+  }
+}
+
+// ─── METRICS ───
+function renderMetrics(){
+  const total=contacts.length;
+  const engaged=contacts.filter(c=>c.status&&c.status!=='new').length;
+  const sequenced=sequences.filter(s=>s.status==='active').length;
+  const meetingSet=contacts.filter(c=>c.status==='meeting_set').length;
+
+  const eClass=engaged===0?(total>0?'m-danger':'m-info'):engaged>=3?'m-good':'m-warn';
+  const sClass=sequenced===0?'m-info':sequenced>=3?'m-good':'m-warn';
+  const msClass=meetingSet>0?'m-good':'m-info';
+
+  document.getElementById('metrics').innerHTML=`
+    <div class="m-card clickable" onclick="jumpToContacts('all')"><div class="m-val m-info">${total}</div><div class="m-label">Total Contacts</div></div>
+    <div class="m-card"><div class="m-val ${eClass}">${engaged}</div><div class="m-label">Engaged</div></div>
+    <div class="m-card clickable" onclick="jumpToContacts('sequenced')"><div class="m-val ${sClass}">${sequenced}</div><div class="m-label">In Sequence</div></div>
+    <div class="m-card"><div class="m-val ${msClass}">${accountMeetings.length||meetingSet}</div><div class="m-label">Meetings</div>${accountMeetings.length?`<div style="font-size:10px;color:var(--text3);margin-top:2px">Latest: ${new Date(accountMeetings[0].meeting_date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div>`:''}</div>
+  `;
+}
+
+// ─── CONTACTS ───
+function renderContacts(){
+  const seqMap={};
+  sequences.forEach(s=>{seqMap[s.contact_id]=s;});
+  const engaged=contacts.filter(c=>c.status&&c.status!=='new').length;
+  document.getElementById('ct-badge').textContent=contacts.length+' total · '+engaged+' engaged';
+
+  const body=document.getElementById('body-contacts');
+  if(!contacts.length){body.innerHTML='<div style="padding:14px;color:var(--text3)">No contacts yet. Use the ＋ Add Contact button above.</div>';return;}
+
+  const allStep1=contacts.every(c=>{const s=seqMap[c.id];return !s||s.current_step<=0;});
+
+  let html='<div class="ct-header"><div></div><div>Name</div><div>Title</div><div>Step</div><div>Status</div><div>LI</div><div>Call</div><div>Seq</div></div>';
+  html+=contacts.map(c=>{
+    const seq=seqMap[c.id];
+    const step=seq?seq.current_step+1:0;
+    const initials=((c.full_name||'?').split(' ').map(w=>w[0]).join('').slice(0,2)).toUpperCase();
+    const stepActive=step>0?'active':'';
+    const li=c.linkedin_url?`<a href="${esc(c.linkedin_url)}" target="_blank" rel="noopener">🔗</a>`:'<span class="no-li">—</span>';
+    const statusCls='cs-'+(c.status||'new');
+    const isDnc=c.status==='do_not_contact';
+    return `<div class="ct-row" style="${isDnc?'opacity:.5;border-left:3px solid var(--neon-red);':''}">${isDnc?'<span style="position:absolute;top:2px;right:8px;font-size:9px;font-weight:700;color:var(--neon-red);background:rgba(255,23,68,.12);padding:2px 6px;border-radius:4px">DNC</span>':''}
+      <div class="ct-avatar">${initials}</div>
+      <div class="ct-name"><a href="contact.html?id=${c.id}" style="color:var(--text);text-decoration:none" onmouseover="this.style.color='var(--neon-cyan)'" onmouseout="this.style.color='var(--text)'">${esc(c.full_name)}</a>${c.intel_summary?`<span class="badge-history" onclick="const t=this.closest('.ct-row').nextElementSibling;if(t&&t.classList.contains('history-tooltip')){t.style.display=t.style.display==='block'?'none':'block'}" title="Click to expand">Has history</span>`:''}</div>
+      <div class="ct-title">${esc(c.title||'')}</div>
+      <span class="ct-step ${stepActive}">${step>0?'Step '+step:'—'}</span>
+      <span class="ct-step" style="border-color:transparent;background:transparent"><span class="pill pill-status ${c.status||'new'}" style="font-size:10px;padding:2px 8px">${esc(c.status||'new')}</span></span>
+      <div class="ct-li">${li}</div>
+      <div class="ct-li">${c.phone?`<a href="rcapp://r/call?number=${stripPhone(c.phone)}" onclick="logCallFor('${c.id}','${c.account_id}','${esc(c.full_name)}')" title="Call via RingCentral" style="color:var(--neon-green);font-size:16px">📲</a>`:'<span style="opacity:.3;font-size:16px" title="No phone number on file">📲</span>'}</div>
+      <div class="ct-li">${seq&&seq.status==='active'?'<span style="opacity:.4;font-size:11px" title="Already in sequence">✓</span>':`<button onclick="startSequence('${c.id}')" style="background:none;border:1px solid var(--neon-cyan);color:var(--neon-cyan);border-radius:6px;padding:2px 8px;font-size:11px;cursor:pointer;white-space:nowrap" title="Start sequence">▶ Start</button>`}</div>
+      <div class="ct-li"><button onclick="openEditContactModal('${c.id}')" class="ct-edit-btn" title="Edit contact">✏️</button></div>
+    </div>${c.intel_summary?`<div class="history-tooltip" style="display:none;padding:6px 0 10px 50px;font-size:12px;color:#999;line-height:1.5;border-bottom:1px solid rgba(42,42,42,.5)">${esc(c.intel_summary)}</div>`:''}`;
+  }).join('');
+
+  if(allStep1 && contacts.length>0 && engaged===0){
+    html+=`<div class="ct-warn">⚠️ All contacts are on Step 1 with no engagement. Time to follow up or try a different angle.</div>`;
+  }
+
+  body.innerHTML=html;
+}
+
+// ─── JUMP TO CONTACTS FROM METRIC CARDS ───
+function jumpToContacts(filter){
+  // Expand the contacts section if collapsed
+  const body=document.getElementById('body-contacts');
+  const chev=document.getElementById('chev-contacts');
+  const hd=chev?.closest('.sec-hd');
+  if(body && !body.classList.contains('open')){
+    body.classList.add('open');
+    if(hd) hd.classList.add('open');
+  }
+
+  // Build set of sequenced contact IDs
+  const seqContactIds=new Set(sequences.filter(s=>s.status==='active').map(s=>s.contact_id));
+
+  // Highlight/dim rows
+  const rows=body?.querySelectorAll('.ct-row')||[];
+  rows.forEach(row=>{
+    row.style.transition='opacity .25s, box-shadow .25s';
+    row.style.opacity='';
+    row.style.boxShadow='';
+  });
+
+  if(filter==='sequenced' && seqContactIds.size>0){
+    // Match rows to contacts by index
+    contacts.forEach((c,i)=>{
+      if(rows[i]){
+        if(seqContactIds.has(c.id)){
+          rows[i].style.opacity='1';
+          rows[i].style.boxShadow='inset 0 0 0 1px rgba(0,212,255,.3)';
+        } else {
+          rows[i].style.opacity='0.3';
+        }
+      }
+    });
+    // Clear highlighting after 5 seconds
+    setTimeout(()=>{
+      rows.forEach(row=>{row.style.opacity='';row.style.boxShadow='';});
+    },5000);
+  }
+
+  // Scroll to contacts section
+  document.getElementById('sec-contacts')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ─── SECTIONS ───
+function toggleSec(name){
+  const chev=document.getElementById('chev-'+name);
+  const body=document.getElementById('body-'+name);
+  const hd=chev?.closest('.sec-hd');
+  if(!body)return;
+  const open=body.classList.toggle('open');
+  if(hd)hd.classList.toggle('open',open);
+}
+
+// ─── ACTIVITY ───
+function renderActivity(){
+  document.getElementById('act-badge').textContent=activity.length;
+  const body=document.getElementById('body-activity');
+  if(!activity.length){body.innerHTML='<div style="padding:14px;color:var(--text3)">No activity logged yet.</div>';return;}
+
+  body.innerHTML=activity.map(a=>{
+    const d=new Date(a.created_at);
+    const time=d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    const dot=a.event_type||'default';
+    return `<div class="act-item"><div class="act-dot ${esc(dot)}"></div><div class="act-time">${time}</div><div class="act-desc">${esc(a.description||a.event_type||'')}</div></div>`;
+  }).join('');
+}
+
+// ─── NOTES ───
+let notesSaveTimer=null;
+function renderNotes(){
+  const area=document.getElementById('notes-area');
+  area.value=account.notes||'';
+  area.addEventListener('blur',saveNotes);
+  area.addEventListener('input',()=>{
+    clearTimeout(notesSaveTimer);
+    document.getElementById('notes-status').textContent='Unsaved changes…';
+    document.getElementById('notes-status').style.color='var(--neon-purple)';
+    notesSaveTimer=setTimeout(saveNotes,3000);
+  });
+}
+async function saveNotes(){
+  clearTimeout(notesSaveTimer);
+  const val=document.getElementById('notes-area').value;
+  const st=document.getElementById('notes-status');
+  st.textContent='Saving…';st.style.color='var(--text3)';
+  const{error}=await db.from('accounts').update({notes:val,updated_at:new Date().toISOString()}).eq('id',account.id);
+  if(error){st.textContent='❌ Save failed';st.style.color='var(--neon-red)';}
+  else{st.textContent='✅ Saved';st.style.color='var(--neon-green)';account.notes=val;}
+  setTimeout(()=>{st.textContent='';st.style.color='';},2500);
+}
+
+// ─── AI SUMMARY ───
+function generateSummary(){
+  const el=document.getElementById('body-ai');
+  el.innerHTML='<span class="ai-loading">Generating summary…</span>';
+  setTimeout(()=>{el.innerHTML=`<div class="ai-text">${buildSummary()}</div>`;},100);
+}
+
+function buildSummary(){
+  const a=account;
+  const seqMap={};sequences.forEach(s=>{seqMap[s.contact_id]=s;});
+  const total=contacts.length;
+  const activeSeqs=sequences.filter(s=>s.status==='active');
+  const engaged=contacts.filter(c=>c.status&&c.status!=='new');
+  const champion=contacts.find(c=>c.role_type==='champion');
+  const meetingSet=contacts.filter(c=>c.status==='meeting_set');
+  let maxStep=0,maxName=null;
+  sequences.forEach(s=>{if(s.current_step>maxStep){maxStep=s.current_step;const c=contacts.find(x=>x.id===s.contact_id);if(c)maxName=c.full_name;}});
+
+  let lines=[];
+
+  // Signal
+  if(a.trigger_event) lines.push(`<strong>${esc(a.company)}</strong> has a live signal: ${esc(a.trigger_event)}.`);
+  else lines.push(`<strong>${esc(a.company)}</strong> is in <strong>${esc(a.status)}</strong> status with ${total} contact${total!==1?'s':''}.`);
+
+  // Meeting set
+  if(meetingSet.length>0){
+    lines.push(`🎯 <strong>Meeting set</strong> with ${meetingSet.map(c=>esc(c.full_name)).join(', ')}. Prep the brief — this is live.`);
+    return lines.join(' ');
+  }
+
+  // Contact/sequence status
+  if(total===0){
+    lines.push('No contacts loaded yet — need to find 3-5 decision makers (VP/Director level) before outreach can start.');
+  } else if(activeSeqs.length===0){
+    lines.push(`${total} contact${total>1?'s':''} loaded but no active sequences.`);
+    lines.push(`<strong>Next:</strong> Start a sequence with ${champion?esc(champion.full_name)+' (champion)':'the top contact'} — LinkedIn connect first.`);
+  } else if(maxStep<=1){
+    lines.push(`${activeSeqs.length} active sequence${activeSeqs.length>1?'s':''}, still in early outreach (step ${maxStep+1}/13).${maxName?' Furthest: '+esc(maxName)+'.':''}`);
+    lines.push(`<strong>Next:</strong> Check if LinkedIn connections were accepted. If yes, send the opener. If not, move to email.`);
+  } else if(maxStep<=5){
+    lines.push(`Outreach in progress — ${activeSeqs.length} sequence${activeSeqs.length>1?'s':''} active, step ${maxStep+1}/13.${maxName?' Lead: '+esc(maxName)+'.':''} ${engaged.length>0?engaged.length+' contact'+(engaged.length>1?'s':'')+' engaged.':''}`);
+    lines.push(`<strong>Next:</strong> Execute the next touchpoint and watch for replies.`);
+  } else {
+    lines.push(`Deep in the sequence at step ${maxStep+1}/13.${maxName?' '+esc(maxName)+' is furthest along.':''} ${engaged.length} engaged.`);
+    lines.push(`<strong>Next:</strong> If no response by step 10, consider a different angle or new contacts.`);
+  }
+
+  return lines.join(' ');
+}
+
+const SUPABASE_URL='https://ilbfbbcaaonxejvnkffi.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsYmZiYmNhYW9ueGVqdm5rZmZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNjI3MDQsImV4cCI6MjA5MDczODcwNH0.JeL849o9ehf9Dekh6n-sYa8qtgjcpOLGdBVQPL3fDgw';
+
+async function startSequence(contactId){
+  const res=await fetch(`${SUPABASE_URL}/rest/v1/sequence_templates?select=id,name,description,step_count&order=step_count.desc`,{
+    headers:{apikey:SUPABASE_ANON_KEY,Authorization:`Bearer ${SUPABASE_ANON_KEY}`}
+  });
+  const templates=await res.json();
+  if(!templates.length){alert('No sequences available.');return;}
+  const options=templates.map((t,i)=>`${i+1}. ${t.name} (${t.step_count} steps) — ${t.description}`).join('\n');
+  const choice=prompt(`Choose a sequence:\n\n${options}\n\nEnter number:`);
+  if(!choice)return;
+  const template=templates[parseInt(choice)-1];
+  if(!template)return;
+  const rpc=await fetch(`${SUPABASE_URL}/rest/v1/rpc/start_sequence`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json',apikey:SUPABASE_ANON_KEY,Authorization:`Bearer ${SUPABASE_ANON_KEY}`},
+    body:JSON.stringify({p_contact_id:contactId,p_template_id:template.id})
+  });
+  const data=await rpc.json();
+  if(data.sequence_id){
+    alert(`✅ Started: ${template.name}\nStep 1: ${data.channel}, due ${data.due_date}`);
+    loadClient();
+  }else{
+    alert('❌ Failed: '+(data.message||'Contact may already be in an active sequence.'));
+  }
+}
+
+function filterAll(query){
+  const q=query.toLowerCase();
+  document.querySelectorAll('#body-contacts .ct-row').forEach(row=>{
+    row.style.display=row.textContent.toLowerCase().includes(q)?'':'none';
+  });
+}
+
+function esc(s){return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''}
+function stripPhone(p){return (p||'').replace(/[\s\-\(\)\.\+]/g,'');}
+async function logCallFor(contactId,accountId,name){
+  const callerRep=(window.currentUser&&window.currentUser.rep_name)||account.assigned_rep||'system';
+  await db.from('activity_log').insert({contact_id:contactId,account_id:accountId,rep_id:callerRep,rep:callerRep,event_type:'call_initiated',description:'Call initiated via RingCentral to '+name+' by '+callerRep});
+}
+
+/* --- ADD CONTACT MODAL --- */
+function showAddContactModal(){
+  if(document.getElementById('add-contact-modal')) return;
+  const m=document.createElement('div');
+  m.id='add-contact-modal';
+  m.style.cssText='position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.7);backdrop-filter:blur(4px)';
+  m.innerHTML=`
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;width:420px;max-width:92vw;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <div style="font-size:18px;font-weight:800">Add Contact</div>
+      <button onclick="document.getElementById('add-contact-modal').remove()" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer">&times;</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <input id="ac-name" placeholder="Full name *" style="${inputStyle()}">
+      <input id="ac-title" placeholder="Title (e.g. VP Engineering)" style="${inputStyle()}">
+      <input id="ac-email" placeholder="Email" type="email" style="${inputStyle()}">
+      <input id="ac-phone" placeholder="Phone" style="${inputStyle()}">
+      <input id="ac-linkedin" placeholder="LinkedIn URL" style="${inputStyle()}">
+      <select id="ac-role" style="${inputStyle()}">
+        <option value="champion">Champion</option>
+        <option value="budget_holder">Budget Holder</option>
+        <option value="influencer">Influencer</option>
+      </select>
+      <div id="ac-err" style="color:var(--neon-red);font-size:12px;min-height:16px"></div>
+      <button id="ac-submit" onclick="submitAddContact()" style="padding:10px;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;border:none;background:var(--neon-cyan);color:#000;transition:.15s">Add Contact</button>
+    </div>
+  </div>`;
+  m.addEventListener('click',e=>{if(e.target===m)m.remove()});
+  document.body.appendChild(m);
+}
+function inputStyle(){return 'width:100%;padding:10px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;outline:none;'}
+async function submitAddContact(){
+  const name=document.getElementById('ac-name').value.trim();
+  const title=document.getElementById('ac-title').value.trim();
+  const email=document.getElementById('ac-email').value.trim();
+  const phone=document.getElementById('ac-phone').value.trim();
+  const linkedin=document.getElementById('ac-linkedin').value.trim();
+  const role_type=document.getElementById('ac-role').value;
+  const errEl=document.getElementById('ac-err');
+  const btn=document.getElementById('ac-submit');
+  errEl.textContent='';
+  if(!name){errEl.textContent='Name is required';return;}
+  // Dupe check
+  const{data:dupes}=await db.from('contacts').select('id').eq('account_id',account.id).ilike('full_name',name);
+  if(dupes&&dupes.length){errEl.textContent='Contact with this name already exists on this account';return;}
+  btn.disabled=true;btn.textContent='Adding...';
+  const{data,error}=await db.from('contacts').insert({account_id:account.id,full_name:name,title,email:email||null,phone:phone||null,linkedin_url:linkedin||null,role_type,status:'new'}).select().single();
+  if(error){errEl.textContent=error.message;btn.disabled=false;btn.textContent='Add Contact';return;}
+  // Log to activity_log
+  const loggedInRep=(window.currentUser&&window.currentUser.rep_name)||account.assigned_rep||'system';
+  await db.from('activity_log').insert({account_id:account.id,contact_id:data.id,rep_id:loggedInRep,rep:loggedInRep,event_type:'contact_added',description:'Added contact: '+name+(title?' ('+title+')':'')+' by '+loggedInRep});
+  document.getElementById('add-contact-modal').remove();
+  loadContacts(account.id);
+}
+
+// ─── EDIT ACCOUNT ─────────────────────────────────────────────────────────────
+function openEditAccountModal() {
+  const a = account;
+  document.getElementById('ea-id').value = a.id;
+  document.getElementById('ea-company').value = a.company || '';
+  document.getElementById('ea-domain').value = a.domain || '';
+  document.getElementById('ea-status').value = a.status || 'prospecting';
+  document.getElementById('ea-vertical').value = a.vertical || '';
+  document.getElementById('ea-city').value = a.hq_city || '';
+  document.getElementById('ea-state').value = a.hq_state || '';
+  document.getElementById('ea-signal').value = a.trigger_event || '';
+  document.getElementById('ea-error').style.display = 'none';
+  document.getElementById('ea-submit').disabled = false;
+  document.getElementById('ea-submit').textContent = 'Save Changes';
+  document.getElementById('edit-account-overlay').classList.add('open');
+}
+
+function closeEditAccountModal() {
+  document.getElementById('edit-account-overlay').classList.remove('open');
+}
+
+document.getElementById('edit-account-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('ea-submit');
+  const err = document.getElementById('ea-error');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  err.style.display = 'none';
+  try {
+    const { error } = await db.from('accounts').update({
+      company: document.getElementById('ea-company').value.trim(),
+      domain: document.getElementById('ea-domain').value.trim() || null,
+      status: document.getElementById('ea-status').value,
+      vertical: document.getElementById('ea-vertical').value.trim() || null,
+      hq_city: document.getElementById('ea-city').value.trim() || null,
+      hq_state: document.getElementById('ea-state').value.trim() || null,
+      trigger_event: document.getElementById('ea-signal').value.trim() || null,
+      updated_at: new Date().toISOString()
+    }).eq('id', document.getElementById('ea-id').value);
+    if (error) throw error;
+    closeEditAccountModal();
+    // Refresh account data
+    const { data: acc } = await db.from('accounts').select('*').eq('id', account.id).single();
+    if (acc) { account = acc; renderHeader(); renderDNCBanner(); }
+    showToast('✅ Account updated');
+  } catch(e) {
+    err.textContent = 'Save failed: ' + (e.message || e);
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Save Changes';
+  }
+});
+
+// ─── EDIT CONTACT ─────────────────────────────────────────────────────────────
+let _editContactCache = {};
+
+function openEditContactModal(contactId) {
+  const c = contacts.find(x => x.id === contactId);
+  if (!c) { showToast('Contact not found'); return; }
+  _editContactCache[contactId] = c;
+  document.getElementById('ec-id').value = contactId;
+  document.getElementById('ec-name').value = c.full_name || '';
+  document.getElementById('ec-title').value = c.title || '';
+  document.getElementById('ec-email').value = c.email || '';
+  document.getElementById('ec-phone').value = c.phone || '';
+  document.getElementById('ec-linkedin').value = c.linkedin_url || '';
+  document.getElementById('ec-role').value = c.role_type || 'other';
+  document.getElementById('ec-status').value = c.status || 'new';
+  document.getElementById('ec-notes').value = c.notes || '';
+  document.getElementById('ec-error').style.display = 'none';
+  document.getElementById('ec-submit').disabled = false;
+  document.getElementById('ec-submit').textContent = 'Save Changes';
+  document.getElementById('edit-contact-overlay').classList.add('open');
+}
+
+function closeEditContactModal() {
+  document.getElementById('edit-contact-overlay').classList.remove('open');
+}
+
+document.getElementById('edit-contact-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('ec-submit');
+  const err = document.getElementById('ec-error');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  err.style.display = 'none';
+  try {
+    const { error } = await db.from('contacts').update({
+      full_name: document.getElementById('ec-name').value.trim(),
+      title: document.getElementById('ec-title').value.trim() || null,
+      email: document.getElementById('ec-email').value.trim() || null,
+      phone: document.getElementById('ec-phone').value.trim() || null,
+      linkedin_url: document.getElementById('ec-linkedin').value.trim() || null,
+      role_type: document.getElementById('ec-role').value,
+      status: document.getElementById('ec-status').value,
+      notes: document.getElementById('ec-notes').value.trim() || null,
+      updated_at: new Date().toISOString()
+    }).eq('id', document.getElementById('ec-id').value);
+    if (error) throw error;
+    closeEditContactModal();
+    // Refresh contacts list
+    const { data: cts } = await db.from('contacts').select('*').eq('account_id', account.id).order('created_at');
+    contacts = cts || [];
+    renderContacts();
+    showToast('✅ Contact updated');
+  } catch(e) {
+    err.textContent = 'Save failed: ' + (e.message || e);
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Save Changes';
+  }
+});
+
+function showToast(msg) {
+  const t = document.getElementById('toast') || (() => {
+    const el = document.createElement('div');
+    el.id = 'toast';
+    el.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1a1a2e;border:1px solid rgba(0,229,255,.3);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;display:none';
+    document.body.appendChild(el);
+    return el;
+  })();
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 2500);
+}
+
+</script>
+
+<!-- Edit Account Modal -->
+<div class="edit-modal-overlay" id="edit-account-overlay" onclick="if(event.target===this)closeEditAccountModal()">
+  <div class="edit-modal-card">
+    <h2>✏️ Edit Account</h2>
+    <form id="edit-account-form">
+      <input type="hidden" id="ea-id" value="${account?.id||''}">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Company Name *</label>
+          <input type="text" id="ea-company" required placeholder="e.g. Stripe">
+        </div>
+        <div class="form-group">
+          <label>Website</label>
+          <input type="text" id="ea-domain" placeholder="e.g. stripe.com">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Status</label>
+          <select id="ea-status">
+            <option value="prospecting">Prospecting</option>
+            <option value="active">Active</option>
+            <option value="client">Client</option>
+            <option value="dormant">Dormant</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Industry / Vertical</label>
+          <input type="text" id="ea-vertical" placeholder="e.g. Technology">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>HQ City</label>
+          <input type="text" id="ea-city" placeholder="e.g. Seattle">
+        </div>
+        <div class="form-group">
+          <label>HQ State</label>
+          <input type="text" id="ea-state" placeholder="e.g. WA">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Signal / Trigger Event</label>
+        <input type="text" id="ea-signal" placeholder="e.g. Just raised Series B, hiring 20+ engineers">
+      </div>
+      <div id="ea-error" style="color:var(--neon-red);font-size:13px;margin-top:8px;display:none"></div>
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" onclick="closeEditAccountModal()">Cancel</button>
+        <button type="submit" class="btn-save" id="ea-submit">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Contact Modal -->
+<div class="edit-modal-overlay" id="edit-contact-overlay" onclick="if(event.target===this)closeEditContactModal()">
+  <div class="edit-modal-card">
+    <h2>✏️ Edit Contact</h2>
+    <form id="edit-contact-form">
+      <input type="hidden" id="ec-id">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input type="text" id="ec-name" required placeholder="e.g. Jane Smith">
+        </div>
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="ec-title" placeholder="e.g. VP Engineering">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="ec-email" placeholder="e.g. jane@stripe.com">
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="tel" id="ec-phone" placeholder="e.g. +1 206 555 0100">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>LinkedIn URL</label>
+          <input type="url" id="ec-linkedin" placeholder="https://linkedin.com/in/...">
+        </div>
+        <div class="form-group">
+          <label>Role Type</label>
+          <select id="ec-role">
+            <option value="champion">Champion</option>
+            <option value="budget_holder">Budget Holder</option>
+            <option value="executive">Executive</option>
+            <option value="influencer">Influencer</option>
+            <option value="end_user">End User</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Status</label>
+          <select id="ec-status">
+            <option value="new">New</option>
+            <option value="engaging">Engaging</option>
+            <option value="warm">Warm</option>
+            <option value="meeting_set">Meeting Set</option>
+            <option value="won">Won</option>
+            <option value="lost">Lost</option>
+            <option value="do_not_contact">Do Not Contact</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <input type="text" id="ec-notes" placeholder="Contact notes...">
+        </div>
+      </div>
+      <div id="ec-error" style="color:var(--neon-red);font-size:13px;margin-top:8px;display:none"></div>
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" onclick="closeEditContactModal()">Cancel</button>
+        <button type="submit" class="btn-save" id="ec-submit">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>

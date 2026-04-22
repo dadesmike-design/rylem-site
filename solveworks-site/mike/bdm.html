@@ -92,6 +92,27 @@ button,input,select{font-family:inherit}
 }
 .btn-add-lead:hover{background:rgba(16,217,135,.2);box-shadow:0 0 12px rgba(16,217,135,.15)}
 
+/* ─── EDIT BUTTONS ─── */
+.btn-edit{
+  background:none;border:1px solid var(--border);border-radius:6px;
+  color:var(--text2);font-size:12px;padding:3px 10px;cursor:pointer;
+  transition:all .15s;flex-shrink:0;margin-left:auto;
+}
+.btn-edit:hover{border-color:var(--accent);color:var(--accent)}
+.edit-modal-card{min-width:520px}
+.edit-modal-card h3{display-flex;align-items:center;gap:8px}
+.edit-modal-card h3 span{font-size:14px;color:var(--accent2)}
+.form-row{display:flex;gap:14px}
+.form-row .form-group{flex:1}
+.acc-edit-btns{display:flex;gap:8px;margin-top:6px;flex-shrink:0}
+.cbtn-edit{
+  background:none;border:1px solid var(--border);border-radius:6px;
+  color:var(--text2);font-size:11px;padding:2px 8px;cursor:pointer;
+  transition:all .15s;flex-shrink:0;
+}
+.cbtn-edit:hover{border-color:var(--accent);color:var(--accent)}
+
+
 /* ─── MODAL ─── */
 .modal-overlay{
   position:fixed;inset:0;z-index:9000;display:none;align-items:center;justify-content:center;
@@ -374,11 +395,44 @@ button,input,select{font-family:inherit}
   .contact-title{width:100%}
   .stat-pill{padding:5px 10px}
   .task-type-icon{width:34px;height:34px;font-size:15px}
+  .metrics-strip{padding:14px 14px 0;gap:8px}
+  .metric-card{min-width:calc(50% - 4px)}
+  .metric-value{font-size:24px}
 }
 @media(max-width:420px){
   .topbar-brand .topbar-tag{display:none}
   .stat-pill .sp-label{display:none}
+  .metrics-strip{padding:14px 14px 0;gap:8px}
+  .metric-card{min-width:calc(50% - 4px);padding:12px 14px}
+  .metric-value{font-size:22px}
 }
+/* ─── ACTIVITY METRICS STRIP ─── */
+.metrics-strip{
+  display:flex;gap:12px;padding:20px 28px 0;max-width:400px;margin:0 auto;width:100%;flex-wrap:wrap
+}
+.metric-card{
+  flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px 24px;transition:border-color .2s;position:relative;overflow:hidden
+}
+.metric-card:hover{border-color:var(--border-hover)}
+.metric-card .mc-icon{
+  position:absolute;top:14px;right:14px;font-size:20px;opacity:.35
+}
+.metric-label{font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px}
+.metric-value{font-size:28px;font-weight:800;letter-spacing:-.02em;line-height:1}
+.metric-value.accent{color:var(--accent)}
+.metric-value.green{color:var(--green)}
+.metric-value.yellow{color:var(--yellow)}
+.metric-value.purple{color:var(--purple)}
+.metric-sub{font-size:11px;color:var(--text3);margin-top:6px}
+.metric-sub .up{color:var(--green);font-weight:600}
+.metric-sub .down{color:var(--red);font-weight:600}
+.metric-sub .same{color:var(--text3)}
+.metrics-refresh{
+  position:absolute;bottom:8px;right:10px;font-size:9px;color:var(--text3);opacity:0;transition:opacity .3s
+}
+.metric-card:hover .metrics-refresh{opacity:1}
+
 .search-wrap{position:relative;max-width:600px;margin:0 auto 16px;padding:0 24px}
 .search-input{width:100%;padding:10px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;transition:border .15s}
 .search-input:focus{border-color:var(--accent)}
@@ -400,88 +454,6 @@ button,input,select{font-family:inherit}
 .sr-empty{padding:14px;color:var(--text3);font-size:13px;text-align:center}
 .contact-highlight{animation:cHighlight 2s ease-out}
 @keyframes cHighlight{0%{background:var(--accent-dim);box-shadow:inset 0 0 0 1px var(--accent-border)}100%{background:transparent;box-shadow:none}}
-
-/* ─── BULK ACTION BAR ─── */
-.bulk-bar{
-  position:fixed;bottom:0;left:0;right:0;z-index:9500;
-  background:#0d1117;border-top:1px solid var(--accent-border);
-  padding:14px 28px;display:flex;align-items:center;gap:16px;
-  transform:translateY(100%);transition:transform .25s ease;
-  box-shadow:0 -4px 24px rgba(0,0,0,.5)
-}
-.bulk-bar.visible{transform:translateY(0)}
-.bulk-bar .bulk-count{font-size:14px;font-weight:700;color:var(--accent);white-space:nowrap}
-.bulk-bar select{
-  padding:8px 32px 8px 12px;background:var(--surface2);border:1px solid var(--border);
-  border-radius:var(--radius-sm);color:var(--text);font-size:13px;font-weight:600;
-  outline:none;appearance:none;cursor:pointer;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a8fa6' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 10px center
-}
-.bulk-bar select:focus{border-color:var(--accent)}
-.bulk-bar .bulk-start{
-  padding:9px 20px;background:linear-gradient(135deg,#0a4d2a,#0d6b38);border:1px solid rgba(16,217,135,.4);
-  border-radius:var(--radius-sm);color:#10d987;font-size:13px;font-weight:700;cursor:pointer;
-  transition:all .2s;letter-spacing:.3px
-}
-.bulk-bar .bulk-start:hover{box-shadow:0 0 16px rgba(16,217,135,.25);background:linear-gradient(135deg,#0d5e35,#10804a)}
-.bulk-bar .bulk-start:disabled{opacity:.4;cursor:not-allowed}
-.bulk-bar .bulk-cancel{
-  padding:9px 16px;background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);
-  color:var(--text3);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s
-}
-.bulk-bar .bulk-cancel:hover{border-color:var(--red);color:var(--red)}
-
-/* ─── CONTACT CHECKBOX ─── */
-.contact-cb{
-  width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;
-  border-radius:4px
-}
-.select-all-wrap{
-  display:flex;align-items:center;gap:8px;padding:8px 14px;
-  border-bottom:1px solid var(--border);background:var(--surface2);border-radius:var(--radius-sm) var(--radius-sm) 0 0;
-  margin-bottom:-1px
-}
-.select-all-wrap label{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);cursor:pointer}
-
-/* ─── LAND & EXPAND BADGE ─── */
-.badge-land-expand{
-  font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;
-  background:rgba(245,200,66,.1);color:#f5c842;border:1px solid rgba(245,200,66,.25)
-}
-/* ─── BDM PILL ─── */
-.bdm-pill{
-  font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;
-  display:inline-block;margin-left:6px;vertical-align:middle
-}
-.bdm-mike{background:rgba(0,212,255,.12);color:#00d4ff;border:1px solid rgba(0,212,255,.25)}
-.bdm-julia{background:rgba(168,85,247,.12);color:#a855f7;border:1px solid rgba(168,85,247,.25)}
-.bdm-april{background:rgba(255,45,120,.12);color:#ff2d78;border:1px solid rgba(255,45,120,.25)}
-
-/* ─── MEETING INSIGHTS ─── */
-.insights-panel{
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-  padding:20px 24px;margin-top:16px
-}
-.insights-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:16px}
-.insight-card{
-  background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);
-  padding:16px;text-align:center
-}
-.insight-card .ic-val{font-size:28px;font-weight:800;color:var(--accent);line-height:1.2}
-.insight-card .ic-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
-.insight-card.green .ic-val{color:var(--green)}
-.insight-card.purple .ic-val{color:var(--purple)}
-.insight-card.yellow .ic-val{color:var(--yellow)}
-.insights-reps{display:flex;flex-direction:column;gap:6px}
-.insight-rep-row{
-  display:flex;align-items:center;gap:12px;padding:8px 12px;
-  background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm)
-}
-.insight-rep-name{font-size:13px;font-weight:600;min-width:100px}
-.insight-rep-bar-wrap{flex:1;height:8px;background:var(--surface3);border-radius:4px;overflow:hidden}
-.insight-rep-bar{height:100%;border-radius:4px;background:var(--accent);transition:width .3s}
-.insight-rep-count{font-size:12px;font-weight:700;color:var(--text2);min-width:24px;text-align:right}
 </style>
 </head>
 <body>
@@ -515,25 +487,33 @@ button,input,select{font-family:inherit}
         <option value="mike">Mike Dades</option>
         <option value="julia">Julia Dusseau</option>
         <option value="april">April Melton</option>
-        <option value="jean">Jean</option>
-        <option value="dee">Dee</option>
       </select>
       <button class="btn-add-lead" onclick="openAddLead()">＋ Add Lead</button>
       <a href="manager.html" class="btn-manager-intel" id="manager-intel-link" style="display:none;padding:7px 14px;background:var(--purple-dim);border:1px solid rgba(168,85,247,.3);border-radius:var(--radius-sm);color:var(--purple);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.3px;text-decoration:none">📊 Manager Intel</a>
       <button class="btn-logout" onclick="doLogout()">Sign Out</button>
     </div>
   </header>
+  <!-- MEETINGS THIS WEEK -->
+  <div class="metrics-strip" id="metrics-strip">
+    <div class="metric-card">
+      <span class="mc-icon">📅</span>
+      <div class="metric-label">Meetings Set This Week</div>
+      <div class="metric-value green" id="metric-meetings">—</div>
+      <div class="metric-sub" id="metric-meetings-sub">Booked since Monday</div>
+    </div>
+  </div>
+
   <div class="search-wrap">
     <input type="text" id="global-search" class="search-input" placeholder="Search accounts, contacts, titles, cities…" autocomplete="off" oninput="handleSearch(this.value)">
     <div class="search-results" id="search-results"></div>
   </div>
 
   <!-- ADD LEAD MODAL -->
-  <div class="modal-overlay" id="add-lead-modal" onclick="if(event.target===this)closeAddLead(false)">
+  <div class="modal-overlay" id="add-lead-modal">
     <div class="modal-card">
       <div class="modal-header">
         <h3>＋ Add Lead</h3>
-        <button class="modal-close" onclick="closeAddLead(true)">✕</button>
+        <button class="modal-close" onclick="closeAddLead()">✕</button>
       </div>
       <form id="add-lead-form">
         <div class="form-row">
@@ -578,24 +558,11 @@ button,input,select{font-family:inherit}
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>Account Rep *</label>
-            <select id="al-rep" required>
-              <option value="mike">Mike Dades</option>
-              <option value="julia">Julia Dusseau</option>
-              <option value="april">April Melton</option>
+            <label>Assigned Rep *</label>
+            <select id="al-rep" required class="rep-dropdown">
+              <!-- populated dynamically from reps table -->
             </select>
           </div>
-          <div class="form-group">
-            <label>Assign BDM (email sender) *</label>
-            <select id="al-bdm" required>
-              <option value="">-- Select BDM --</option>
-              <option value="mike">Mike Dades</option>
-              <option value="julia">Julia Dusseau</option>
-              <option value="april">April Melton</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
           <div class="form-group">
             <label>Role Type</label>
             <select id="al-role">
@@ -608,22 +575,9 @@ button,input,select{font-family:inherit}
           </div>
           <div class="form-group">
             <label>Contact Owner</label>
-            <select id="al-owner">
+            <select id="al-owner" class="rep-dropdown">
               <option value="">(Inherit from Rep)</option>
-              <option value="mike">Mike Dades</option>
-              <option value="julia">Julia Dusseau</option>
-              <option value="april">April Melton</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Assign BDM *</label>
-            <select id="al-bdm" required>
-              <option value="">— Select —</option>
-              <option value="mike">Mike Dades</option>
-              <option value="julia">Julia Dusseau</option>
-              <option value="april">April Melton</option>
+              <!-- rep options populated dynamically -->
             </select>
           </div>
         </div>
@@ -645,7 +599,7 @@ button,input,select{font-family:inherit}
           <textarea id="al-notes" rows="3" placeholder="Trigger event, hiring signal, referral source..."></textarea>
         </div>
         <div class="form-actions">
-          <button type="button" class="btn btn-cancel" onclick="closeAddLead(true)">Cancel</button>
+          <button type="button" class="btn btn-cancel" onclick="closeAddLead()">Cancel</button>
           <button type="submit" class="btn btn-submit" id="al-submit" disabled>Submit Lead</button>
         </div>
         <div class="form-status" id="al-status"></div>
@@ -663,21 +617,17 @@ button,input,select{font-family:inherit}
 
 </div>
 
-<!-- BULK ACTION BAR -->
-<div class="bulk-bar" id="bulk-bar">
-  <span class="bulk-count" id="bulk-count">0 contacts selected</span>
-  <select id="bulk-seq-select"></select>
-  <button class="bulk-start" id="bulk-start-btn" onclick="bulkStartSequences()">Start Sequence</button>
-  <button class="bulk-cancel" onclick="bulkDeselectAll()">Cancel</button>
-</div>
-
 <!-- TOAST -->
 <div id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="auth-check.js"></script>
+<script src="auth-guard.js"></script>
 <script>
-const db = window.rylemDb;
+// ─── SUPABASE (reuse auth client) ───
+const db = window._authDb;
+
+// ─── ACCOUNT LOOKUP CACHE ───
+let _accountCache = {};
 
 // ─── STATE ──────────────────────────────────────────────
 let state = {
@@ -688,39 +638,55 @@ let state = {
 };
 
 // ─── INIT ────────────────────────────────────────────────
-async function init(user) {
+async function init() {
+  // Wait for auth guard
+  const user = await window.authReady;
   document.getElementById('app').style.display = '';
   document.getElementById('app').classList.add('visible');
 
-  // Store profile globally so all functions can check role/rep_key
-  window._rylemProfile = user;
+  // Rep name from profile (lowercase to match existing data convention)
+  const myRep = user.rep_name.toLowerCase();
+  const isAdmin = user.role === 'admin';
 
-  // Set default rep from auth profile
-  state.rep = user.rep_key || 'mike';
-  localStorage.setItem('bdm_rep', state.rep);
-
+  // Configure rep selector: admins see all reps (from DB), others locked to their own
   const repSelect = document.getElementById('rep-select');
-  setDateLabel();
-
-  // Role-based rep selector visibility
-  if (user.role === 'admin') {
-    // Admin sees all options — keep as-is
-  } else if (user.role === 'manager' && user.allowedReps && user.allowedReps.length > 1) {
-    // Managers see only themselves + their reports
-    Array.from(repSelect.options).forEach(function(opt) {
-      if (user.allowedReps.indexOf(opt.value) === -1) opt.remove();
-    });
+  if (!isAdmin) {
+    repSelect.innerHTML = `<option value="${myRep}">${user.full_name}</option>`;
+    repSelect.disabled = true;
   } else {
-    // SDRs: hide selector entirely
-    repSelect.style.display = 'none';
+    // Dynamic: pull all active reps from Supabase so new SDRs appear automatically
+    try {
+      const { data: allReps } = await db.from('reps').select('id,name').eq('is_active', true).order('name');
+      if (allReps && allReps.length) {
+        repSelect.innerHTML = allReps.map(r =>
+          `<option value="${r.id}">${r.name}</option>`
+        ).join('');
+      }
+    } catch(e) { console.warn('Reps fetch error, using defaults:', e); }
   }
-  repSelect.value = state.rep;
+  repSelect.value = myRep;
+
+  setDateLabel();
+  state.rep = isAdmin ? (localStorage.getItem('bdm_rep') || myRep) : myRep;
+  if (isAdmin) repSelect.value = state.rep;
 
   updateManagerLink();
+
+  // Populate all modal rep dropdowns from same data
+  try {
+    const { data: modalReps } = await db.from('reps').select('id,name').eq('is_active', true).order('name');
+    if (modalReps && modalReps.length) {
+      populateRepDropdowns(modalReps);
+      // Default the add-lead rep to current rep
+      const alRep = document.getElementById('al-rep');
+      if (alRep) alRep.value = state.rep;
+    }
+  } catch(e) { console.warn('Modal reps fetch error:', e); }
 
   try {
     state.supabaseAccounts = await fetchRepAccounts(state.rep);
     state.supabaseTasks = await fetchRepTasks(state.rep);
+    startMetricsRefresh(state.rep);
     render();
   } catch(e) {
     console.warn('Data load error:', e);
@@ -730,13 +696,24 @@ async function init(user) {
   }
 }
 
-// Boot via auth
-window.rylemAuthReady.then(function(user) { init(user); });
+// Boot via auth guard
+window.authReady.then(() => init());
 
 function setDateLabel() {
   const d = new Date();
   const opts = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
   document.getElementById('today-date').textContent = d.toLocaleDateString('en-US', opts);
+}
+
+// ─── POPULATE REP DROPDOWNS ──────────────────────────────
+function populateRepDropdowns(reps) {
+  document.querySelectorAll('.rep-dropdown').forEach(sel => {
+    const hasInherit = sel.querySelector('option[value=""]'); // preserve "Inherit" option
+    const inheritOpt = hasInherit ? '<option value="">(Inherit from Rep)</option>' : '';
+    sel.innerHTML = inheritOpt + reps.map(r =>
+      `<option value="${r.id}">${r.name}</option>`
+    ).join('');
+  });
 }
 
 // ─── SWITCH REP ──────────────────────────────────────────
@@ -746,12 +723,13 @@ async function switchRep(rep) {
   updateManagerLink();
   state.supabaseAccounts = await fetchRepAccounts(rep);
   state.supabaseTasks = await fetchRepTasks(rep);
+  startMetricsRefresh(rep);
   render();
 }
 
 function updateManagerLink() {
   const el = document.getElementById('manager-intel-link');
-  if (el) el.style.display = (window.rylemUser && window.rylemUser.role === 'admin') ? 'inline-flex' : 'none';
+  if (el) el.style.display = (window.currentUser && window.currentUser.role === 'admin') ? 'inline-flex' : 'none';
 }
 
 // ─── DONE STATE ──────────────────────────────────────────
@@ -768,7 +746,9 @@ async function markDone(repId, taskId) {
   if (taskId && taskId.match(/^[0-9a-f]{8}-/)) {
     const { error } = await db.from('tasks').update({ completed: true }).eq('id', taskId);
     if (error) { console.error('Supabase markDone error:', error); return; }
-    // Don't render here — handleDone() calls renderTasksOnly() after this returns
+    // Reload accounts from Supabase to reflect advanced sequence
+    state.supabaseAccounts = await fetchRepAccounts(state.rep);
+    render();
   }
 }
 function isTaskSkipped(repId, taskId) {
@@ -788,45 +768,6 @@ function taskId(task, idx) {
 // ─── MESSAGES (removed — now uses tasks.message_body from Supabase) ───
 
 // ─── RENDER ──────────────────────────────────────────────
-// Render ONLY the tasks section — never touches the accounts/contacts DOM
-function renderTasksOnly() {
-  const rep = state.rep;
-  const tasks = (state.supabaseTasks || []).sort(sortTasks);
-  const doneCount = tasks.filter((t, i) => isTaskDone(rep, taskId(t, i))).length;
-  const activeAccounts = getRepAccounts(rep).length;
-  document.getElementById('stat-done').textContent = doneCount;
-  document.getElementById('stat-total').textContent = tasks.length;
-  document.getElementById('stat-accounts').textContent = activeAccounts;
-
-  const tasksWrap = document.getElementById('tasks-section-wrap');
-  if (!tasksWrap) { render(); return; } // fallback: full render if not yet built
-
-  tasksWrap.innerHTML = '';
-  const tasksSec = makeSectionHeader('Today\'s Tasks', tasks.length, tasks.length === doneCount && tasks.length > 0 ? 'green' : 'accent');
-  tasksWrap.appendChild(tasksSec);
-
-  if (tasks.length === 0) {
-    const es = document.createElement('div');
-    es.className = 'empty-state';
-    es.innerHTML = '<div class="es-icon">📭</div><p>No tasks assigned for today.</p>';
-    tasksWrap.appendChild(es);
-  } else if (doneCount === tasks.length) {
-    const banner = document.createElement('div');
-    banner.className = 'all-done-banner';
-    banner.innerHTML = '<h3>🎉 All done for today!</h3><p>Every task is complete. Nice work — check back tomorrow.</p>';
-    tasksWrap.appendChild(banner);
-  } else {
-    const list = document.createElement('div');
-    list.className = 'tasks-list';
-    list.id = 'tasks-list';
-    tasks.forEach((task, idx) => {
-      const tid = taskId(task, idx);
-      list.appendChild(buildTaskCard(task, idx, tid, rep));
-    });
-    tasksWrap.appendChild(list);
-  }
-}
-
 function render() {
   const rep = state.rep;
   const tasks = (state.supabaseTasks || []).sort(sortTasks);
@@ -838,29 +779,24 @@ function render() {
   document.getElementById('stat-total').textContent = tasks.length;
   document.getElementById('stat-accounts').textContent = activeAccounts;
 
-  // Body — full rebuild
-  console.log('[render] FULL RENDER called — accounts will rebuild. Stack:', new Error().stack.split('\n').slice(1,4).join(' | '));
+  // Body
   const wrap = document.getElementById('body-wrap');
   wrap.innerHTML = '';
 
-  // ── TODAY'S TASKS (in its own container so renderTasksOnly can target it) ──
-  const tasksWrap = document.createElement('div');
-  tasksWrap.id = 'tasks-section-wrap';
-  wrap.appendChild(tasksWrap);
-
+  // ── TODAY'S TASKS ──
   const tasksSec = makeSectionHeader('Today\'s Tasks', tasks.length, tasks.length === doneCount && tasks.length > 0 ? 'green' : 'accent');
-  tasksWrap.appendChild(tasksSec);
+  wrap.appendChild(tasksSec);
 
   if (tasks.length === 0) {
     const es = document.createElement('div');
     es.className = 'empty-state';
     es.innerHTML = '<div class="es-icon">📭</div><p>No tasks assigned for today.</p>';
-    tasksWrap.appendChild(es);
+    wrap.appendChild(es);
   } else if (doneCount === tasks.length) {
     const banner = document.createElement('div');
     banner.className = 'all-done-banner';
     banner.innerHTML = '<h3>🎉 All done for today!</h3><p>Every task is complete. Nice work — check back tomorrow.</p>';
-    tasksWrap.appendChild(banner);
+    wrap.appendChild(banner);
   } else {
     const list = document.createElement('div');
     list.className = 'tasks-list';
@@ -869,22 +805,8 @@ function render() {
       const tid = taskId(task, idx);
       list.appendChild(buildTaskCard(task, idx, tid, rep));
     });
-    tasksWrap.appendChild(list);
+    wrap.appendChild(list);
   }
-
-  // ── MEETING INSIGHTS ──
-  const insightsHd = makeSectionHeader('Meeting Insights', '', 'accent');
-  insightsHd.style.marginTop = '36px';
-  wrap.appendChild(insightsHd);
-  const insightsContainer = document.createElement('div');
-  insightsContainer.id = 'insights-container';
-  insightsContainer.innerHTML = '<div style="padding:16px;color:var(--text3);font-size:13px;text-align:center">Loading insights...</div>';
-  wrap.appendChild(insightsContainer);
-  fetchMeetingInsights().then(data => {
-    insightsContainer.innerHTML = buildMeetingInsightsPanel(data);
-  }).catch(() => {
-    insightsContainer.innerHTML = '<div style="padding:16px;color:var(--text3);font-size:13px;text-align:center">Could not load meeting insights.</div>';
-  });
 
   // ── SEQUENCE PROGRESS ──
   const accounts = getRepAccounts(rep);
@@ -1000,8 +922,7 @@ function buildActionBtn(task, tid) {
     const to = encodeURIComponent(task.email || '');
     const subj = encodeURIComponent('Quick intro — Rylem Staffing');
     const body = encodeURIComponent(task.message_body || '');
-    return `<a class="btn btn-action email" href="https://outlook.office.com/mail/deeplink/compose?to=${to}&subject=${subj}&body=${body}" target="_blank" rel="noopener">✉️ Open Outlook</a>`
-      + `<button class="btn btn-action email" onclick="handleAIEmail('${escAttr(task.contact)}','${escAttr(task.title||'')}','${escAttr(task.company)}','${tid}')">🤖 AI Email</button>`;
+    return `<a class="btn btn-action email" href="https://outlook.office.com/mail/deeplink/compose?to=${to}&subject=${subj}&body=${body}" target="_blank" rel="noopener">✉️ Open Outlook</a>`;
   }
   if (type === 'call') {
     if (task.phone) {
@@ -1040,9 +961,10 @@ async function handleDone(rep, tid, company) {
   // Write to Supabase (also refreshes accounts + tasks via markDone)
   await markDone(rep, tid);
 
-  // Refresh tasks only — do NOT rebuild the accounts section (would wipe bulk selection)
+  // Refresh tasks from Supabase
   state.supabaseTasks = await fetchRepTasks(rep);
-  renderTasksOnly();
+  state.supabaseAccounts = await fetchRepAccounts(rep);
+  render();
 }
 
 function handleSkip(rep, tid) {
@@ -1083,19 +1005,11 @@ function copyText(text, btn) {
 
 // ─── ACCOUNTS / SEQUENCE (SUPABASE) ──────────────────────
 async function fetchRepAccounts(rep) {
-  const profile = window._rylemProfile || {};
-  const isSdr = profile.role === 'sdr';
-
-  let accounts, accErr;
-  if (isSdr) {
-    // SDRs see ALL accounts — full visibility, claim by action
-    const res = await db.from('accounts').select('*').order('company');
-    accounts = res.data; accErr = res.error;
-  } else {
-    // BDMs and admins see their own assigned accounts
-    const res = await db.from('accounts').select('*').eq('assigned_rep', rep);
-    accounts = res.data; accErr = res.error;
-  }
+  // Get accounts assigned to this rep with their contacts and sequences
+  const { data: accounts, error: accErr } = await db
+    .from('accounts')
+    .select('*')
+    .eq('assigned_rep', rep);
   if (accErr) { console.error('accounts fetch error:', accErr); return []; }
 
   // Get contact counts per account via individual head requests (reliable, no row limit)
@@ -1116,8 +1030,7 @@ async function fetchRepAccounts(rep) {
       sequence_step: 0,
       days_since_touch: daysSinceTouch,
       contact_count: countMap[a.id] || 0,
-      contacts: null, // loaded on expand
-      acct_status: a.status || ''
+      contacts: null // loaded on expand
     };
   });
 }
@@ -1185,20 +1098,6 @@ loadSeqTemplates();
 function openAddLead(prefillCompany, prefillAccountId) {
   document.getElementById('add-lead-modal').classList.add('open');
   document.getElementById('al-rep').value = state.rep;
-  // Restore auto-saved notes if any
-  if (_savedNotes) {
-    document.getElementById('al-notes').value = _savedNotes;
-  }
-  // Auto-set BDM: infer from account if prefilled
-  const profile = window._rylemProfile || {};
-  const bdmSel = document.getElementById('al-bdm');
-  if (prefillAccountId) {
-    const acct = (state.supabaseAccounts || []).find(a => a.id === prefillAccountId);
-    if (acct) { bdmSel.value = acct.assigned_rep || ''; }
-  }
-  // SDRs don't change account ownership — hide that field
-  const repRow = document.getElementById('al-rep').parentElement;
-  repRow.style.display = (profile.role === 'sdr') ? 'none' : '';
   _dupeContact = null;
   _dncBlocked = false;
   document.getElementById('al-dupe').style.display = 'none';
@@ -1215,7 +1114,7 @@ function openAddLead(prefillCompany, prefillAccountId) {
     setTimeout(() => document.getElementById('al-company').focus(), 100);
   }
 }
-function closeAddLead(clearNotes) {
+function closeAddLead() {
   document.getElementById('add-lead-modal').classList.remove('open');
   document.getElementById('add-lead-form').reset();
   document.getElementById('al-status').textContent = '';
@@ -1226,8 +1125,6 @@ function closeAddLead(clearNotes) {
   _dncBlocked = false;
   document.getElementById('al-dupe').style.display = 'none';
   document.getElementById('al-dnc-warn').style.display = 'none';
-  // Only clear saved notes on explicit submit or Cancel click
-  if (clearNotes) { _savedNotes = ''; }
   // Reset sequence selector to default (first template = Cold Outreach)
   _selectedSeqId=_seqTemplates.length?_seqTemplates[0].id:'';
   renderSeqPicker();
@@ -1305,9 +1202,8 @@ function hideDupe() {
 function updateSubmitState() {
   const co = document.getElementById('al-company')?.value.trim();
   const cn = document.getElementById('al-contact')?.value.trim();
-  const bdm = document.getElementById('al-bdm')?.value;
   const blocked = !!_dupeContact || _dncBlocked;
-  document.getElementById('al-submit').disabled = !(co && cn && bdm && !blocked);
+  document.getElementById('al-submit').disabled = !(co && cn && !blocked);
 }
 
 // Enable/disable submit on any input
@@ -1333,7 +1229,6 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
     const rep = document.getElementById('al-rep').value;
     const role = document.getElementById('al-role').value;
     const ownerVal = document.getElementById('al-owner').value;
-    const bdmVal = document.getElementById('al-bdm').value;
     const notes = document.getElementById('al-notes').value.trim();
 
     let accountId;
@@ -1361,7 +1256,6 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
     }
 
     // Create contact
-    const workingRep = window._rylemProfile ? window._rylemProfile.rep_key : state.rep;
     const { data: con, error: conErr } = await db.from('contacts').insert({
       account_id: accountId,
       full_name: contact,
@@ -1371,9 +1265,7 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
       role_type: role,
       status: 'new',
       source: 'manual',
-      owner: ownerVal || null,
-      assigned_bdm: bdmVal || null,
-      working_rep: workingRep
+      owner: ownerVal || null
     }).select().single();
     if (conErr) throw conErr;
 
@@ -1396,7 +1288,8 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
 
     // Create first task
     if (step1) {
-      const dueDate = (step1.day_offset || 0) > 0 ? addBusinessDays(new Date(), step1.day_offset) : new Date();
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + (step1.day_offset || 0));
       await db.from('tasks').insert({
         sequence_id: seq.id,
         contact_id: con.id,
@@ -1429,8 +1322,8 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
     state.supabaseTasks = await fetchRepTasks(state.rep);
     render();
 
-    // Auto-close after 1.5s — clear notes on successful submit
-    setTimeout(() => closeAddLead(true), 1500);
+    // Auto-close after 1.5s
+    setTimeout(closeAddLead, 1500);
 
   } catch(err) {
     console.error('Add lead error:', err);
@@ -1478,9 +1371,7 @@ async function fetchRepTasks(rep) {
 }
 
 async function loadAccountContacts(accountId) {
-  // All roles see all contacts — SDRs claim by starting a sequence
-  let query = db.from('contacts').select('*').eq('account_id', accountId);
-  const { data: contacts } = await query;
+  const { data: contacts } = await db.from('contacts').select('*').eq('account_id', accountId);
   const { data: seqs } = await db.from('sequences').select('*').eq('account_id', accountId);
   return (contacts || []).map(c => {
     const cSeq = (seqs || []).find(s => s.contact_id === c.id);
@@ -1488,9 +1379,7 @@ async function loadAccountContacts(accountId) {
       id: c.id, name: c.full_name, first_name: (c.full_name||'').split(' ')[0],
       title: c.title||'', email: c.email||'', phone: c.phone||'',
       linkedin: c.linkedin_url||'', role: c.role_type||'other',
-      sequence_step: cSeq ? cSeq.current_step + 1 : 0, status: c.status||'new',
-      assigned_bdm: c.assigned_bdm||'',
-      working_rep: c.working_rep||''
+      sequence_step: cSeq ? cSeq.current_step + 1 : 0, status: c.status||'new'
     };
   });
 }
@@ -1510,7 +1399,9 @@ function buildAccountCard(acc) {
   row.dataset.accountId = acc.id;
   row.onclick = () => toggleAccount(acc.id);
   row.innerHTML = `
-    <div class="account-name"><a href="client.html?id=${acc.id}" style="color:var(--text);text-decoration:none" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text)'">${esc(acc.company)}</a></div>
+    <div class="account-name"><a href="client.html?id=${acc.id}" style="color:var(--text);text-decoration:none" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text)'">${esc(acc.company)}</a>
+      <button class="btn-edit" onclick="event.stopPropagation();openEditAccountModal(${acc.id})" title="Edit Account">✏️ Edit</button>
+    </div>
     <div class="account-meta">
       <div class="champion">${ctCount} contact${ctCount !== 1 ? 's' : ''}</div>
       <div>${steps[curStep - 1]?.name || 'New'}</div>
@@ -1536,9 +1427,7 @@ function buildAccountCard(acc) {
   const detail = document.createElement('div');
   detail.className = 'account-detail';
   detail.id = 'acd_' + acc.id;
-  detail.dataset.acctStatus = acc.acct_status || '';
   detail.innerHTML = `<div class="account-detail-hd">All Contacts</div>
-    <div class="select-all-wrap"><input type="checkbox" class="contact-cb" id="sa_${acc.id}" onchange="toggleSelectAll('${acc.id}', this.checked)"><label for="sa_${acc.id}">Select All</label></div>
     <div class="contact-rows" id="cr_${acc.id}"><div style="padding:12px;color:var(--text-dim)">Loading contacts…</div></div>
     <button class="btn btn-add-contact" onclick="event.stopPropagation(); openAddLead('${escAttr(acc.company)}', '${acc.id}')">＋ Add Contact</button>`;
   detail.dataset.loaded = 'false';
@@ -1555,17 +1444,10 @@ function buildDots(steps, curStep) {
   }).join('');
 }
 
-function buildContactRow(c, accountId, acctStatus) {
+function buildContactRow(c) {
   const roleLabels = {champion:'⭐ Champion', budget_holder:'💰 Budget Holder', executive:'👔 Executive', end_user:'🎯 End User', other:'👤 Other'};
   const roleClass = c.role === 'champion' ? 'role-champion' : 'role-' + (c.role || 'other');
   const roleLabel = roleLabels[c.role] || '👤 Other';
-  const landExpand = acctStatus === 'active' ? '<span class="badge-land-expand">🏆 Land &amp; Expand</span>' : '';
-  const bdmNames = {mike:'Mike',julia:'Julia',april:'April'};
-  const sdrNames = {jean:'Jean',dee:'Dee',mike:'Mike',julia:'Julia',april:'April'};
-  const bdmPill = c.assigned_bdm ? `<span class="bdm-pill bdm-${c.assigned_bdm}">${esc(bdmNames[c.assigned_bdm]||c.assigned_bdm)}</span>` : '';
-  const workerPill = c.working_rep
-    ? `<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(16,217,135,.12);color:#10d987;border:1px solid rgba(16,217,135,.25);margin-left:4px">👤 ${esc(sdrNames[c.working_rep]||c.working_rep)}</span>`
-    : `<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(122,143,166,.08);color:#4a5f75;border:1px solid rgba(122,143,166,.15);margin-left:4px">unclaimed</span>`;
   let actionBtns = '';
   if (c.linkedin) {
     actionBtns += `<a class="cbtn" href="${esc(c.linkedin)}" target="_blank" rel="noopener">🔗</a>`;
@@ -1581,14 +1463,12 @@ function buildContactRow(c, accountId, acctStatus) {
     actionBtns += `<a class="cbtn" href="tel:${esc(c.phone)}">${esc(c.phone)}</a>`;
   }
   return `
-    <div class="contact-row" data-contact-id="${c.id || ''}" data-account-id="${accountId || ''}">
-      <input type="checkbox" class="contact-cb" data-contact-id="${c.id || ''}" data-account-id="${accountId || ''}" data-contact-name="${escAttr(c.name)}" onchange="bulkSelectionChanged()">
-      <div class="contact-name">${esc(c.name)}${bdmPill}${workerPill}</div>
-      ${landExpand}
+    <div class="contact-row" data-contact-id="${c.id || ''}">
+      <div class="contact-name">${esc(c.name)}</div>
       <div class="contact-title">${esc(c.title)}</div>
       <span class="contact-role-badge ${roleClass}">${roleLabel}</span>
       <div class="contact-step">Step ${c.sequence_step || 1}</div>
-      <div class="contact-actions">${actionBtns}</div>
+      <div class="contact-actions">${actionBtns}<button class="cbtn-edit" onclick="openEditContactModal('${c.id}')" title="Edit Contact">✏️</button></div>
     </div>`;
 }
 
@@ -1598,20 +1478,12 @@ async function toggleAccount(id) {
   if (!detail) return;
   const open = detail.classList.toggle('open');
   if (row) row.classList.toggle('open', open);
-  if (open) {
-    if (detail.dataset.loaded === 'false') {
-      // First open — fetch contacts from Supabase
-      detail.dataset.loaded = 'true';
-      const contacts = await loadAccountContacts(id);
-      const acctStatus = detail.dataset.acctStatus || '';
-      const cr = document.getElementById('cr_' + id);
-      if (cr) {
-        cr.innerHTML = contacts.length ? contacts.map(c => buildContactRow(c, id, acctStatus)).join('') : '<div style="padding:12px;color:var(--text-dim)">No contacts yet</div>';
-        restoreBulkCheckboxes(cr);
-      }
-    }
-    // Always update bar on every open (handles re-open of already-loaded accounts)
-    updateBulkBar();
+  // Lazy-load contacts on first expand
+  if (open && detail.dataset.loaded === 'false') {
+    detail.dataset.loaded = 'true';
+    const contacts = await loadAccountContacts(id);
+    const cr = document.getElementById('cr_' + id);
+    if (cr) cr.innerHTML = contacts.length ? contacts.map(c => buildContactRow(c)).join('') : '<div style="padding:12px;color:var(--text-dim)">No contacts yet</div>';
   }
 }
 
@@ -1625,6 +1497,125 @@ function defaultSteps() {
   ];
 }
 
+
+// ─── EDIT ACCOUNT ────────────────────────────────────────────────────────────
+async function openEditAccountModal(accId) {
+  document.getElementById('edit-account-modal').classList.add('open');
+  document.getElementById('ea-error').style.display = 'none';
+  document.getElementById('ea-submit').disabled = false;
+  document.getElementById('ea-submit').textContent = 'Save Changes';
+
+  // Fetch fresh account data
+  const { data: acc, error } = await db.from('accounts').select('*').eq('id', accId).single();
+  if (error || !acc) { showToast('Account not found', false); closeEditAccountModal(); return; }
+  _accountCache[accId] = acc;
+
+  document.getElementById('ea-id').value = accId;
+  document.getElementById('ea-company').value = acc.company || '';
+  document.getElementById('ea-domain').value = acc.domain || '';
+  document.getElementById('ea-status').value = acc.status || 'prospecting';
+  document.getElementById('ea-vertical').value = acc.vertical || '';
+  document.getElementById('ea-notes').value = acc.notes || '';
+}
+
+function closeEditAccountModal() {
+  document.getElementById('edit-account-modal').classList.remove('open');
+  document.getElementById('edit-account-form').reset();
+}
+
+document.getElementById('edit-account-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('ea-id').value;
+  const btn = document.getElementById('ea-submit');
+  const err = document.getElementById('ea-error');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  err.style.display = 'none';
+
+  try {
+    const { error } = await db.from('accounts').update({
+      company: document.getElementById('ea-company').value.trim(),
+      domain: document.getElementById('ea-domain').value.trim() || null,
+      status: document.getElementById('ea-status').value,
+      vertical: document.getElementById('ea-vertical').value.trim() || null,
+      notes: document.getElementById('ea-notes').value.trim() || null
+    }).eq('id', id);
+    if (error) throw error;
+    closeEditAccountModal();
+    await loadAll();
+    showToast('Account updated', true);
+  } catch(e) {
+    err.textContent = 'Save failed: ' + (e.message || e);
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Save Changes';
+  }
+});
+
+// ─── EDIT CONTACT ─────────────────────────────────────────────────────────────
+async function openEditContactModal(contactId) {
+  document.getElementById('edit-contact-modal').classList.add('open');
+  document.getElementById('ec-error').style.display = 'none';
+  document.getElementById('ec-submit').disabled = false;
+  document.getElementById('ec-submit').textContent = 'Save Changes';
+
+  const { data: c, error } = await db.from('contacts').select('*').eq('id', contactId).single();
+  if (error || !c) { showToast('Contact not found', false); closeEditContactModal(); return; }
+
+  document.getElementById('ec-id').value = contactId;
+  document.getElementById('ec-name').value = c.full_name || '';
+  document.getElementById('ec-title').value = c.title || '';
+  document.getElementById('ec-email').value = c.email || '';
+  document.getElementById('ec-phone').value = c.phone || '';
+  document.getElementById('ec-linkedin').value = c.linkedin_url || '';
+  document.getElementById('ec-role').value = c.role_type || 'other';
+  document.getElementById('ec-notes').value = c.notes || '';
+}
+
+function closeEditContactModal() {
+  document.getElementById('edit-contact-modal').classList.remove('open');
+  document.getElementById('edit-contact-form').reset();
+}
+
+document.getElementById('edit-contact-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('ec-id').value;
+  const btn = document.getElementById('ec-submit');
+  const err = document.getElementById('ec-error');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  err.style.display = 'none';
+
+  try {
+    const { error } = await db.from('contacts').update({
+      full_name: document.getElementById('ec-name').value.trim(),
+      title: document.getElementById('ec-title').value.trim() || null,
+      email: document.getElementById('ec-email').value.trim() || null,
+      phone: document.getElementById('ec-phone').value.trim() || null,
+      linkedin_url: document.getElementById('ec-linkedin').value.trim() || null,
+      role_type: document.getElementById('ec-role').value,
+      notes: document.getElementById('ec-notes').value.trim() || null
+    }).eq('id', id);
+    if (error) throw error;
+    closeEditContactModal();
+    // Reload the parent account detail if open
+    const detail = document.querySelector('.account-detail.open');
+    if (detail && detail.dataset.loaded === 'true') {
+      const accId = detail.id.replace('acd_', '');
+      const contacts = await loadAccountContacts(accId);
+      const cr = document.getElementById('cr_' + accId);
+      if (cr) cr.innerHTML = contacts.length ? contacts.map(c => buildContactRow(c)).join('') : '<div style="padding:12px;color:var(--text-dim)">No contacts yet</div>';
+    }
+    showToast('Contact updated', true);
+  } catch(e) {
+    err.textContent = 'Save failed: ' + (e.message || e);
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Save Changes';
+  }
+});
+
+
 // ─── TOAST ────────────────────────────────────────────────
 let toastTimer;
 function showToast(msg, green) {
@@ -1633,137 +1624,6 @@ function showToast(msg, green) {
   t.className = 'show' + (green ? ' green-toast' : '');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { t.className = ''; }, 2500);
-}
-
-// ─── MEETING INSIGHTS ─────────────────────────────────────
-async function fetchMeetingInsights() {
-  const now = new Date();
-  const weekStart = new Date(now);
-  weekStart.setDate(now.getDate() - now.getDay()); // Sunday
-  weekStart.setHours(0,0,0,0);
-  const weekStartStr = weekStart.toISOString();
-
-  // Meetings this week
-  const { data: meetings, error } = await db.from('activity_log')
-    .select('id, rep, event_type, created_at')
-    .ilike('event_type', '%meeting%')
-    .gte('created_at', weekStartStr);
-  if (error) { console.warn('Meeting insights error:', error); return null; }
-
-  // Total leads added this week (for conversion rate)
-  const { count: leadsThisWeek } = await db.from('activity_log')
-    .select('id', { count: 'exact', head: true })
-    .eq('event_type', 'lead_added')
-    .gte('created_at', weekStartStr);
-
-  const meetingCount = (meetings || []).length;
-  const byRep = {};
-  (meetings || []).forEach(m => {
-    const r = m.rep || 'unknown';
-    byRep[r] = (byRep[r] || 0) + 1;
-  });
-  const conversion = (leadsThisWeek && leadsThisWeek > 0) ? Math.round((meetingCount / leadsThisWeek) * 100) : 0;
-
-  return { meetingCount, byRep, conversion, leadsThisWeek: leadsThisWeek || 0 };
-}
-
-function buildMeetingInsightsPanel(data) {
-  if (!data) return '';
-  const repNames = {mike:'Mike Dades',julia:'Julia Dusseau',april:'April Melton',jean:'Jean',dee:'Dee'};
-  const maxMeetings = Math.max(1, ...Object.values(data.byRep));
-  const repRows = Object.entries(data.byRep).sort((a,b) => b[1]-a[1]).map(([rep, count]) => {
-    const pct = Math.round((count / maxMeetings) * 100);
-    return `<div class="insight-rep-row">
-      <div class="insight-rep-name">${esc(repNames[rep] || rep)}</div>
-      <div class="insight-rep-bar-wrap"><div class="insight-rep-bar" style="width:${pct}%"></div></div>
-      <div class="insight-rep-count">${count}</div>
-    </div>`;
-  }).join('');
-
-  return `<div class="insights-panel">
-    <div class="insights-grid">
-      <div class="insight-card"><div class="ic-val">${data.meetingCount}</div><div class="ic-label">Meetings This Week</div></div>
-      <div class="insight-card green"><div class="ic-val">${data.conversion}%</div><div class="ic-label">Lead → Meeting Rate</div></div>
-      <div class="insight-card purple"><div class="ic-val">${data.leadsThisWeek}</div><div class="ic-label">Leads Added</div></div>
-      <div class="insight-card yellow"><div class="ic-val">${Object.keys(data.byRep).length}</div><div class="ic-label">Active Reps</div></div>
-    </div>
-    ${repRows ? '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Meetings by Rep</div><div class="insights-reps">' + repRows + '</div>' : ''}
-  </div>`;
-}
-
-// ─── BUSINESS DAYS HELPER ─────────────────────────────────
-function addBusinessDays(startDate, days) {
-  const US_HOLIDAYS = [
-    '01-01','01-20','02-17','05-26','06-19','07-04','09-01','10-13','11-11','11-27','12-25'
-  ];
-  const d = new Date(startDate);
-  let added = 0;
-  while (added < days) {
-    d.setDate(d.getDate() + 1);
-    const dow = d.getDay();
-    if (dow === 0 || dow === 6) continue;
-    const mmdd = String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-    if (US_HOLIDAYS.includes(mmdd)) continue;
-    added++;
-  }
-  return d;
-}
-
-// ─── NOTES AUTO-SAVE ─────────────────────────────────────
-let _savedNotes = '';
-document.getElementById('al-notes')?.addEventListener('input', (e) => {
-  _savedNotes = e.target.value;
-});
-
-// ─── AI EMAIL GENERATION ─────────────────────────────────
-async function generateAIEmail(contactName, contactTitle, companyName, context) {
-  const btn = event?.target;
-  if (btn) { btn.disabled = true; btn.textContent = 'Generating...'; }
-  try {
-    const resp = await fetch('https://rylem-ai-chat.rylem-ai.workers.dev', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        mode: 'generate',
-        system_prompt: 'You are a staffing recruiter at Rylem, a nationwide staffing agency (IT, Finance, Marketing, Creative, HR, Admin). Write personalized cold outreach emails that are signal-based, problem-first, and under 150 words. Reference the prospect\'s company and role. No subject line. Sign off with just your first name.',
-        user_prompt: `Write a personalized cold outreach email to ${contactName}, ${contactTitle} at ${companyName}. ${context || 'Reference their company and role to show you researched them.'} Keep it under 150 words, professional but warm. Problem-first structure. End with a timeline CTA like "Worth 15 minutes this week?"`,
-        max_tokens: 300
-      })
-    });
-    if (!resp.ok) {
-      const errText = await resp.text();
-      throw new Error('AI service returned ' + resp.status + ': ' + errText);
-    }
-    const data = await resp.json();
-    const emailText = data.message || data.response || data.content || data.text || '';
-    if (!emailText) throw new Error('Empty response from AI service');
-    if (btn) { btn.disabled = false; btn.textContent = '🤖 AI Email'; }
-    return emailText;
-  } catch (err) {
-    console.error('AI email generation error:', err);
-    if (btn) { btn.disabled = false; btn.textContent = '🤖 AI Email'; }
-    showToast('AI email error: ' + (err.message || 'Unknown error'));
-    return null;
-  }
-}
-
-async function handleAIEmail(contactName, contactTitle, companyName, tid) {
-  const email = await generateAIEmail(contactName, contactTitle, companyName);
-  if (!email) return;
-  // Show in the message area
-  const msgWrap = document.getElementById('msg_' + tid);
-  const toggle = document.getElementById('toggle_' + tid);
-  if (msgWrap) {
-    const body = msgWrap.querySelector('.task-message-body');
-    if (body) {
-      body.querySelector('.task-message-text').textContent = email;
-      const copyBtn = body.querySelector('.btn-copy');
-      if (copyBtn) copyBtn.onclick = () => copyText(email, copyBtn);
-    }
-    msgWrap.classList.add('open');
-    if (toggle) toggle.classList.add('open');
-  }
-  showToast('AI email generated!', true);
 }
 
 // ─── UTILS ───────────────────────────────────────────────
@@ -1905,185 +1765,168 @@ document.addEventListener('click', e => {
   }
 });
 
-// ─── BULK SEQUENCE START ─────────────────────────────────
-// Persistent selection state — survives re-renders when accounts expand
-const _bulkSel = new Map(); // contact_id → {contact_id, account_id, name}
+// ─── ACTIVITY METRICS ─────────────────────────────────────
+let _metricsInterval = null;
 
-function getSelectedContacts() {
-  return Array.from(_bulkSel.values());
+function getWeekRange() {
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun
+  const mondayOffset = day === 0 ? -6 : 1 - day;
+  const monday = new Date(now);
+  monday.setDate(now.getDate() + mondayOffset);
+  monday.setHours(0, 0, 0, 0);
+  return { start: monday.toISOString(), end: now.toISOString() };
 }
 
-function bulkSelectionChanged() {
-  // Sync DOM checkboxes → _bulkSel
-  const allCbs = document.querySelectorAll('.contact-rows .contact-cb[data-contact-id]');
-  console.log('[bulk] bulkSelectionChanged fired, DOM checkboxes found:', allCbs.length, 'current _bulkSel size:', _bulkSel.size);
-  allCbs.forEach(cb => {
-    if (cb.checked) {
-      _bulkSel.set(cb.dataset.contactId, {
-        contact_id: cb.dataset.contactId,
-        account_id: cb.dataset.accountId,
-        name: cb.dataset.contactName
-      });
-    } else {
-      _bulkSel.delete(cb.dataset.contactId);
-    }
-  });
-  updateBulkBar();
+async function fetchMeetings(rep) {
+  const { start, end } = getWeekRange();
+  let meetingCount = 0;
+  try {
+    const { count } = await db
+      .from('activity_log')
+      .select('id', { count: 'exact', head: true })
+      .eq('rep', rep)
+      .eq('action_type', 'meeting_booked')
+      .gte('created_at', start)
+      .lte('created_at', end);
+    meetingCount = count || 0;
+  } catch(e) {
+    try {
+      const { count } = await db
+        .from('activity_log')
+        .select('id', { count: 'exact', head: true })
+        .eq('rep', rep)
+        .eq('event_type', 'meeting_booked')
+        .gte('created_at', start)
+        .lte('created_at', end);
+      meetingCount = count || 0;
+    } catch(e2) { meetingCount = 0; }
+  }
+  return meetingCount;
 }
 
-function updateBulkBar() {
-  const count = _bulkSel.size;
-  const bar = document.getElementById('bulk-bar');
-  if (!bar) return;
-  if (count > 0) {
-    document.getElementById('bulk-count').textContent = count + ' contact' + (count !== 1 ? 's' : '') + ' selected';
-    bar.classList.add('visible');
-  } else {
-    bar.classList.remove('visible');
+async function renderMeetings(rep) {
+  try {
+    const count = await fetchMeetings(rep);
+    document.getElementById('metric-meetings').textContent = count;
+    document.getElementById('metric-meetings-sub').textContent = count === 0 ? 'None booked yet this week' : count === 1 ? '1 booked since Monday' : count + ' booked since Monday';
+  } catch(e) {
+    console.warn('Meetings fetch error:', e);
   }
 }
 
-function restoreBulkCheckboxes(container) {
-  // After re-rendering a contact list, re-check any previously selected contacts
-  if (!_bulkSel.size) return;
-  container.querySelectorAll('.contact-cb[data-contact-id]').forEach(cb => {
-    if (_bulkSel.has(cb.dataset.contactId)) cb.checked = true;
-  });
-}
-
-function toggleSelectAll(accountId, checked) {
-  const cr = document.getElementById('cr_' + accountId);
-  if (!cr) return;
-  cr.querySelectorAll('.contact-cb[data-contact-id]').forEach(cb => {
-    cb.checked = checked;
-    if (checked) {
-      _bulkSel.set(cb.dataset.contactId, {
-        contact_id: cb.dataset.contactId,
-        account_id: cb.dataset.accountId,
-        name: cb.dataset.contactName
-      });
-    } else {
-      _bulkSel.delete(cb.dataset.contactId);
-    }
-  });
-  updateBulkBar();
-}
-
-function bulkDeselectAll() {
-  _bulkSel.clear();
-  document.querySelectorAll('.contact-cb').forEach(cb => { cb.checked = false; });
-  document.getElementById('bulk-bar').classList.remove('visible');
-}
-
-// Populate bulk sequence dropdown when templates load
-function populateBulkSeqSelect() {
-  const sel = document.getElementById('bulk-seq-select');
-  sel.innerHTML = _seqTemplates.map(t => `<option value="${t.id}">${esc(t.name)}</option>`).join('');
-}
-// Hook into loadSeqTemplates
-const _origLoadSeq = loadSeqTemplates;
-loadSeqTemplates = async function() {
-  await _origLoadSeq();
-  populateBulkSeqSelect();
-};
-// If templates already loaded, populate now
-if (_seqTemplates.length) populateBulkSeqSelect();
-
-async function bulkStartSequences() {
-  const selected = getSelectedContacts();
-  if (!selected.length) return;
-  const templateId = document.getElementById('bulk-seq-select').value;
-  if (!templateId) { showToast('Select a sequence first'); return; }
-
-  const btn = document.getElementById('bulk-start-btn');
-  btn.disabled = true;
-  btn.textContent = 'Starting...';
-
-  const rep = window._rylemProfile ? window._rylemProfile.rep_key : state.rep;
-  const tpl = _seqTemplates.find(t => t.id === templateId);
-  const tplName = tpl ? tpl.name : 'Sequence';
-
-  // Get step 1 for this template
-  const { data: step1 } = await db.from('sequence_steps').select('*')
-    .eq('template_id', templateId).eq('step_number', 1).single();
-
-  let started = 0, skipped = 0;
-
-  for (const c of selected) {
-    // Check for active sequence
-    const { data: existing } = await db.from('sequences').select('id')
-      .eq('contact_id', c.contact_id).eq('status', 'active');
-    if (existing && existing.length > 0) { skipped++; continue; }
-
-    // Fetch contact to get assigned_bdm for alias pool
-    const { data: ctRow } = await db.from('contacts').select('assigned_bdm, working_rep, assigned_alias').eq('id', c.contact_id).single();
-    const contactBdm = ctRow?.assigned_bdm || null;
-
-    // If contact has no working_rep yet, set it to the logged-in user
-    if (!ctRow?.working_rep) {
-      await db.from('contacts').update({ working_rep: rep }).eq('id', c.contact_id);
-    }
-
-    // If assigned_bdm is set but no alias yet, trigger alias assignment by touching assigned_bdm
-    if (contactBdm && !ctRow?.assigned_alias) {
-      await db.from('contacts').update({ assigned_bdm: contactBdm }).eq('id', c.contact_id);
-    }
-
-    // Insert sequence
-    const { data: seq, error: seqErr } = await db.from('sequences').insert({
-      contact_id: c.contact_id,
-      account_id: c.account_id,
-      template_id: templateId,
-      rep: rep,
-      status: 'active',
-      current_step: 0,
-      started_at: new Date().toISOString()
-    }).select().single();
-    if (seqErr) { console.error('Seq insert error:', seqErr); skipped++; continue; }
-
-    // Re-fetch contact to get assigned_alias (may have been set by trigger)
-    const { data: ctUpdated } = await db.from('contacts').select('assigned_alias').eq('id', c.contact_id).single();
-
-    // Insert first task — rep = working_rep (SDR credit), sent_from = assigned_alias (BDM pool)
-    if (step1) {
-      const bulkDueDate = (step1.day_offset || 0) > 0 ? addBusinessDays(new Date(), step1.day_offset) : new Date();
-      await db.from('tasks').insert({
-        sequence_id: seq.id,
-        contact_id: c.contact_id,
-        account_id: c.account_id,
-        rep: rep,
-        sent_from: ctUpdated?.assigned_alias || null,
-        step_number: 1,
-        channel: step1.channel || 'linkedin',
-        action: step1.instructions || 'Step 1',
-        due_date: bulkDueDate.toISOString().split('T')[0],
-        completed: false
-      });
-    }
-
-    // Log activity — rep = working_rep (SDR gets credit)
-    await db.from('activity_log').insert({
-      event_type: 'sequence_started',
-      description: 'Started ' + tplName + ' sequence',
-      contact_id: c.contact_id,
-      account_id: c.account_id,
-      rep: rep
-    });
-
-    started++;
-  }
-
-  showToast('Sequences started for ' + started + ' contacts. ' + skipped + ' skipped (already active).', true);
-  bulkDeselectAll();
-  btn.disabled = false;
-  btn.textContent = 'Start Sequence';
-
-  // Refresh data
-  state.supabaseTasks = await fetchRepTasks(state.rep);
-  state.supabaseAccounts = await fetchRepAccounts(state.rep);
-  render();
+function startMetricsRefresh(rep) {
+  if (_metricsInterval) clearInterval(_metricsInterval);
+  renderMeetings(rep);
+  _metricsInterval = setInterval(() => renderMeetings(state.rep), 5 * 60 * 1000);
 }
 </script>
+
+<!-- Edit Account Modal -->
+<div class="modal-overlay" id="edit-account-modal">
+  <div class="modal-card edit-modal-card">
+    <div class="modal-header">
+      <h3>✏️ Edit Account</h3>
+      <button class="modal-close" onclick="closeEditAccountModal()">✕</button>
+    </div>
+    <form id="edit-account-form">
+      <input type="hidden" id="ea-id">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Company Name *</label>
+          <input type="text" id="ea-company" required placeholder="e.g. Stripe">
+        </div>
+        <div class="form-group">
+          <label>Website</label>
+          <input type="text" id="ea-domain" placeholder="e.g. stripe.com">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Status</label>
+          <select id="ea-status">
+            <option value="prospecting">Prospecting</option>
+            <option value="active">Active</option>
+            <option value="client">Client</option>
+            <option value="dormant">Dormant</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Industry / Vertical</label>
+          <input type="text" id="ea-vertical" placeholder="e.g. Technology, Finance">
+        </div>
+      </div>
+      <div class="form-group full">
+        <label>Notes</label>
+        <textarea id="ea-notes" rows="3" placeholder="Internal notes about this account..."></textarea>
+      </div>
+      <div id="ea-error" style="color:var(--neon-red);font-size:13px;margin-bottom:10px;display:none"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button type="button" class="btn btn-cancel" onclick="closeEditAccountModal()">Cancel</button>
+        <button type="submit" class="btn btn-submit" id="ea-submit">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Contact Modal -->
+<div class="modal-overlay" id="edit-contact-modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>✏️ Edit Contact</h3>
+      <button class="modal-close" onclick="closeEditContactModal()">✕</button>
+    </div>
+    <form id="edit-contact-form">
+      <input type="hidden" id="ec-id">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input type="text" id="ec-name" required placeholder="e.g. Jane Smith">
+        </div>
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="ec-title" placeholder="e.g. VP Engineering">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="ec-email" placeholder="e.g. jane@stripe.com">
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="tel" id="ec-phone" placeholder="e.g. +1 206 555 0100">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>LinkedIn URL</label>
+          <input type="url" id="ec-linkedin" placeholder="https://linkedin.com/in/...">
+        </div>
+        <div class="form-group">
+          <label>Role Type</label>
+          <select id="ec-role">
+            <option value="champion">Champion</option>
+            <option value="budget_holder">Budget Holder</option>
+            <option value="executive">Executive</option>
+            <option value="end_user">End User</option>
+            <option value="influencer">Influencer</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group full">
+        <label>Notes</label>
+        <textarea id="ec-notes" rows="2" placeholder="Contact notes..."></textarea>
+      </div>
+      <div id="ec-error" style="color:var(--neon-red);font-size:13px;margin-bottom:10px;display:none"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button type="button" class="btn btn-cancel" onclick="closeEditContactModal()">Cancel</button>
+        <button type="submit" class="btn btn-submit" id="ec-submit">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 </body>
 </html>
-

@@ -908,15 +908,36 @@ function showAddContactModal(){
         <option value="influencer">Influencer</option>
       </select>
       <div id="ac-err" style="color:var(--neon-red);font-size:12px;min-height:16px"></div>
+      <div id="ac-dupe-warn" style="display:none;background:rgba(255,200,0,.08);border:1px solid rgba(255,200,0,.3);border-radius:8px;padding:10px 14px;font-size:13px;color:#ffcc00;text-align:center">🚫 Duplicate — this name already exists on this account</div>
       <button id="ac-submit" onclick="submitAddContact()" style="padding:10px;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;border:none;background:var(--neon-cyan);color:#000;transition:.15s">Add Contact</button>
     </div>
   </div>`;
   m.addEventListener('click',e=>{if(e.target===m)m.remove()});
   document.body.appendChild(m);
+  const nameInput = document.getElementById('ac-name');
+  let _dupeTimer = null;
+  nameInput.addEventListener('input', () => {
+    clearTimeout(_dupeTimer);
+    const dupeWarn = document.getElementById('ac-dupe-warn');
+    dupeWarn.style.display = 'none';
+    const val = nameInput.value.trim().replace(/\s+/g,' ');
+    if (val.length < 2) return;
+    _dupeTimer = setTimeout(async () => {
+      const normalized = val.toLowerCase();
+      const { data: cs } = await db.from('contacts').select('id,full_name').eq('account_id', account.id);
+      const found = (cs||[]).find(c => (c.full_name||'').toLowerCase().trim().replace(/\s+/g,' ') === normalized);
+      if (found) {
+        dupeWarn.style.display = 'block';
+        document.getElementById('ac-submit').disabled = true;
+      } else {
+        document.getElementById('ac-submit').disabled = false;
+      }
+    }, 350);
+  });
 }
 function inputStyle(){return 'width:100%;padding:10px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;outline:none;'}
 async function submitAddContact(){
-  const name=document.getElementById('ac-name').value.trim();
+  const name=document.getElementById('ac-name').value.trim().replace(/\s+/g,' ');
   const title=document.getElementById('ac-title').value.trim();
   const email=document.getElementById('ac-email').value.trim();
   const phone=document.getElementById('ac-phone').value.trim();
@@ -926,9 +947,11 @@ async function submitAddContact(){
   const btn=document.getElementById('ac-submit');
   errEl.textContent='';
   if(!name){errEl.textContent='Name is required';return;}
-  // Dupe check
-  const{data:dupes}=await db.from('contacts').select('id').eq('account_id',account.id).ilike('full_name',name);
-  if(dupes&&dupes.length){errEl.textContent='Contact with this name already exists on this account';return;}
+  // Robust dupe check: normalize input, check same-account by LOWER(name)
+  const normalizedName = name.toLowerCase();
+  const {data:allContacts} = await db.from('contacts').select('id,full_name,account_id').eq('account_id',account.id);
+  const dupe = (allContacts||[]).find(c => (c.full_name||'').toLowerCase().trim().replace(/\s+/g,' ') === normalizedName);
+  if(dupe){errEl.textContent='Contact with this name already exists on this account';btn.disabled=false;btn.textContent='Add Contact';return;}
   btn.disabled=true;btn.textContent='Adding...';
   const{data,error}=await db.from('contacts').insert({account_id:account.id,full_name:name,title,email:email||null,phone:phone||null,linkedin_url:linkedin||null,role_type,status:'new'}).select().single();
   if(error){errEl.textContent=error.message;btn.disabled=false;btn.textContent='Add Contact';return;}

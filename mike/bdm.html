@@ -740,6 +740,38 @@ button,input,select{font-family:inherit}
     </div>
   </div>
 
+  <!-- VERIFICATION FAILURE MODAL -->
+  <div class="modal-overlay" id="verify-fail-modal" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal-card" style="max-width:640px">
+      <div class="modal-header">
+        <h3 style="color:var(--red)">⚠️ Email Verification Failed</h3>
+        <button class="modal-close" onclick="document.getElementById('verify-fail-modal').classList.remove('open')">✕</button>
+      </div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">The AI-generated email did not pass verification. Fix the issues below, or override (all overrides are logged).</p>
+      <div style="margin-bottom:14px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--red);text-transform:uppercase;margin-bottom:6px">Errors</div>
+        <div id="vf-errors" style="background:var(--red-dim);border:1px solid rgba(240,64,96,.2);border-radius:8px;padding:10px 12px"></div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--yellow);text-transform:uppercase;margin-bottom:6px">Warnings</div>
+        <div id="vf-warnings" style="background:var(--yellow-dim);border:1px solid rgba(245,200,66,.2);border-radius:8px;padding:10px 12px"></div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:6px">Generated Subject</div>
+        <div id="vf-subject" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text)"></div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:6px">Generated Body</div>
+        <div id="vf-body" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text);white-space:pre-wrap;max-height:200px;overflow-y:auto"></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-action email" id="vf-regenerate" style="background:var(--accent-dim);border-color:var(--accent-border);color:var(--accent)">🔄 Regenerate</button>
+        <button class="btn btn-action email" id="vf-edit">✏️ Edit Manually</button>
+        <button class="btn" id="vf-override" style="background:var(--red-dim);border-color:rgba(240,64,96,.3);color:var(--red)">⚠️ Override & Send</button>
+      </div>
+    </div>
+  </div>
+
   <!-- BULK ADD MODAL -->
   <div class="modal-overlay" id="bulk-add-modal">
     <div class="modal-card" style="max-width:680px">
@@ -1177,7 +1209,7 @@ function buildActionBtn(task, tid) {
   }
   if (type === 'email') {
     const to = encodeURIComponent(task.email || '');
-    const subj = encodeURIComponent('Quick intro - Rylem Staffing');
+    const subj = encodeURIComponent(''); // Subject comes from AI generation — fill after clicking 🤖 AI Email
     const body = encodeURIComponent(task.message_body || '');
     const alias = task.sent_from || '';
     const aliasLabel = alias ? `<div style="font-size:10px;color:var(--blue);margin-bottom:4px">📤 From: ${esc(alias)}</div>` : '';
@@ -1271,35 +1303,118 @@ function copyText(text, btn) {
   });
 }
 
-// ─── AI EMAIL GENERATION ─────────────────────────────────
+// ─── AI EMAIL GENERATION (v2 — verified, JSON output, enriched payload) ───
 async function generateAIEmail(tid, contactName, contactTitle, company) {
-  // Find the button that triggered this
   const btns = document.querySelectorAll(`#ta_${tid} .btn-ai-email`);
   const btn = btns[0];
   if (btn) { btn.disabled = true; btn.textContent = '🤖 Generating...'; }
   showToast('🤖 Generating email...', true);
 
-  // Determine sender name from task's sent_from field
   const task = (state.supabaseTasks || []).find(t => t.id === tid);
-  const senderAlias = task?.sent_from || '';
+  if (!task) {
+    console.error('[generateAIEmail] task not found for tid:', tid);
+    showToast('❌ Task not found', false);
+    if (btn) { btn.disabled = false; btn.textContent = '🤖 AI Email'; }
+    return null;
+  }
+
+  // ── Enrich: pull contact + account data from Supabase ──
+  let contact = null, account = null;
+  try {
+    if (task.contact_id) {
+      const { data: c } = await db.from('contacts').select('*').eq('id', task.contact_id).single();
+      contact = c;
+    }
+    if (task.account_id) {
+      const { data: a } = await db.from('accounts').select('*').eq('id', task.account_id).single();
+      account = a;
+    }
+  } catch(e) { console.error('[generateAIEmail] Supabase lookup failed:', e); }
+
+  // Fallback: find contact by name if ID missing
+  if (!contact && contactName) {
+    try {
+      const { data: clist } = await db.from('contacts').select('*').ilike('full_name', contactName).limit(1);
+      if (clist?.[0]) contact = clist[0];
+    } catch(e) { /* ignore */ }
+  }
+
+  // ── Build structured input block ──
+  const firstName = (contact?.full_name || contactName || '').split(' ')[0];
+  const lastName = (contact?.full_name || contactName || '').split(' ').slice(1).join(' ');
+  const senderAlias = task.sent_from || '';
   const senderFirstName = senderAlias.split('@')[0].split('.')[0].charAt(0).toUpperCase() + senderAlias.split('@')[0].split('.')[0].slice(1) || 'Mike';
 
-  const systemPrompt = `You are a staffing recruiter at Rylem, a specialized staffing firm. Write signal-based cold outreach emails following these rules:
-- Lead with a PROBLEM or SIGNAL (hiring pain, growth, turnover) - never a generic intro
-- Under 150 words, conversational tone, no buzzwords
-- End with a specific timeline CTA (e.g. "15 min this Thursday or Friday?")
-- No subject line - just the email body
-- First name basis, professional but human
-- Reference the prospect's role and company specifically
-- Sign off as: ${senderFirstName} from Rylem Staffing - always use this exact first name, never make up a different name`;
+  const PROSPECT = {
+    first_name: firstName,
+    last_name: lastName,
+    title: contact?.title || contactTitle || '',
+    company_name: account?.company || company || '',
+    company_size: '', // not tracked yet
+    industry: ''
+  };
 
-  // Build signal context from task's account data
-  const signalCtx = [];
-  if (task?.trigger_event) signalCtx.push(task.trigger_event);
-  if (task?.open_roles_count) signalCtx.push(`${task.open_roles_count} open roles`);
-  const signalText = signalCtx.length ? signalCtx.join('. ') : '';
+  // Signal — fail if missing
+  const signalDetail = task.trigger_event || account?.trigger_event || '';
+  const signalSource = account?.trigger_date ? `trigger_date: ${account.trigger_date}` : '';
+  if (!signalDetail && !task.open_roles_count && !account?.open_roles_count) {
+    console.error('[generateAIEmail] No signal data for task:', tid);
+    showToast('❌ No signal data — add a trigger event or open roles to this account before generating', false);
+    if (btn) { btn.disabled = false; btn.textContent = '🤖 AI Email'; }
+    return null;
+  }
+  const SIGNAL = {
+    type: task.trigger_event ? 'trigger' : 'open_roles',
+    detail: signalDetail || `${task.open_roles_count || account?.open_roles_count || 0} open roles`,
+    source: signalSource || 'account_data'
+  };
 
-  const userPrompt = `Write a personalized cold outreach email to ${contactName}, ${contactTitle} at ${company}. You are ${senderFirstName} from Rylem Staffing. ${signalText ? 'Use this signal: ' + signalText + '. ' : ''}Reference a plausible hiring signal or pain point for their role/industry. Sign off as ${senderFirstName}.`;
+  // Sequence context
+  let priorEmails = [], priorReplies = [];
+  try {
+    if (task.sequence_id) {
+      const { data: seqTasks } = await db.from('tasks').select('*').eq('sequence_id', task.sequence_id).eq('completed', true).order('step_number');
+      if (seqTasks) {
+        for (const st of seqTasks) {
+          const entry = { step: st.step_number, channel: st.channel, date: st.completed_at || '' };
+          if (st.channel === 'email') priorEmails.push(entry);
+          // Replies tracked via activity log
+        }
+      }
+      // Check activity log for replies
+      const { data: actLogs } = await db.from('activity_log').select('*').eq('sequence_id', task.sequence_id).eq('event_type', 'reply');
+      if (actLogs) priorReplies = actLogs.map(l => ({ date: l.created_at, detail: l.description }));
+    }
+  } catch(e) { console.warn('[generateAIEmail] prior touch lookup failed:', e); }
+
+  const SEQUENCE = {
+    template: 'cold_outbound',
+    step: task.step_number || 1,
+    prior_emails: priorEmails,
+    prior_replies: priorReplies
+  };
+
+  // Sender
+  const SENDER = {
+    name: senderFirstName,
+    title: 'Rylem Staffing',
+    email_alias: senderAlias,
+    signature_block: `${senderFirstName}\nRylem Staffing\n(206) 261-8828`
+  };
+
+  // ── Required field check — fail fast if any core field is null/empty ──
+  const requiredFields = { first_name: PROSPECT.first_name, last_name: PROSPECT.last_name, title: PROSPECT.title, company_name: PROSPECT.company_name };
+  const missingFields = Object.entries(requiredFields).filter(([k,v]) => !v).map(([k]) => k);
+  if (missingFields.length > 0) {
+    console.error('[generateAIEmail] missing required fields:', missingFields);
+    showToast(`❌ Missing required fields: ${missingFields.join(', ')}. Fill in contact/account data first.`, false);
+    if (btn) { btn.disabled = false; btn.textContent = '🤖 AI Email'; }
+    return null;
+  }
+
+  const userPrompt = JSON.stringify({ PROSPECT, SIGNAL, SEQUENCE, SENDER }, null, 2);
+
+  console.log('[generateAIEmail] sending to worker', { tid, step: SEQUENCE.step, signal: SIGNAL.type, prospect: PROSPECT.first_name });
 
   try {
     const resp = await fetch('https://rylem-ai-chat.rylem-ai.workers.dev', {
@@ -1307,72 +1422,181 @@ async function generateAIEmail(tid, contactName, contactTitle, company) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         mode: 'generate',
-        system_prompt: systemPrompt,
+        email_verification: true,  // activates master prompt + verification in worker
+        step: SEQUENCE.step,
+        prospect_first_name: PROSPECT.first_name,
+        prospect_last_name: PROSPECT.last_name,
+        prospect_company: PROSPECT.company_name,
         user_prompt: userPrompt,
-        max_tokens: 2048
+        max_tokens: 2048,
+        failure_meta: {
+          contact_id: task.contact_id,
+          account_id: task.account_id,
+          task_id: tid,
+          rep: task.rep || state.rep
+        }
       })
     });
-    if (!resp.ok) throw new Error('AI service returned ' + resp.status);
-    const data = await resp.json();
-    const emailText = data.message || data.text || '';
-    if (!emailText) throw new Error('Empty response from AI');
 
-    // Show result in the message area
+    const data = await resp.json();
+
+    // ── Handle verification failure ──
+    if (data.ok === false) {
+      console.error('[generateAIEmail] verification failed:', data.errors);
+      showVerificationFailureModal(data, tid, contactName, contactTitle, company);
+      if (btn) { btn.disabled = false; btn.textContent = '🤖 AI Email'; }
+      return null;
+    }
+
+    // ── Parse verified response ──
+    const subject = data.subject || '';
+    const emailBody = data.body || '';
+    const ctaType = data.cta_type || '';
+    const signalUsed = data.signal_used || '';
+    const warnings = data.warnings || [];
+
+    if (!subject || !emailBody) {
+      console.error('[generateAIEmail] empty subject or body after verification', data);
+      showToast('❌ AI returned empty subject or body — try again', false);
+      if (btn) { btn.disabled = false; btn.textContent = '🤖 AI Email'; }
+      return null;
+    }
+
+    // ── Render subject + body separately ──
     const msgWrap = document.getElementById('msg_' + tid);
     const toggle = document.getElementById('toggle_' + tid);
+    const escapedSubject = esc(subject);
+    const escapedBody = esc(emailBody);
+    const emailJSON = JSON.stringify(emailBody);
+    const subjectJSON = JSON.stringify(subject);
+    const outlookUrl = `https://outlook.office.com/mail/deeplink/compose?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
+    const warningsHtml = warnings.length > 0
+      ? `<div style="margin-top:8px;padding:6px 10px;background:var(--yellow-dim);border:1px solid rgba(245,200,66,.2);border-radius:6px;font-size:11px;color:var(--yellow)">⚠️ Warnings: ${warnings.map(w => w.detail).join('; ')}</div>`
+      : '';
+
+    const emailHtml = `
+      <div class="ai-label">🤖 AI-Generated Email <span style="font-size:9px;color:var(--green);margin-left:6px">✓ Verified</span></div>
+      <div style="margin-bottom:8px;padding:6px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:3px">Subject</div>
+        <div style="font-size:13px;color:var(--accent);font-weight:600" id="ai-subject-${tid}">${escapedSubject}</div>
+      </div>
+      <div class="ai-text" id="ai-body-${tid}">${escapedBody}</div>
+      ${warningsHtml}
+      <div class="ai-email-actions">
+        <button class="btn btn-copy" onclick="copyText(${emailJSON}, this)">📋 Copy Email</button>
+        <button class="btn btn-action email" onclick="window.open('${outlookUrl}','_blank')">✉️ Use in Outlook</button>
+      </div>`;
+
     if (msgWrap) {
-      // Ensure expanded
       msgWrap.classList.add('open');
       if (toggle) toggle.classList.add('open');
-      // Append AI result
       let aiDiv = msgWrap.querySelector('.ai-email-result');
       if (!aiDiv) {
         aiDiv = document.createElement('div');
         aiDiv.className = 'ai-email-result';
         msgWrap.querySelector('.task-message-body').appendChild(aiDiv);
       }
-      const escapedText = esc(emailText);
-      aiDiv.innerHTML = `
-        <div class="ai-label">🤖 AI-Generated Email</div>
-        <div class="ai-text">${escapedText}</div>
-        <div class="ai-email-actions">
-          <button class="btn btn-copy" onclick="copyText(${JSON.stringify(emailText)}, this)">📋 Copy Email</button>
-          <button class="btn btn-action email" onclick="window.open('https://outlook.office.com/mail/deeplink/compose?body='+encodeURIComponent(${JSON.stringify(emailText)}),'_blank')">✉️ Use in Outlook</button>
-        </div>`;
+      aiDiv.innerHTML = emailHtml;
     } else {
-      // No message wrap exists - create one dynamically
       const card = document.getElementById('tc_' + tid);
       if (card) {
         const newWrap = document.createElement('div');
         newWrap.className = 'task-message-wrap open';
         newWrap.id = 'msg_' + tid;
-        const body = document.createElement('div');
-        body.className = 'task-message-body';
-        const escapedText = esc(emailText);
-        body.innerHTML = `<div class="ai-email-result">
-          <div class="ai-label">🤖 AI-Generated Email</div>
-          <div class="ai-text">${escapedText}</div>
-          <div class="ai-email-actions">
-            <button class="btn btn-copy" onclick="copyText(${JSON.stringify(emailText)}, this)">📋 Copy Email</button>
-            <button class="btn btn-action email" onclick="window.open('https://outlook.office.com/mail/deeplink/compose?body='+encodeURIComponent(${JSON.stringify(emailText)}),'_blank')">✉️ Use in Outlook</button>
-          </div></div>`;
-        newWrap.appendChild(body);
+        const bodyDiv = document.createElement('div');
+        bodyDiv.className = 'task-message-body';
+        bodyDiv.innerHTML = `<div class="ai-email-result">${emailHtml}</div>`;
+        newWrap.appendChild(bodyDiv);
         card.appendChild(newWrap);
       }
     }
 
-    // Store on task element dataset so sendViaSmartlead can find it reliably
+    // Store subject + body on task element dataset
     const taskActionEl = document.getElementById('ta_' + tid);
-    if (taskActionEl) taskActionEl.dataset.generatedEmail = emailText;
+    if (taskActionEl) {
+      taskActionEl.dataset.generatedEmail = emailBody;
+      taskActionEl.dataset.generatedSubject = subject;
+    }
 
-    showToast('🤖 AI email generated!', true);
-    return emailText; // Return the generated text so callers can use it directly
+    showToast('🤖 AI email generated & verified!', true);
+    return emailBody;
   } catch(err) {
-    console.error('AI email error:', err);
-    showToast('❌ AI email failed: ' + (err.message || 'Unknown error'));
-    return null; // Return null on failure
+    console.error('[generateAIEmail] error:', err);
+    showToast('❌ AI email failed: ' + (err.message || 'Unknown error'), false);
+    return null;
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = '🤖 AI Email'; }
+  }
+}
+
+// ─── VERIFICATION FAILURE MODAL ──────────────────────────
+function showVerificationFailureModal(data, tid, contactName, contactTitle, company) {
+  const modal = document.getElementById('verify-fail-modal');
+  if (!modal) return;
+  modal.classList.add('open');
+
+  const errorsList = (data.errors || []).map(e =>
+    `<div style="padding:4px 0;font-size:12px;color:var(--red)"><strong>${e.rule}</strong>: ${esc(e.detail)}</div>`
+  ).join('');
+  const warningsList = (data.warnings || []).map(w =>
+    `<div style="padding:4px 0;font-size:12px;color:var(--yellow)"><strong>${w.rule}</strong>: ${esc(w.detail)}</div>`
+  ).join('');
+
+  document.getElementById('vf-errors').innerHTML = errorsList || '<div style="color:var(--text3)">None</div>';
+  document.getElementById('vf-warnings').innerHTML = warningsList || '<div style="color:var(--text3)">None</div>';
+  document.getElementById('vf-subject').textContent = data.rendered_subject || '(none)';
+  document.getElementById('vf-body').textContent = data.rendered_body || '(none)';
+
+  // Wire buttons
+  document.getElementById('vf-regenerate').onclick = () => { modal.classList.remove('open'); generateAIEmail(tid, contactName, contactTitle, company); };
+  document.getElementById('vf-edit').onclick = () => { modal.classList.remove('open'); /* User edits manually in the DOM */ };
+  document.getElementById('vf-override').onclick = () => {
+    modal.classList.remove('open');
+    // Log override to Supabase
+    const task = (state.supabaseTasks || []).find(t => t.id === tid);
+    const overrideNote = prompt('Override reason (required):');
+    if (!overrideNote) { showToast('❌ Override cancelled — reason required', false); return; }
+    logVerificationOverride({
+      contact_id: task?.contact_id,
+      account_id: task?.account_id,
+      task_id: tid,
+      rep: task?.rep || state.rep,
+      errors: data.errors || [],
+      warnings: data.warnings || [],
+      rendered_subject: data.rendered_subject,
+      rendered_body: data.rendered_body,
+      override_reason: 'manual_override',
+      override_note: overrideNote
+    });
+    // Allow the user to still send the broken email by setting the data
+    const taskActionEl = document.getElementById('ta_' + tid);
+    if (taskActionEl) {
+      taskActionEl.dataset.generatedEmail = data.rendered_body || '';
+      taskActionEl.dataset.generatedSubject = data.rendered_subject || '';
+    }
+    showToast('⚠️ Override logged — email stored but flagged', true);
+  };
+}
+
+async function logVerificationOverride(failureData) {
+  try {
+    await db.from('ai_email_failures').insert({
+      contact_id: failureData.contact_id || null,
+      account_id: failureData.account_id || null,
+      task_id: failureData.task_id || null,
+      rep: failureData.rep || null,
+      verification_mode: 'strict',
+      trigger_type: 'override',
+      errors: failureData.errors || [],
+      warnings: failureData.warnings || [],
+      rendered_subject: failureData.rendered_subject || null,
+      rendered_body: failureData.rendered_body || null,
+      override_reason: failureData.override_reason || null,
+      override_note: failureData.override_note || null
+    });
+    console.log('[logVerificationOverride] logged to Supabase');
+  } catch(e) {
+    console.error('[logVerificationOverride] Supabase insert failed:', e);
   }
 }
 
@@ -1783,45 +2007,54 @@ async function sendViaSmartlead(tid, fromAlias) {
   const btn = taskEl?.querySelector('.btn-smartlead');
   if (btn) { btn.disabled = true; btn.textContent = '🚀 Sending...'; }
 
-  // Get task data
   const task = (state.supabaseTasks || []).find(t => t.id === tid);
-  console.log('[sendViaSmartlead] task resolved', { id: task?.id, email: task?.email, sent_from: task?.sent_from });
+  console.log('[sendViaSmartlead] task resolved', { id: task?.id, sent_from: task?.sent_from });
   if (!task) { console.error('[sendViaSmartlead] task not found for tid:', tid); showToast('❌ Task not found', false); if (btn) { btn.disabled = false; btn.textContent = '🚀 Send'; } return; }
 
   // Get email - try task.email first, then extract from DOM if missing
   let toEmail = task.email || '';
   if (!toEmail) {
-    // Try extracting from the task card's "From:" label or any email in the card
     const emailEl = taskEl?.querySelector('.task-email, [data-email], a[href^="mailto:"]');
     if (emailEl) {
       toEmail = emailEl.textContent || emailEl.href?.replace('mailto:', '') || '';
     }
   }
   if (!toEmail) {
-    // Last resort: re-query the contact from Supabase
     try {
       const { data: contactData } = await db.from('contacts').select('email').eq('full_name', task.contact).limit(1);
       if (contactData?.[0]?.email) toEmail = contactData[0].email;
     } catch(e) { console.error('[Smartlead] Contact lookup failed:', e); }
   }
 
-  // Check for email body - read from dataset (most reliable), then DOM, then task.message_body
+  // Get email body from dataset (most reliable)
   let emailBody =
     taskEl?.dataset.generatedEmail ||
+    document.getElementById('ai-body-' + tid)?.textContent ||
     document.getElementById('msg_' + tid)?.querySelector('.ai-email-result .ai-text')?.textContent ||
     task.message_body ||
     '';
-  console.log('[sendViaSmartlead] emailBody sources:', {
-    fromDataset: !!taskEl?.dataset.generatedEmail,
-    fromDom: !!document.getElementById('msg_' + tid)?.querySelector('.ai-email-result .ai-text'),
-    fromTask: !!task.message_body,
-    finalLength: emailBody.length
+
+  // Get subject from dataset — FAIL LOUD if missing (no more hardcoded subject)
+  let emailSubject =
+    taskEl?.dataset.generatedSubject ||
+    document.getElementById('ai-subject-' + tid)?.textContent ||
+    '';
+
+  console.log('[sendViaSmartlead] email data:', {
+    hasSubject: !!emailSubject, hasBody: !!emailBody,
+    bodyLength: emailBody.length, subject: emailSubject
   });
 
   if (!emailBody) {
     console.error('[sendViaSmartlead] no email body available', { tid });
     showToast('❌ Generate an email first by clicking 🤖 AI Email', false);
-    if (btn) { btn.disabled = false; btn.textContent = '🚀 Send'; }
+    if (btn) { btn.disabled = false; btn.textContent = '🚀 Smartlead'; }
+    return;
+  }
+  if (!emailSubject) {
+    console.error('[sendViaSmartlead] no subject — generate email first', { tid });
+    showToast('❌ No subject line — generate an email with 🤖 AI Email first', false);
+    if (btn) { btn.disabled = false; btn.textContent = '🚀 Smartlead'; }
     return;
   }
 
@@ -1832,9 +2065,24 @@ async function sendViaSmartlead(tid, fromAlias) {
     return;
   }
 
-  // Use the Cloudflare worker as proxy to avoid exposing API key
+  // Resolve prospect name for worker verification
+  let prospectFirstName = '', prospectLastName = '', prospectCompany = '';
   try {
-    console.log('[sendViaSmartlead] POSTing to worker', { mode: 'smartlead_send', accountId, toEmail, bodyLength: emailBody?.length });
+    if (task.contact_id) {
+      const { data: c } = await db.from('contacts').select('full_name').eq('id', task.contact_id).single();
+      if (c?.full_name) {
+        prospectFirstName = c.full_name.split(' ')[0];
+        prospectLastName = c.full_name.split(' ').slice(1).join(' ');
+      }
+    }
+    if (task.account_id) {
+      const { data: a } = await db.from('accounts').select('company').eq('id', task.account_id).single();
+      if (a?.company) prospectCompany = a.company;
+    }
+  } catch(e) { /* ignore lookup failures */ }
+
+  try {
+    console.log('[sendViaSmartlead] POSTing to worker', { mode: 'smartlead_send', accountId, toEmail, subject: emailSubject, bodyLength: emailBody.length });
     const resp = await fetch('https://rylem-ai-chat.rylem-ai.workers.dev', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1844,19 +2092,41 @@ async function sendViaSmartlead(tid, fromAlias) {
         to_name: task.contact,
         from_alias: fromAlias,
         from_account_id: accountId,
-        subject: 'Quick intro - Rylem Staffing',
-        body: emailBody
+        subject: emailSubject,
+        body: emailBody,
+        // Verification context (belt-and-suspenders)
+        step: task.step_number || 1,
+        prospect_first_name: prospectFirstName,
+        prospect_last_name: prospectLastName,
+        prospect_company: prospectCompany,
+        contact_id: task.contact_id,
+        account_id: task.account_id,
+        task_id: tid,
+        rep: task.rep || state.rep
       })
     });
     console.log('[sendViaSmartlead] worker response', { status: resp.status, ok: resp.ok });
     const respData = await resp.json().catch(() => ({}));
+
+    // Handle pre-send verification failure (status 422)
+    if (resp.status === 422 && respData.ok === false) {
+      console.error('[sendViaSmartlead] pre-send verification failed:', respData.errors);
+      showToast('❌ Email failed pre-send verification — edit the email and try again', false);
+      showVerificationFailureModal({
+        ...respData,
+        rendered_subject: emailSubject,
+        rendered_body: emailBody
+      }, tid, task.contact, '', prospectCompany);
+      if (btn) { btn.disabled = false; btn.textContent = '🚀 Smartlead'; }
+      return;
+    }
+
     if (!resp.ok) throw new Error(`Smartlead ${resp.status}: ${respData.error || respData.message || 'no detail'}`);
     if (respData.error) throw new Error(respData.error);
     showToast('🚀 Email sent from ' + fromAlias + '!', true);
-    // Mark task as done
     if (task) await handleDone(state.rep, tid, task.company);
   } catch(err) {
-    console.error('Smartlead send error:', err);
+    console.error('[sendViaSmartlead] error:', err);
     showToast('❌ Send failed: ' + (err.message || 'Unknown error'), false);
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = '🚀 Smartlead'; }
@@ -1869,25 +2139,66 @@ async function smartleadSendContact(contactId, contactName, contactEmail, fromAl
   if (!accountId) { showToast('❌ Unknown alias: ' + fromAlias, false); return; }
   if (!contactEmail) { showToast('❌ No email on file for this contact', false); return; }
 
-  showToast('🤖 Generating email...', true);
+  // Enrich: pull contact + account from Supabase
+  let contact = null, account = null, accountIdFromDb = null;
   try {
-    // Generate AI email
+    const { data: c } = await db.from('contacts').select('*').eq('id', contactId).single();
+    contact = c;
+    if (c?.account_id) {
+      const { data: a } = await db.from('accounts').select('*').eq('id', c.account_id).single();
+      account = a;
+      accountIdFromDb = c.account_id;
+    }
+  } catch(e) { console.error('[smartleadSendContact] Supabase lookup failed:', e); }
+
+  const firstName = (contact?.full_name || contactName || '').split(' ')[0];
+  const lastName = (contact?.full_name || contactName || '').split(' ').slice(1).join(' ');
+  const senderFirstName = fromAlias.split('@')[0].split('.')[0].charAt(0).toUpperCase() + fromAlias.split('@')[0].split('.')[0].slice(1) || 'Mike';
+  const signalDetail = account?.trigger_event || '';
+
+  if (!signalDetail && !account?.open_roles_count) {
+    showToast('❌ No signal data on this account — add a trigger event first', false);
+    return;
+  }
+
+  const PROSPECT = { first_name: firstName, last_name: lastName, title: contact?.title || '', company_name: account?.company || '', company_size: '', industry: '' };
+  const SIGNAL = { type: account?.trigger_event ? 'trigger' : 'open_roles', detail: signalDetail || `${account?.open_roles_count || 0} open roles`, source: 'account_data' };
+  const SEQUENCE = { template: 'cold_outbound', step: 1, prior_emails: [], prior_replies: [] };
+  const SENDER = { name: senderFirstName, title: 'Rylem Staffing', email_alias: fromAlias, signature_block: `${senderFirstName}\nRylem Staffing\n(206) 261-8828` };
+
+  showToast('🤖 Generating verified email...', true);
+  try {
+    // Generate via verified pipeline
     const genResp = await fetch('https://rylem-ai-chat.rylem-ai.workers.dev', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         mode: 'generate',
-        system_prompt: `You are ${fromAlias.split('@')[0].charAt(0).toUpperCase() + fromAlias.split('@')[0].slice(1)} from Rylem Staffing, a specialized staffing firm. Write signal-based cold outreach emails following these rules:\n- Lead with a PROBLEM or SIGNAL (hiring pain, growth, turnover) - never a generic intro\n- Under 150 words, conversational tone, no buzzwords\n- End with a specific timeline CTA (e.g. "15 min this Thursday or Friday?")\n- No subject line - just the email body\n- Sign off as ${fromAlias.split('@')[0].charAt(0).toUpperCase() + fromAlias.split('@')[0].slice(1)} from Rylem Staffing\n- Reference the prospect's role and company specifically`,
-        user_prompt: `Write a personalized cold outreach email to ${contactName}. You are ${fromAlias.split('@')[0].charAt(0).toUpperCase() + fromAlias.split('@')[0].slice(1)} from Rylem Staffing. Use signal-based outreach. Sign off as ${fromAlias.split('@')[0].charAt(0).toUpperCase() + fromAlias.split('@')[0].slice(1)}.`,
-        max_tokens: 512
+        email_verification: true,
+        step: 1,
+        prospect_first_name: PROSPECT.first_name,
+        prospect_last_name: PROSPECT.last_name,
+        prospect_company: PROSPECT.company_name,
+        user_prompt: JSON.stringify({ PROSPECT, SIGNAL, SEQUENCE, SENDER }, null, 2),
+        max_tokens: 2048,
+        failure_meta: { contact_id: contactId, account_id: accountIdFromDb, rep: state.rep }
       })
     });
-    if (!genResp.ok) throw new Error('AI generation failed');
     const genData = await genResp.json();
-    const emailBody = genData.message || '';
-    if (!emailBody) throw new Error('Empty AI response');
 
-    // Send via Smartlead
+    // Handle verification failure
+    if (genData.ok === false) {
+      console.error('[smartleadSendContact] verification failed:', genData.errors);
+      showToast('❌ Email verification failed — see details', false);
+      showVerificationFailureModal({ ...genData }, 'contact-' + contactId, contactName, contact?.title || '', account?.company || '');
+      return;
+    }
+
+    const emailSubject = genData.subject || '';
+    const emailBody = genData.body || '';
+    if (!emailSubject || !emailBody) throw new Error('AI returned empty subject or body');
+
+    // Send via Smartlead (with pre-send verification)
     const sendResp = await fetch('https://rylem-ai-chat.rylem-ai.workers.dev', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1897,16 +2208,28 @@ async function smartleadSendContact(contactId, contactName, contactEmail, fromAl
         to_name: contactName,
         from_alias: fromAlias,
         from_account_id: accountId,
-        subject: 'Quick intro - Rylem Staffing',
-        body: emailBody
+        subject: emailSubject,
+        body: emailBody,
+        step: 1,
+        prospect_first_name: PROSPECT.first_name,
+        prospect_last_name: PROSPECT.last_name,
+        prospect_company: PROSPECT.company_name,
+        contact_id: contactId,
+        account_id: accountIdFromDb,
+        rep: state.rep
       })
     });
-    if (!sendResp.ok) throw new Error('Smartlead proxy returned ' + sendResp.status);
-    const sendData = await sendResp.json();
+    const sendData = await sendResp.json().catch(() => ({}));
+    if (sendResp.status === 422 && sendData.ok === false) {
+      showToast('❌ Pre-send verification failed', false);
+      showVerificationFailureModal({ ...sendData, rendered_subject: emailSubject, rendered_body: emailBody }, 'contact-' + contactId, contactName, contact?.title || '', account?.company || '');
+      return;
+    }
+    if (!sendResp.ok) throw new Error(`Smartlead ${sendResp.status}: ${sendData.error || 'no detail'}`);
     if (sendData.error) throw new Error(sendData.error);
     showToast('🚀 Email sent from ' + fromAlias + '!', true);
   } catch(err) {
-    console.error('Smartlead contact send error:', err);
+    console.error('[smartleadSendContact] error:', err);
     showToast('❌ Send failed: ' + (err.message || 'Unknown error'), false);
   }
 }

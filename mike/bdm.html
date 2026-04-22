@@ -361,6 +361,21 @@ button,input,select{font-family:inherit}
 }
 .cbtn:hover{color:var(--text);border-color:var(--border-hover)}
 
+/* ─── EDIT CONTACT INLINE ─── */
+.edit-contact-btn,.edit-account-btn{margin-left:4px}
+.contact-row.editing{background:var(--surface3);border-color:var(--accent-border)}
+.contact-edit-form{width:100%;padding:10px 0}
+.contact-edit-form .cef-row{display:flex;gap:10px;margin-bottom:10px}
+.contact-edit-form .cef-row .cef-field{flex:1;display:flex;flex-direction:column;gap:3px}
+.contact-edit-form .cef-field label{font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.3px}
+.contact-edit-form .cef-field input,
+.contact-edit-form .cef-field select{padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;outline:none;transition:border-color .2s}
+.contact-edit-form .cef-field input:focus,
+.contact-edit-form .cef-field select:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,212,255,.08)}
+.contact-edit-form .cef-field select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a8fa6' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:26px}
+.contact-edit-form .cef-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
+.contact-edit-form .cef-error{font-size:11px;color:var(--red);margin-top:4px;display:none}
+
 /* ─── SIGNAL STRIP ─── */
 .account-signal{
   font-size:11px;color:var(--text3);padding:6px 20px 10px;
@@ -1932,7 +1947,9 @@ async function fetchRepAccounts(rep) {
       days_since_touch: daysSinceTouch,
       contact_count: countMap[a.id] || 0,
       contacts: null, // loaded on expand
-      acct_status: a.status || ''
+      acct_status: a.status || '',
+      domain: a.domain || '',
+      assigned_rep: a.assigned_rep || ''
     };
   });
 }
@@ -2576,6 +2593,7 @@ function buildAccountCard(acc) {
       <div class="seq-step-label">${curStep > 0 ? 'Step ' + curStep + '/13 · ' + (steps[curStep-1]?.name || '') : 'Not started'}</div>
     </div>
     <div class="account-days">${acc.days_since_touch === 0 ? 'Today' : acc.days_since_touch + 'd ago'}</div>
+    <button class="cbtn edit-account-btn" onclick="event.stopPropagation();openAccountEditModal('${acc.id}')" title="Edit company">✏️</button>
     <div class="account-toggle">▼</div>
   `;
   card.appendChild(row);
@@ -2663,7 +2681,7 @@ function buildContactRow(c, accountId, acctStatus) {
         <span>Step ${c.sequence_step || 1}</span>
         <button class="cbtn" style="padding:2px 6px;font-size:11px" onclick="event.stopPropagation();bumpContactStep('${c.id}','${accountId}',${c.sequence_step||1},+1)">▶</button>
       </div>
-      <div class="contact-actions">${actionBtns}<button class="cbtn" onclick="event.stopPropagation();openTransferContact('${c.id}','${accountId}')" title="Transfer to another company">↗</button><button class="cbtn" onclick="event.stopPropagation();openStatusModal('${c.id}','${accountId}')" title="Contact Status">⚙</button></div>
+      <div class="contact-actions">${actionBtns}<button class="cbtn edit-contact-btn" onclick=\"event.stopPropagation();editContactRow('${c.id}','${accountId}')\" title=\"Edit contact\">✏️</button><button class="cbtn" onclick=\"event.stopPropagation();openTransferContact('${c.id}','${accountId}')\" title=\"Transfer to another company\">↗</button><button class="cbtn" onclick=\"event.stopPropagation();openStatusModal('${c.id}','${accountId}')\" title=\"Contact Status\">⚙</button></div>
       <div class="contact-status-badges">${statusBadges}</div>
     </div>`;
 }
@@ -3517,6 +3535,260 @@ async function toggleStatusFlag(field, value) {
   const toastLabels = { replied: '💬 Replied', unsubscribed: '🚫 Unsubscribed', not_interested: '👎 Not Interested' };
   showToast((value ? '✅ ' : '↩ ') + (toastLabels[field] || field), true);
   await _refreshContactRow(_csmAccountId);
+}
+
+// ─── INLINE CONTACT EDIT ────────────────────────────────
+let _editingContactId = null;
+
+async function editContactRow(contactId, accountId) {
+  if (_editingContactId === contactId) return; // already editing
+  if (_editingContactId) cancelContactEdit(_editingContactId); // close any other open edit
+  _editingContactId = contactId;
+
+  const row = document.querySelector(`[data-contact-id="${contactId}"]`);
+  if (!row) return;
+  row.classList.add('editing');
+
+  // Fetch current contact data from Supabase
+  let c;
+  try {
+    const db = getDB();
+    const { data, error } = await db.from('contacts').select('*').eq('id', contactId).single();
+    if (error) throw error;
+    c = data;
+  } catch(e) {
+    console.error('[editContactRow] fetch failed', e);
+    _editingContactId = null;
+    row.classList.remove('editing');
+    showToast('❌ Could not load contact data');
+    return;
+  }
+
+  const currentName = c.full_name || '';
+  const currentTitle = c.title || '';
+  const currentEmail = c.email || '';
+  const currentPhone = c.phone || '';
+  const currentMobile = c.mobile || '';
+  const currentLinkedin = c.linkedin_url || '';
+  const currentStatus = c.status || 'new';
+  const currentRole = c.role_type || 'champion';
+
+  const editForm = document.createElement('div');
+  editForm.className = 'contact-edit-form';
+  editForm.id = 'cef_' + contactId;
+  editForm.innerHTML = `
+    <div class="cef-row">
+      <div class="cef-field"><label>Name</label><input type="text" class="cef-name" value="${escHtml(currentName)}"></div>
+      <div class="cef-field"><label>Title</label><input type="text" class="cef-title" value="${escHtml(currentTitle)}"></div>
+    </div>
+    <div class="cef-row">
+      <div class="cef-field"><label>Email</label><input type="email" class="cef-email" value="${escHtml(currentEmail)}"></div>
+      <div class="cef-field"><label>Phone</label><input type="text" class="cef-phone" value="${escHtml(currentPhone)}"></div>
+    </div>
+    <div class="cef-row">
+      <div class="cef-field"><label>Mobile</label><input type="text" class="cef-mobile" value="${escHtml(currentMobile)}"></div>
+      <div class="cef-field"><label>LinkedIn</label><input type="url" class="cef-linkedin" value="${escHtml(currentLinkedin)}"></div>
+    </div>
+    <div class="cef-row">
+      <div class="cef-field"><label>Status</label>
+        <select class="cef-status">
+          <option value="new" ${currentStatus==='new'?'selected':''}>New</option>
+          <option value="engaging" ${currentStatus==='engaging'?'selected':''}>Engaging</option>
+          <option value="warm" ${currentStatus==='warm'?'selected':''}>Warm</option>
+          <option value="meeting_set" ${currentStatus==='meeting_set'?'selected':''}>Meeting Set</option>
+          <option value="won" ${currentStatus==='won'?'selected':''}>Won</option>
+          <option value="lost" ${currentStatus==='lost'?'selected':''}>Lost</option>
+          <option value="do_not_contact" ${currentStatus==='do_not_contact'?'selected':''}>Do Not Contact</option>
+        </select>
+      </div>
+      <div class="cef-field"><label>Role Type</label>
+        <select class="cef-role">
+          <option value="champion" ${currentRole==='champion'?'selected':''}>Champion</option>
+          <option value="budget_holder" ${currentRole==='budget_holder'?'selected':''}>Budget Holder</option>
+          <option value="influencer" ${currentRole==='influencer'?'selected':''}>Influencer</option>
+        </select>
+      </div>
+    </div>
+    <div class="cef-error" id="cef_err_${contactId}"></div>
+    <div class="cef-actions">
+      <button class="cbtn" onclick="cancelContactEdit('${contactId}')">Cancel</button>
+      <button class="cbtn" style="background:var(--accent-dim);border-color:var(--accent-border);color:var(--accent)" onclick="saveContactEdit('${contactId}','${accountId}')">💾 Save</button>
+    </div>
+  `;
+
+  row._originalHTML = row.innerHTML;
+  row.innerHTML = '';
+  row.appendChild(editForm);
+}
+
+function cancelContactEdit(contactId) {
+  const row = document.querySelector(`[data-contact-id="${contactId}"]`);
+  if (!row) return;
+  row.classList.remove('editing');
+  if (row._originalHTML) {
+    row.innerHTML = row._originalHTML;
+    delete row._originalHTML;
+  }
+  _editingContactId = null;
+}
+
+async function saveContactEdit(contactId, accountId) {
+  const form = document.getElementById('cef_' + contactId);
+  if (!form) return;
+  const errEl = document.getElementById('cef_err_' + contactId);
+
+  const name = form.querySelector('.cef-name').value.trim();
+  const title = form.querySelector('.cef-title').value.trim();
+  const email = form.querySelector('.cef-email').value.trim();
+  const phone = form.querySelector('.cef-phone').value.trim();
+  const mobile = form.querySelector('.cef-mobile').value.trim();
+  const linkedin = form.querySelector('.cef-linkedin').value.trim();
+  const status = form.querySelector('.cef-status').value;
+  const roleType = form.querySelector('.cef-role').value;
+
+  if (!name) {
+    if (errEl) { errEl.textContent = 'Name is required'; errEl.style.display = 'block'; }
+    return;
+  }
+
+  const db = getDB();
+  const update = {
+    full_name: name,
+    title: title || null,
+    email: email || null,
+    phone: phone || null,
+    mobile: mobile || null,
+    linkedin_url: linkedin || null,
+    status: status,
+    role_type: roleType
+  };
+
+  try {
+    const { error } = await db.from('contacts').update(update).eq('id', contactId);
+    if (error) throw error;
+    console.log('[saveContactEdit] updated', contactId, update);
+    _editingContactId = null;
+    await _refreshContactRow(accountId);
+    showToast('✅ Contact updated');
+  } catch(e) {
+    console.error('[saveContactEdit] failed', e);
+    if (errEl) { errEl.textContent = e.message || 'Save failed'; errEl.style.display = 'block'; }
+  }
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// ─── ACCOUNT EDIT MODAL ────────────────────────────────
+function openAccountEditModal(accountId) {
+  const acc = (state.supabaseAccounts||[]).find(a => a.id === accountId);
+  if (!acc) return;
+
+  let modal = document.getElementById('account-edit-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'account-edit-modal';
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+      <div class="modal-card" style="max-width:480px">
+        <div class="modal-header">
+          <h3>✏️ Edit Company</h3>
+          <button class="modal-close" onclick="closeAccountEditModal()">✕</button>
+        </div>
+        <form id="account-edit-form" onsubmit="event.preventDefault();saveAccountEdit()">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Company Name *</label>
+              <input type="text" id="ae-company" required>
+            </div>
+            <div class="form-group">
+              <label>Website</label>
+              <input type="text" id="ae-domain" placeholder="e.g. stripe.com">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Assigned Rep</label>
+              <select id="ae-rep">
+                <option value="mike">Mike</option>
+                <option value="julia">Julia</option>
+                <option value="april">April</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <select id="ae-status">
+                <option value="prospecting">Prospecting</option>
+                <option value="active">Active</option>
+                <option value="client">Client</option>
+                <option value="dormant">Dormant</option>
+              </select>
+            </div>
+          </div>
+          <div id="ae-error" style="color:var(--red);font-size:12px;margin-top:8px;display:none"></div>
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" onclick="closeAccountEditModal()">Cancel</button>
+            <button type="submit" class="btn-primary">💾 Save</button>
+          </div>
+        </form>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+
+  // Populate fields
+  document.getElementById('ae-company').value = acc.company || '';
+  document.getElementById('ae-domain').value = acc.domain || '';
+  document.getElementById('ae-rep').value = acc.assigned_rep || 'mike';
+  // Map acct_status to accounts.status
+  const acctStatus = acc.acct_status || acc.status || 'prospecting';
+  document.getElementById('ae-status').value = acctStatus;
+  // Store the account ID for save
+  modal.dataset.accountId = accountId;
+  modal.style.display = 'flex';
+}
+
+function closeAccountEditModal() {
+  const modal = document.getElementById('account-edit-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function saveAccountEdit() {
+  const modal = document.getElementById('account-edit-modal');
+  if (!modal) return;
+  const accountId = modal.dataset.accountId;
+  const errEl = document.getElementById('ae-error');
+
+  const company = document.getElementById('ae-company').value.trim();
+  const domain = document.getElementById('ae-domain').value.trim();
+  const assigned_rep = document.getElementById('ae-rep').value;
+  const status = document.getElementById('ae-status').value;
+
+  if (!company) {
+    if (errEl) { errEl.textContent = 'Company name is required'; errEl.style.display = 'block'; }
+    return;
+  }
+
+  const db = getDB();
+  const update = { company, assigned_rep, status };
+  if (domain) update.domain = domain;
+
+  try {
+    const { error } = await db.from('accounts').update(update).eq('id', accountId);
+    if (error) throw error;
+    console.log('[saveAccountEdit] updated', accountId, update);
+    closeAccountEditModal();
+    // Refresh the accounts list
+    state.supabaseAccounts = await fetchRepAccounts(state.rep);
+    render();
+    showToast('✅ Company updated');
+  } catch(e) {
+    console.error('[saveAccountEdit] failed', e);
+    if (errEl) { errEl.textContent = e.message || 'Save failed'; errEl.style.display = 'block'; }
+  }
 }
 
 async function _refreshContactRow(accountId) {

@@ -3552,7 +3552,6 @@ async function editContactRow(contactId, accountId) {
   // Fetch current contact data from Supabase
   let c;
   try {
-    const db = getDB();
     const { data, error } = await db.from('contacts').select('*').eq('id', contactId).single();
     if (error) throw error;
     c = data;
@@ -3651,7 +3650,6 @@ async function saveContactEdit(contactId, accountId) {
     return;
   }
 
-  const db = getDB();
   const update = {
     full_name: name,
     title: title || null,
@@ -3772,7 +3770,6 @@ async function saveAccountEdit() {
     return;
   }
 
-  const db = getDB();
   const update = { company, assigned_rep, status };
   if (domain) update.domain = domain;
 

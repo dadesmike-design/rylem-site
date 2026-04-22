@@ -913,7 +913,6 @@ async function saveContactEdit(cid){
   const status=wrap.querySelector('.cedit-status').value;
   const roleType=wrap.querySelector('.cedit-role').value;
   if(!name){if(errEl){errEl.textContent='Name is required';errEl.style.display='block';}return;}
-  const db=getDB();
   const update={full_name:name,title:title||null,email:email||null,phone:phone||null,mobile:mobile||null,linkedin_url:linkedin||null,status:status,role_type:roleType};
   try{
     const{error}=await db.from('contacts').update(update).eq('id',cid);
@@ -942,7 +941,7 @@ function editAccountInline(){
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <div><label style="font-size:11px;color:var(--text3)">Company *</label><input id="ae-company" value="${esc(a.company||'')}" style="width:100%;padding:6px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"></div>
       <div><label style="font-size:11px;color:var(--text3)">Domain</label><input id="ae-domain" value="${esc(a.domain||'')}" style="width:100%;padding:6px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"></div>
-      <div><label style="font-size:11px;color:var(--text3)">Location</label><input id="ae-city" value="${esc(a.city||'')}" style="width:100%;padding:6px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"></div>
+      <div><label style="font-size:11px;color:var(--text3)">Location</label><input id="ae-city" value="${esc(a.hq_city||'')}" style="width:100%;padding:6px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"></div>
       <div><label style="font-size:11px;color:var(--text3)">Status</label><select id="ae-status" style="width:100%;padding:6px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px">${statuses.map(s=>`<option value="${s}"${a.status===s?' selected':''}>${s}</option>`).join('')}</select></div>
       <div><label style="font-size:11px;color:var(--text3)">Open Roles</label><input id="ae-open_roles_count" type="number" value="${a.open_roles_count||''}" style="width:100%;padding:6px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"></div>
       <div><label style="font-size:11px;color:var(--text3)">Trigger Event</label><input id="ae-trigger_event" value="${esc(a.trigger_event||'')}" style="width:100%;padding:6px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"></div>
@@ -959,11 +958,10 @@ async function saveAccountEdit(){
   const company=document.getElementById('ae-company').value.trim();
   const errEl=document.getElementById('ae_err');
   if(!company){if(errEl){errEl.textContent='Company name is required';errEl.style.display='block';}return;}
-  const db=getDB();
   const update={
     company,
     domain:document.getElementById('ae-domain').value.trim()||null,
-    city:document.getElementById('ae-city').value.trim()||null,
+    hq_city:document.getElementById('ae-city').value.trim()||null,
     status:document.getElementById('ae-status').value,
     open_roles_count:parseInt(document.getElementById('ae-open_roles_count').value)||null,
     trigger_event:document.getElementById('ae-trigger_event').value.trim()||null

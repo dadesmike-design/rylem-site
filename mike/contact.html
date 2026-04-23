@@ -505,6 +505,27 @@ const SMARTLEAD_ALIAS_MAP={
   'julia@rylemconsulting.com':17584900,'julia@hirerylem.com':17584949,'julia@scalewithrylem.com':17584897,'julia@rylemstaffing.com':17584888,
   'april@rylemconsulting.com':17584884,'april@hirerylem.com':17584878,'april@scalewithrylem.com':17584875,'april@rylemstaffing.com':17584851
 };
+const SIGNATURE_BLOCKS={
+  'mike@rylemconsulting.com':'Mike Dades\nCEO, Rylem Staffing\n206-261-8828\nhttps://www.linkedin.com/in/mikedades/\nrylem.com',
+  'mike@hirerylem.com':'Mike Dades\nCEO, Rylem Staffing\n206-261-8828\nhttps://www.linkedin.com/in/mikedades/\nrylem.com',
+  'mike@scalewithrylem.com':'Mike Dades\nCEO, Rylem Staffing\n206-261-8828\nhttps://www.linkedin.com/in/mikedades/\nrylem.com',
+  'mike@rylemstaffing.com':'Mike Dades\nCEO, Rylem Staffing\n206-261-8828\nhttps://www.linkedin.com/in/mikedades/\nrylem.com',
+  'julia@rylemconsulting.com':'Julia Dusseau\nLead BDM, Rylem Staffing\n425-979-8807\nhttps://www.linkedin.com/in/juliaallenwa/\nrylem.com',
+  'julia@hirerylem.com':'Julia Dusseau\nLead BDM, Rylem Staffing\n425-979-8807\nhttps://www.linkedin.com/in/juliaallenwa/\nrylem.com',
+  'julia@scalewithrylem.com':'Julia Dusseau\nLead BDM, Rylem Staffing\n425-979-8807\nhttps://www.linkedin.com/in/juliaallenwa/\nrylem.com',
+  'julia@rylemstaffing.com':'Julia Dusseau\nLead BDM, Rylem Staffing\n425-979-8807\nhttps://www.linkedin.com/in/juliaallenwa/\nrylem.com',
+  'april@rylemconsulting.com':'April Kolodge\nBusiness Development Manager, Rylem Staffing\n214-226-0735\nhttps://www.linkedin.com/in/april-melton87/\nrylem.com',
+  'april@hirerylem.com':'April Kolodge\nBusiness Development Manager, Rylem Staffing\n214-226-0735\nhttps://www.linkedin.com/in/april-melton87/\nrylem.com',
+  'april@scalewithrylem.com':'April Kolodge\nBusiness Development Manager, Rylem Staffing\n214-226-0735\nhttps://www.linkedin.com/in/april-melton87/\nrylem.com',
+  'april@rylemstaffing.com':'April Kolodge\nBusiness Development Manager, Rylem Staffing\n214-226-0735\nhttps://www.linkedin.com/in/april-melton87/\nrylem.com'
+};
+function getSignatureBlock(alias){
+  if(!alias)throw new Error('getSignatureBlock called with no alias');
+  const key=alias.toLowerCase();
+  const sig=SIGNATURE_BLOCKS[key];
+  if(!sig)throw new Error('No signature block defined for alias: '+alias);
+  return sig;
+}
 const BDM_ALIAS_POOLS={
   mike:['mike@rylemconsulting.com','mike@hirerylem.com','mike@scalewithrylem.com','mike@rylemstaffing.com'],
   julia:['julia@rylemconsulting.com','julia@hirerylem.com','julia@scalewithrylem.com','julia@rylemstaffing.com'],
@@ -1236,7 +1257,7 @@ async function generateMessage(){
     sender:{
       name:senderFirstName,
       email_alias:alias||'mike@rylemconsulting.com',
-      signature_block:senderFirstName+'\nRylem Staffing'
+      signature_block:getSignatureBlock(alias)
     },
     verification_mode:'strict'
   };

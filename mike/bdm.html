@@ -1322,7 +1322,7 @@ async function generateAIEmail(tid, contactName, contactTitle, company) {
     sender: {
       name: senderFirstName,
       email_alias: senderAlias || 'miked@rylem.com',
-      signature_block: senderFirstName + '\nRylem Staffing'
+      signature_block: getSignatureBlock(senderAlias)
     },
     verification_mode: 'strict'
   };
@@ -1805,6 +1805,27 @@ const SMARTLEAD_ALIAS_MAP = {
   'april@scalewithrylem.com': 17584875,
   'april@rylemstaffing.com': 17584851
 };
+const SIGNATURE_BLOCKS={
+  'mike@rylemconsulting.com':'Mike Dades\nCEO, Rylem Staffing\n206-261-8828\nhttps://www.linkedin.com/in/mikedades/\nrylem.com',
+  'mike@hirerylem.com':'Mike Dades\nCEO, Rylem Staffing\n206-261-8828\nhttps://www.linkedin.com/in/mikedades/\nrylem.com',
+  'mike@scalewithrylem.com':'Mike Dades\nCEO, Rylem Staffing\n206-261-8828\nhttps://www.linkedin.com/in/mikedades/\nrylem.com',
+  'mike@rylemstaffing.com':'Mike Dades\nCEO, Rylem Staffing\n206-261-8828\nhttps://www.linkedin.com/in/mikedades/\nrylem.com',
+  'julia@rylemconsulting.com':'Julia Dusseau\nLead BDM, Rylem Staffing\n425-979-8807\nhttps://www.linkedin.com/in/juliaallenwa/\nrylem.com',
+  'julia@hirerylem.com':'Julia Dusseau\nLead BDM, Rylem Staffing\n425-979-8807\nhttps://www.linkedin.com/in/juliaallenwa/\nrylem.com',
+  'julia@scalewithrylem.com':'Julia Dusseau\nLead BDM, Rylem Staffing\n425-979-8807\nhttps://www.linkedin.com/in/juliaallenwa/\nrylem.com',
+  'julia@rylemstaffing.com':'Julia Dusseau\nLead BDM, Rylem Staffing\n425-979-8807\nhttps://www.linkedin.com/in/juliaallenwa/\nrylem.com',
+  'april@rylemconsulting.com':'April Kolodge\nBusiness Development Manager, Rylem Staffing\n214-226-0735\nhttps://www.linkedin.com/in/april-melton87/\nrylem.com',
+  'april@hirerylem.com':'April Kolodge\nBusiness Development Manager, Rylem Staffing\n214-226-0735\nhttps://www.linkedin.com/in/april-melton87/\nrylem.com',
+  'april@scalewithrylem.com':'April Kolodge\nBusiness Development Manager, Rylem Staffing\n214-226-0735\nhttps://www.linkedin.com/in/april-melton87/\nrylem.com',
+  'april@rylemstaffing.com':'April Kolodge\nBusiness Development Manager, Rylem Staffing\n214-226-0735\nhttps://www.linkedin.com/in/april-melton87/\nrylem.com'
+};
+function getSignatureBlock(alias){
+  if(!alias)throw new Error('getSignatureBlock called with no alias');
+  const key=alias.toLowerCase();
+  const sig=SIGNATURE_BLOCKS[key];
+  if(!sig)throw new Error('No signature block defined for alias: '+alias);
+  return sig;
+}
 
 function getDefaultAlias(rep) {
   // Return the primary rylemconsulting.com alias for each rep
@@ -2091,7 +2112,7 @@ async function smartleadSendContact(contactId, contactName, contactEmail, fromAl
         sender: {
           name: senderFirstName,
           email_alias: fromAlias,
-          signature_block: senderFirstName + '\nRylem Staffing'
+          signature_block: getSignatureBlock(fromAlias)
         },
         verification_mode: 'strict'
       })

@@ -756,6 +756,9 @@ async function submitMeeting(){
   }).select().single();
   if(mtgErr){showToast('❌ '+mtgErr.message);btn.disabled=false;btn.textContent='Save Meeting + Start Follow Up Sequence';return;}
 
+  // 1b. Also set meeting_set_date on contact for dashboard fallback queries
+  await db.from('contacts').update({meeting_set_date:mtgDate,meeting_set_by:rep}).eq('id',contact.id);
+
   // 2. Append to contacts.intel
   const dateStr=mtgDate.replace(/(\d{4})-(\d{2})-(\d{2})/,(_,y,m,d)=>{const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return `${months[parseInt(m)-1]} ${parseInt(d)}, ${y}`;});
   const intelLine=`[Meeting ${dateStr}]: ${notes||'No notes'}${nextStep?' | Next step: '+nextStep:''}${_mtgOutcome?' | Outcome: '+_mtgOutcome:''}`;

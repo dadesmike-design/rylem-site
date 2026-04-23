@@ -493,13 +493,31 @@ button,input,select{font-family:inherit}
       <button class="btn-logout" onclick="doLogout()">Sign Out</button>
     </div>
   </header>
-  <!-- MEETINGS THIS WEEK -->
+  <!-- ACTIVITY METRICS -->
   <div class="metrics-strip" id="metrics-strip">
     <div class="metric-card">
+      <span class="mc-icon">🚀</span>
+      <div class="metric-label">Sequences in Motion</div>
+      <div class="metric-value accent" id="metric-sequences">—</div>
+      <div class="metric-sub" id="metric-sequences-sub">Active outreach sequences</div>
+    </div>
+    <div class="metric-card">
       <span class="mc-icon">📅</span>
-      <div class="metric-label">Meetings Set This Week</div>
+      <div class="metric-label">Meetings This Week</div>
       <div class="metric-value green" id="metric-meetings">—</div>
       <div class="metric-sub" id="metric-meetings-sub">Booked since Monday</div>
+    </div>
+    <div class="metric-card">
+      <span class="mc-icon">✉️</span>
+      <div class="metric-label">Emails Sent (Week)</div>
+      <div class="metric-value yellow" id="metric-emails">—</div>
+      <div class="metric-sub" id="metric-emails-sub">Since Monday</div>
+    </div>
+    <div class="metric-card">
+      <span class="mc-icon">📞</span>
+      <div class="metric-label">Calls Made (Week)</div>
+      <div class="metric-value purple" id="metric-calls">—</div>
+      <div class="metric-sub" id="metric-calls-sub">Since Monday</div>
     </div>
   </div>
 
@@ -1783,20 +1801,20 @@ async function fetchMeetings(rep) {
   let meetingCount = 0;
   try {
     const { count } = await db
-      .from('activity_log')
+      .from('meetings')
       .select('id', { count: 'exact', head: true })
       .eq('rep', rep)
-      .eq('action_type', 'meeting_booked')
-      .gte('created_at', start)
-      .lte('created_at', end);
+      .gte('meeting_date', start.slice(0, 10))
+      .lte('meeting_date', end.slice(0, 10));
     meetingCount = count || 0;
   } catch(e) {
+    console.warn('Meetings fetch error, falling back to activity_log:', e);
     try {
       const { count } = await db
         .from('activity_log')
         .select('id', { count: 'exact', head: true })
         .eq('rep', rep)
-        .eq('event_type', 'meeting_booked')
+        .eq('event_type', 'meeting_set')
         .gte('created_at', start)
         .lte('created_at', end);
       meetingCount = count || 0;
@@ -1815,10 +1833,66 @@ async function renderMeetings(rep) {
   }
 }
 
+async function fetchActiveSequences(rep) {
+  try {
+    const { count } = await db
+      .from('sequences')
+      .select('id', { count: 'exact', head: true })
+      .eq('rep', rep)
+      .eq('status', 'active');
+    return count || 0;
+  } catch(e) { return 0; }
+}
+
+async function fetchWeeklyEmails(rep) {
+  const { start, end } = getWeekRange();
+  try {
+    const { count } = await db
+      .from('activity_log')
+      .select('id', { count: 'exact', head: true })
+      .eq('rep', rep)
+      .eq('event_type', 'task_completed')
+      .gte('created_at', start)
+      .lte('created_at', end);
+    return count || 0;
+  } catch(e) { return 0; }
+}
+
+async function fetchWeeklyCalls(rep) {
+  const { start, end } = getWeekRange();
+  try {
+    const { count } = await db
+      .from('activity_log')
+      .select('id', { count: 'exact', head: true })
+      .eq('rep', rep)
+      .in('event_type', ['call_initiated', 'call_completed'])
+      .gte('created_at', start)
+      .lte('created_at', end);
+    return count || 0;
+  } catch(e) { return 0; }
+}
+
+async function renderAllMetrics(rep) {
+  const [seqCount, meetCount, emailCount, callCount] = await Promise.all([
+    fetchActiveSequences(rep),
+    fetchMeetings(rep),
+    fetchWeeklyEmails(rep),
+    fetchWeeklyCalls(rep)
+  ]);
+  document.getElementById('metric-sequences').textContent = seqCount;
+  document.getElementById('metric-sequences-sub').textContent = seqCount === 0 ? 'No active sequences' : seqCount === 1 ? '1 active sequence' : seqCount + ' active sequences';
+  document.getElementById('metric-meetings').textContent = meetCount;
+  document.getElementById('metric-meetings-sub').textContent = meetCount === 0 ? 'None booked yet this week' : meetCount === 1 ? '1 booked since Monday' : meetCount + ' booked since Monday';
+  document.getElementById('metric-emails').textContent = emailCount;
+  document.getElementById('metric-emails-sub').textContent = emailCount === 0 ? 'No emails this week' : emailCount + ' since Monday';
+  document.getElementById('metric-calls').textContent = callCount;
+  document.getElementById('metric-calls-sub').textContent = callCount === 0 ? 'No calls this week' : callCount + ' since Monday';
+}
+
 function startMetricsRefresh(rep) {
   if (_metricsInterval) clearInterval(_metricsInterval);
-  renderMeetings(rep);
-  _metricsInterval = setInterval(() => renderMeetings(state.rep), 5 * 60 * 1000);
+  renderAllMetrics(rep);
+  _metricsInterval = setInterval(() => renderAllMetrics(state.rep), 5 * 60 * 1000);
 }
 </script>
 

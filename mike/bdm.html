@@ -1401,6 +1401,11 @@ async function generateAIEmail(tid, contactName, contactTitle, company) {
     if (taskActionEl) {
       taskActionEl.dataset.generatedEmail = emailBody;
       taskActionEl.dataset.generatedSubject = emailSubject;
+      // Store verification data for overrideAndSend diagnostic logging
+      if (verification) {
+        taskActionEl.dataset.verifErrors = JSON.stringify(verification.errors || []);
+        taskActionEl.dataset.verifWarnings = JSON.stringify(verification.warnings || []);
+      }
     }
 
     showToast('🤖 AI email generated!' + (verification && !verification.passed ? ' ⚠️ Verification issues' : ''), true);
@@ -1868,15 +1873,33 @@ async function overrideAndSend(tid, fromAlias, accountId, toEmail, isOverride) {
   const emailSubject = taskEl?.dataset.generatedSubject || '';
 
   try {
-    // Log override to Supabase
+    // Log override to Supabase with ALL available diagnostic fields (Bug 3 fix)
     if (isOverride && db) {
+      const senderFirstName = fromAlias ? fromAlias.split('@')[0].charAt(0).toUpperCase() + fromAlias.split('@')[0].slice(1) : '';
+      const nameParts = (task?.contact || '').trim().split(/\s+/);
+      // Retrieve stored verification data from task element dataset if available
+      const verifErrors = taskEl?.dataset.verifErrors ? JSON.parse(taskEl.dataset.verifErrors) : [];
+      const verifWarnings = taskEl?.dataset.verifWarnings ? JSON.parse(taskEl.dataset.verifWarnings) : [];
+
       await db.from('ai_email_failures').insert({
         task_id: tid,
         overridden_by: state.rep || 'unknown',
         rendered_subject: emailSubject,
         rendered_body: emailBody.slice(0, 2000),
         override_reason: 'manual_override',
-        mode: 'bdm_send'
+        mode: 'bdm_send',
+        // Full diagnostic fields
+        prospect_email: toEmail,
+        prospect_name: task?.contact || '',
+        sender_alias: fromAlias || '',
+        sender_name: senderFirstName,
+        sequence_step: task?.step || null,
+        sequence_template: 'cold_outbound',
+        word_count: emailBody.split(/\s+/).filter(Boolean).length,
+        errors: JSON.stringify(verifErrors),
+        warnings: JSON.stringify(verifWarnings),
+        contact_id: task?.contact_id || null,
+        account_id: task?.lead_id || null
       }).catch(e => console.warn('[override] log failed:', e.message));
     }
 
@@ -2082,24 +2105,21 @@ async function smartleadSendContact(contactId, contactName, contactEmail, fromAl
     const verification = genData.verification || null;
     if (!emailBody) throw new Error('Empty AI response');
 
-    // If verification failed, alert but still show option to override
+    // If verification failed, BLOCK the send and show verification failure modal
+    // (same UX as task card path — no auto-override)
     if (verification && !verification.passed) {
-      const errorRules = (verification.errors || []).map(e => e.rule).join(', ');
-      showToast('⚠️ Verification failed: ' + errorRules + '. Sending anyway.', false);
-      // Log override
-      if (db) {
-        await db.from('ai_email_failures').insert({
-          task_id: 'contact_' + contactId,
-          overridden_by: state.rep || 'unknown',
-          rendered_subject: emailSubject,
-          rendered_body: emailBody.slice(0, 2000),
-          override_reason: 'contact_send_override',
-          mode: 'contact_send'
-        }).catch(e => console.warn('[override] log failed:', e.message));
-      }
+      console.log('[smartleadSendContact] verification failed, blocking send', {
+        contactId, errors: verification.errors?.length, warnings: verification.warnings?.length
+      });
+      showContactVerificationModal(
+        contactId, contactName, contactEmail, fromAlias, accountId,
+        emailSubject, emailBody, verification
+      );
+      return; // BLOCK — do not send
     }
 
-    // Send via Smartlead
+    // Verification passed — send via Smartlead
+    console.log('[smartleadSendContact] verification passed, sending', { contactId, fromAlias });
     const sendResp = await fetch('https://rylem-ai-chat.rylem-ai.workers.dev', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -2120,6 +2140,115 @@ async function smartleadSendContact(contactId, contactName, contactEmail, fromAl
   } catch(err) {
     console.error('Smartlead contact send error:', err);
     showToast('❌ Send failed: ' + (err.message || 'Unknown error'), false);
+  }
+}
+
+// ─── CONTACT CARD VERIFICATION FAILURE MODAL ───────────
+// Same UX as showVerificationFailureModal but for contact cards (no task tid)
+function showContactVerificationModal(contactId, contactName, contactEmail, fromAlias, accountId, subject, body, verification) {
+  const existing = document.getElementById('verif-fail-modal');
+  if (existing) existing.remove();
+
+  const errorsHtml = (verification.errors || []).map(e =>
+    `<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px">
+      <span style="color:var(--red);font-size:14px;flex-shrink:0">⛔</span>
+      <div><div style="font-weight:600;font-size:13px;color:var(--red)">${esc(e.rule.replace(/_/g,' '))}</div>
+      <div style="font-size:12px;color:var(--text2)">${esc(e.detail)}</div></div>
+    </div>`
+  ).join('');
+
+  const warningsHtml = (verification.warnings || []).map(w =>
+    `<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px">
+      <span style="color:var(--yellow);font-size:14px;flex-shrink:0">⚠️</span>
+      <div><div style="font-weight:600;font-size:13px;color:var(--yellow)">${esc(w.rule.replace(/_/g,' '))}</div>
+      <div style="font-size:12px;color:var(--text2)">${esc(w.detail)}</div></div>
+    </div>`
+  ).join('');
+
+  const bodyPreview = body.length > 200 ? body.slice(0, 200) + '...' : body;
+
+  const modal = document.createElement('div');
+  modal.id = 'verif-fail-modal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px';
+  modal.innerHTML = `
+    <div style="background:var(--surface);border:1px solid var(--red);border-radius:var(--radius);max-width:600px;width:100%;max-height:80vh;overflow-y:auto;padding:24px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 style="color:var(--red);font-size:18px;margin:0">⛔ Email Verification Failed</h3>
+        <button onclick="document.getElementById('verif-fail-modal').remove()" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer">✕</button>
+      </div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:16px">${verification.errors.length} error(s) · ${verification.warnings.length} warning(s) · ${verification.word_count} words</div>
+      ${errorsHtml ? '<div style="margin-bottom:16px">' + errorsHtml + '</div>' : ''}
+      ${warningsHtml ? '<div style="margin-bottom:16px">' + warningsHtml + '</div>' : ''}
+      <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:12px;margin-bottom:16px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:6px">Preview</div>
+        <div style="font-size:11px;color:var(--accent);margin-bottom:4px">Subject: ${esc(subject)}</div>
+        <div style="font-size:12px;color:var(--text2);white-space:pre-wrap;line-height:1.5">${esc(bodyPreview)}</div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button onclick="document.getElementById('verif-fail-modal').remove()" style="flex:1;padding:10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;font-size:13px;font-weight:600">✏️ Edit & Regenerate</button>
+        <button onclick="overrideAndSendContact('${escAttr(contactId)}','${escAttr(contactName)}','${escAttr(contactEmail)}','${escAttr(fromAlias)}','${escAttr(accountId)}','${escAttr(subject)}','${escAttr(body.slice(0,2000))}',true)" style="flex:1;padding:10px;border-radius:var(--radius-sm);border:1px solid var(--red);background:rgba(240,64,96,.1);color:var(--red);cursor:pointer;font-size:13px;font-weight:600">🔓 Override & Send Anyway</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+// ─── CONTACT CARD OVERRIDE & SEND ───────────────────────
+// Logs override with full diagnostic fields, then sends via Smartlead
+async function overrideAndSendContact(contactId, contactName, contactEmail, fromAlias, accountId, emailSubject, emailBody, isOverride) {
+  document.getElementById('verif-fail-modal')?.remove();
+
+  console.log('[overrideAndSendContact] start', { contactId, fromAlias, isOverride });
+
+  try {
+    // Log override to Supabase with ALL available diagnostic fields
+    if (isOverride && db) {
+      const contact = (state.supabaseContacts || []).find(c => c.id === contactId) || {};
+      const account = (state.supabaseAccounts || []).find(a => a.id === contact.account_id) || {};
+      const senderFirstName = fromAlias.split('@')[0].charAt(0).toUpperCase() + fromAlias.split('@')[0].slice(1);
+      const nameParts = (contactName || '').trim().split(/\s+/);
+
+      await db.from('ai_email_failures').insert({
+        task_id: 'contact_' + contactId,
+        overridden_by: state.rep || 'unknown',
+        rendered_subject: emailSubject,
+        rendered_body: emailBody.slice(0, 2000),
+        override_reason: 'manual_override',
+        mode: 'contact_send',
+        // Full diagnostic fields (Bug 3 fix)
+        prospect_email: contactEmail,
+        prospect_name: contactName,
+        sender_alias: fromAlias,
+        sender_name: senderFirstName,
+        sequence_step: 1,
+        sequence_template: 'cold_outbound',
+        word_count: emailBody.split(/\s+/).filter(Boolean).length,
+        errors: JSON.stringify(verification?.errors || []),
+        warnings: JSON.stringify(verification?.warnings || []),
+        contact_id: contactId,
+        account_id: contact.account_id || null
+      }).catch(e => console.warn('[override] log failed:', e.message));
+    }
+
+    const resp = await fetch('https://rylem-ai-chat.rylem-ai.workers.dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mode: 'smartlead_send',
+        to_email: contactEmail,
+        to_name: contactName,
+        from_alias: fromAlias,
+        from_account_id: accountId,
+        subject: emailSubject || 'Quick intro - Rylem Staffing',
+        body: emailBody
+      })
+    });
+    const respData = await resp.json().catch(() => ({}));
+    if (!resp.ok) throw new Error(`Smartlead ${resp.status}: ${respData.error || 'no detail'}`);
+    if (respData.error) throw new Error(respData.error);
+    showToast('🚀 Email sent from ' + fromAlias + ' (override)!', true);
+  } catch(err) {
+    console.error('Contact override send error:', err);
+    showToast('❌ Send failed: ' + err.message, false);
   }
 }
 

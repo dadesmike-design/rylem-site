@@ -2256,14 +2256,15 @@ async function overrideAndSendContact(contactId, contactName, contactEmail, from
 async function fetchRepAccounts(rep) {
   const profile = window._rylemProfile || {};
   const isSdr = profile.role === 'sdr';
+  const isAdmin = profile.role === 'admin';
 
   let accounts, accErr;
-  if (isSdr) {
-    // SDRs see ALL accounts - full visibility, claim by action
+  if (isSdr || isAdmin) {
+    // Admins and SDRs see ALL accounts - full visibility
     const res = await db.from('accounts').select('*').order('company');
     accounts = res.data; accErr = res.error;
   } else {
-    // BDMs and admins see their own assigned accounts
+    // BDMs/managers see their own assigned accounts
     const res = await db.from('accounts').select('*').eq('assigned_rep', rep);
     accounts = res.data; accErr = res.error;
   }
@@ -2834,13 +2835,16 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
 
 // ─── SUPABASE TASKS ──────────────────────────────────────
 async function fetchRepTasks(rep) {
-  const { data: tasks, error } = await db
+  const profile = window._rylemProfile || {};
+  const isAdmin = profile.role === 'admin';
+  let query = db
     .from('tasks')
     .select('*, contacts(full_name, title, email, phone, mobile, linkedin_url, status), accounts(company, do_not_contact, trigger_event, trigger_date, open_roles_count, domain, hq_city, status)')
-    .eq('rep', rep)
     .eq('completed', false)
-    .lte('due_date', localDateStr())
-    .order('due_date');
+    .lte('due_date', localDateStr());
+  if (!isAdmin) query = query.eq('rep', rep);
+  query = query.order('due_date');
+  const { data: tasks, error } = await query;
   if (error) { console.error('tasks fetch error:', error); return []; }
 
   // Filter out DNC contacts and DNC accounts

@@ -1833,6 +1833,48 @@ function getDefaultAlias(rep) {
   return aliases[rep] || 'mike@rylemconsulting.com';
 }
 
+// ─── ALIAS RESOLUTION CHAIN (shared with contact.html) ──────────────────
+const BDM_ALIAS_POOLS = {
+  mike:  ['mike@rylemconsulting.com','mike@hirerylem.com','mike@scalewithrylem.com','mike@rylemstaffing.com'],
+  julia: ['julia@rylemconsulting.com','julia@hirerylem.com','julia@scalewithrylem.com','julia@rylemstaffing.com'],
+  april: ['april@rylemconsulting.com','april@hirerylem.com','april@scalewithrylem.com','april@rylemstaffing.com']
+};
+const _bdmAliasIndex = (function() {
+  try { const s = localStorage.getItem('rylem_bdm_alias_index'); if (s) { const p = JSON.parse(s); if (p && typeof p === 'object') return p; } } catch(e) {}
+  return { mike: 0, julia: 0, april: 0 };
+})();
+function _persistBdmAliasIndex() {
+  try { localStorage.setItem('rylem_bdm_alias_index', JSON.stringify(_bdmAliasIndex)); } catch(e) {}
+}
+class AliasError extends Error { constructor(m) { super(m); this.name = 'AliasError'; } }
+
+function resolveSendingAlias(contact, loggedInRep) {
+  // a. explicit override: contact.assigned_alias (sticky alias from prior send)
+  if (contact?.assigned_alias) return contact.assigned_alias;
+
+  // b. pool lookup by contact's BDM, round-robin
+  const bdm = contact?.assigned_bdm;
+  if (bdm && BDM_ALIAS_POOLS[bdm]) {
+    const pool = BDM_ALIAS_POOLS[bdm];
+    const idx = _bdmAliasIndex[bdm] % pool.length;
+    _bdmAliasIndex[bdm] = idx + 1;
+    _persistBdmAliasIndex();
+    return pool[idx];
+  }
+
+  // c. fallback: logged-in user's own pool (only works if they're a BDM)
+  if (loggedInRep && BDM_ALIAS_POOLS[loggedInRep]) {
+    const pool = BDM_ALIAS_POOLS[loggedInRep];
+    const idx = _bdmAliasIndex[loggedInRep] % pool.length;
+    _bdmAliasIndex[loggedInRep] = idx + 1;
+    _persistBdmAliasIndex();
+    return pool[idx];
+  }
+
+  // d. hard fail
+  throw new AliasError('Cannot resolve sending alias: contact has no assigned_bdm and logged-in rep (' + loggedInRep + ') has no alias pool. Assign a BDM to this contact.');
+}
+
 // ─── VERIFICATION FAILURE MODAL ─────────────────────────
 function showVerificationFailureModal(tid, subject, body, verification, fromAlias, accountId, toEmail, task) {
   // Remove existing modal if any
@@ -2628,13 +2670,13 @@ document.getElementById('bulk-add-form')?.addEventListener('submit', async (e) =
         .eq('template_id', templateId).eq('step_number', 1).single();
       if (step1) {
         const dueDate = nextBusinessDay(new Date());
-        const bdmAlias = await getBdmAlias(bdmVal) || await getBdmAlias(rep);
+        const sentFrom = resolveSendingAlias({ assigned_alias: null, assigned_bdm: bdm || null }, rep);
         await db.from('tasks').insert({
           sequence_id: seq.id,
           contact_id: con.id,
           account_id: accountId,
           rep: rep,
-          sent_from: bdmAlias,
+          sent_from: sentFrom,
           step_number: 1,
           channel: step1.channel || 'linkedin',
           action: step1.instructions || 'Step 1',
@@ -2806,13 +2848,13 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
     // Create first task
     if (step1) {
       const dueDate = nextBusinessDay(new Date());
-      const bdmAlias = await getBdmAlias(bdm) || await getBdmAlias(rep);
+      const sentFrom = resolveSendingAlias({ assigned_alias: null, assigned_bdm: bdmVal || null }, rep);
       await db.from('tasks').insert({
         sequence_id: seq.id,
         contact_id: con.id,
         account_id: accountId,
         rep: rep,
-        sent_from: bdmAlias,
+        sent_from: sentFrom,
         step_number: 1,
         channel: step1.channel || 'linkedin',
         action: step1.instructions || 'Step 1',
@@ -3515,17 +3557,24 @@ async function bulkStartSequences() {
     }).select().single();
     if (seqErr) { console.error('Seq insert error:', seqErr); skipped++; continue; }
 
-    // Re-fetch contact to get assigned_alias (may have been set by trigger)
-    const { data: ctUpdated } = await db.from('contacts').select('assigned_alias').eq('id', c.contact_id).single();
+    // Re-fetch contact to get assigned_alias + assigned_bdm for alias resolution
+    const { data: ctUpdated } = await db.from('contacts').select('assigned_alias, assigned_bdm').eq('id', c.contact_id).single();
 
-    // Insert first task - rep = working_rep (SDR credit), sent_from = assigned_alias (BDM pool)
+    // Insert first task - rep = working_rep (SDR credit), sent_from resolved via full priority chain
     if (step1) {
+      let sentFrom;
+      try {
+        sentFrom = resolveSendingAlias(ctUpdated, rep);
+      } catch(ae) {
+        if (ae.name === 'AliasError') { showToast('⚠️ ' + ae.message, true); skipped++; continue; }
+        throw ae;
+      }
       await db.from('tasks').insert({
         sequence_id: seq.id,
         contact_id: c.contact_id,
         account_id: c.account_id,
         rep: rep,
-        sent_from: ctUpdated?.assigned_alias || null,
+        sent_from: sentFrom,
         step_number: 1,
         channel: step1.channel || 'linkedin',
         action: step1.instructions || 'Step 1',
@@ -3664,7 +3713,8 @@ async function bumpContactStep(contactId, accountId, currentStep, direction) {
   // 6. Delete pending tasks, insert new task
   await db.from('tasks').delete().eq('contact_id', contactId).eq('completed', false);
   if (stepTpl) {
-    const bumpAlias = await getBdmAlias(state.rep);
+    const { data: bumpContact } = await db.from('contacts').select('assigned_alias, assigned_bdm').eq('id', contactId).single();
+    const bumpAlias = resolveSendingAlias(bumpContact, state.rep);
     await db.from('tasks').insert({
       sequence_id: seq.id, contact_id: contactId, account_id: accountId,
       rep: state.rep, sent_from: bumpAlias, step_number: newStep,
@@ -3864,7 +3914,8 @@ async function saveMeetingCompleted() {
       started_at: new Date().toISOString()
     }).select().single();
     if (newSeq && step1) {
-      const mtgAlias = await getBdmAlias(state.rep);
+      const { data: mtgContact } = await db.from('contacts').select('assigned_alias, assigned_bdm').eq('id', _csmContactId).single();
+      const mtgAlias = resolveSendingAlias(mtgContact, state.rep);
       await db.from('tasks').insert({
         sequence_id: newSeq.id, contact_id: _csmContactId, account_id: _csmAccountId,
         rep: state.rep, sent_from: mtgAlias, step_number: 1, channel: step1.channel || 'email',

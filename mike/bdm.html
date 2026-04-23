@@ -3098,11 +3098,16 @@ async function loadMeetingInsights(container) {
     weekStart.setHours(0, 0, 0, 0);
     const weekStartStr = weekStart.toISOString().split('T')[0];
 
-    // Query meeting events this week
+    // Query meeting events this week (includes meeting_logged from contact.html)
     const { data: meetingEvents } = await db.from('activity_log')
-      .select('rep, created_at, event_type')
-      .ilike('event_type', '%meeting%')
+      .select('rep, created_at, event_type, contact_id')
+      .in('event_type', ['meeting_set', 'meeting_completed', 'meeting_logged'])
       .gte('created_at', weekStartStr + 'T00:00:00');
+
+    // ALSO count meetings from meetings table (fallback for contact.html submitMeeting path)
+    const { data: meetingsRows } = await db.from('meetings')
+      .select('rep, meeting_date, contact_id')
+      .gte('meeting_date', weekStartStr);
 
     // ALSO count meetings from contacts table (fallback if activity_log insert failed)
     const { data: meetingContacts } = await db.from('contacts')
@@ -3119,12 +3124,18 @@ async function loadMeetingInsights(container) {
     // Get active reps
     const { data: activeReps } = await db.from('reps').select('rep_key, name');
 
-    // Merge activity_log meetings + contacts meetings (dedup)
-    const logMeetings = (meetingEvents || []).filter(e => e.event_type === 'meeting_set' || e.event_type === 'meeting_completed');
+    // Merge all sources (dedup by contact_id first, then by rep+date)
+    const logMeetings = (meetingEvents || []);
+    const logContactIds = new Set(logMeetings.map(m => m.contact_id).filter(Boolean));
+
     const contactMeetings = (meetingContacts || []).map(c => ({ rep: c.meeting_set_by, created_at: c.meeting_set_date, event_type: 'meeting_set' }));
     const logReps = new Set(logMeetings.map(m => m.rep + '|' + String(m.created_at).slice(0,10)));
     const extraContactMeetings = contactMeetings.filter(c => !logReps.has((c.rep||'') + '|' + String(c.created_at||'').slice(0,10)));
-    const allMeetings = [...logMeetings, ...extraContactMeetings];
+
+    const meetingsTableMeetings = (meetingsRows || []).map(m => ({ rep: m.rep, created_at: m.meeting_date, event_type: 'meeting_set', contact_id: m.contact_id }));
+    const extraMeetingsTable = meetingsTableMeetings.filter(m => !logContactIds.has(m.contact_id));
+
+    const allMeetings = [...logMeetings, ...extraContactMeetings, ...extraMeetingsTable];
     const meetingCount = allMeetings.length;
     const leadsCount = (leadsAdded || []).length;
     const conversionRate = leadsCount > 0 ? Math.round((meetingCount / leadsCount) * 100) : 0;

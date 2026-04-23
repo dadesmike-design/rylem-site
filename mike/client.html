@@ -404,8 +404,8 @@ async function selectRep(rep,e){
 // ─── ALERT ───
 function renderAlert(){
   const el=document.getElementById('alert-slot');
-  const engaged=contacts.filter(c=>c.status&&c.status!=='new').length;
-  const meetingSet=contacts.filter(c=>c.status==='meeting_set').length;
+  const engaged=contacts.filter(c=>c.meeting_set_date||c.not_interested===false).length;
+  const meetingSet=contacts.filter(c=>!!c.meeting_set_date).length;
   const daysSinceCreated=Math.floor((Date.now()-new Date(account.created_at).getTime())/86400000);
 
   if(meetingSet>0){
@@ -426,9 +426,9 @@ function renderAlert(){
 // ─── METRICS ───
 function renderMetrics(){
   const total=contacts.length;
-  const engaged=contacts.filter(c=>c.status&&c.status!=='new').length;
+  const engaged=contacts.filter(c=>c.meeting_set_date||c.not_interested===false).length;
   const sequenced=sequences.filter(s=>s.status==='active').length;
-  const meetingSet=contacts.filter(c=>c.status==='meeting_set').length;
+  const meetingSet=contacts.filter(c=>!!c.meeting_set_date).length;
 
   const eClass=engaged===0?(total>0?'m-danger':'m-info'):engaged>=3?'m-good':'m-warn';
   const sClass=sequenced===0?'m-info':sequenced>=3?'m-good':'m-warn';
@@ -446,7 +446,7 @@ function renderMetrics(){
 function renderContacts(){
   const seqMap={};
   sequences.forEach(s=>{seqMap[s.contact_id]=s;});
-  const engaged=contacts.filter(c=>c.status&&c.status!=='new').length;
+  const engaged=contacts.filter(c=>c.meeting_set_date||c.not_interested===false).length;
   document.getElementById('ct-badge').textContent=contacts.length+' total · '+engaged+' engaged';
 
   const body=document.getElementById('body-contacts');
@@ -461,14 +461,14 @@ function renderContacts(){
     const initials=((c.full_name||'?').split(' ').map(w=>w[0]).join('').slice(0,2)).toUpperCase();
     const stepActive=step>0?'active':'';
     const li=c.linkedin_url?`<a href="${esc(c.linkedin_url)}" target="_blank" rel="noopener">🔗</a>`:'<span class="no-li">—</span>';
-    const statusCls='cs-'+(c.status||'new');
-    const isDnc=c.status==='do_not_contact';
+    const statusBadge=c.meeting_set_date?'<span class="pill" style="font-size:10px;padding:2px 8px;background:rgba(0,188,188,.12);color:#00d4d4;border:1px solid rgba(0,188,188,.25);border-radius:10px">📅 Meeting</span>':c.not_interested?'<span class="pill" style="font-size:10px;padding:2px 8px;background:rgba(255,23,68,.12);color:#ff1744;border:1px solid rgba(255,23,68,.25);border-radius:10px">🚫 DNC</span>':'';
+    const isDnc=c.not_interested||c.status==='do_not_contact';
     return `<div class="ct-row" style="${isDnc?'opacity:.5;border-left:3px solid var(--neon-red);':''}">${isDnc?'<span style="position:absolute;top:2px;right:8px;font-size:9px;font-weight:700;color:var(--neon-red);background:rgba(255,23,68,.12);padding:2px 6px;border-radius:4px">DNC</span>':''}
       <div class="ct-avatar">${initials}</div>
       <div class="ct-name"><a href="contact.html?id=${c.id}" style="color:var(--text);text-decoration:none" onmouseover="this.style.color='var(--neon-cyan)'" onmouseout="this.style.color='var(--text)'">${esc(c.full_name)}</a>${c.intel_summary?`<span class="badge-history" onclick="const t=this.closest('.ct-row').nextElementSibling;if(t&&t.classList.contains('history-tooltip')){t.style.display=t.style.display==='block'?'none':'block'}" title="Click to expand">Has history</span>`:''}</div>
       <div class="ct-title">${esc(c.title||'')}</div>
       <span class="ct-step ${stepActive}">${step>0?'Step '+step:'—'}</span>
-      <span class="ct-step" style="border-color:transparent;background:transparent"><span class="pill pill-status ${c.status||'new'}" style="font-size:10px;padding:2px 8px">${esc(c.status||'new')}</span></span>
+      <span class="ct-step" style="border-color:transparent;background:transparent">${statusBadge}</span>
       <div class="ct-li">${li}</div>
       <div class="ct-li">${c.phone?`<a href="rcapp://r/call?number=${stripPhone(c.phone)}" onclick="logCallFor('${c.id}','${c.account_id}','${esc(c.full_name)}')" title="Call via RingCentral" style="color:var(--neon-green);font-size:16px">📲</a>`:'<span style="opacity:.3;font-size:16px" title="No phone number on file">📲</span>'}</div>
       <div class="ct-li">${seq&&seq.status==='active'?'<span style="opacity:.4;font-size:11px" title="Already in sequence">✓</span>':`<button onclick="startSequence('${c.id}')" style="background:none;border:1px solid var(--neon-cyan);color:var(--neon-cyan);border-radius:6px;padding:2px 8px;font-size:11px;cursor:pointer;white-space:nowrap" title="Start sequence">▶ Start</button>`}</div>
@@ -738,9 +738,9 @@ function buildSummary(){
   const seqMap={};sequences.forEach(s=>{seqMap[s.contact_id]=s;});
   const total=contacts.length;
   const activeSeqs=sequences.filter(s=>s.status==='active');
-  const engaged=contacts.filter(c=>c.status&&c.status!=='new');
+  const engaged=contacts.filter(c=>c.meeting_set_date||c.not_interested===false);
   const champion=contacts.find(c=>c.role_type==='champion');
-  const meetingSet=contacts.filter(c=>c.status==='meeting_set');
+  const meetingSet=contacts.filter(c=>!!c.meeting_set_date);
   let maxStep=0,maxName=null;
   sequences.forEach(s=>{if(s.current_step>maxStep){maxStep=s.current_step;const c=contacts.find(x=>x.id===s.contact_id);if(c)maxName=c.full_name;}});
 
@@ -880,7 +880,6 @@ function editContactInline(cid){
   const wrap=document.getElementById('cedit_'+cid);
   if(!wrap)return;
   if(wrap.style.display!=='none'&&wrap.innerHTML){wrap.style.display='none';wrap.innerHTML='';return;}
-  const statuses=['new','engaging','warm','meeting_set','won','lost','do_not_contact'];
   const roles=['champion','budget_holder','influencer','other'];
   wrap.innerHTML=`
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border-hover);border-radius:var(--radius-sm);margin:4px 0">
@@ -890,7 +889,6 @@ function editContactInline(cid){
       <div><label style="font-size:11px;color:var(--text3)">Phone</label><input class="cedit-phone" value="${esc(c.phone||'')}" style="width:100%;padding:6px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"></div>
       <div><label style="font-size:11px;color:var(--text3)">Mobile</label><input class="cedit-mobile" value="${esc(c.mobile||'')}" style="width:100%;padding:6px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"></div>
       <div><label style="font-size:11px;color:var(--text3)">LinkedIn</label><input class="cedit-linkedin" value="${esc(c.linkedin_url||'')}" style="width:100%;padding:6px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"></div>
-      <div><label style="font-size:11px;color:var(--text3)">Status</label><select class="cedit-status" style="width:100%;padding:6px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px">${statuses.map(s=>`<option value="${s}"${c.status===s?' selected':''}>${s}</option>`).join('')}</select></div>
       <div><label style="font-size:11px;color:var(--text3)">Role</label><select class="cedit-role" style="width:100%;padding:6px 8px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px">${roles.map(r=>`<option value="${r}"${c.role_type===r?' selected':''}>${r}</option>`).join('')}</select></div>
       <div style="grid-column:1/-1;display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
         <button onclick="document.getElementById('cedit_${cid}').style.display='none'" style="padding:6px 14px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text2);cursor:pointer;font-size:12px">Cancel</button>
@@ -910,10 +908,9 @@ async function saveContactEdit(cid){
   const phone=wrap.querySelector('.cedit-phone').value.trim();
   const mobile=wrap.querySelector('.cedit-mobile').value.trim();
   const linkedin=wrap.querySelector('.cedit-linkedin').value.trim();
-  const status=wrap.querySelector('.cedit-status').value;
   const roleType=wrap.querySelector('.cedit-role').value;
   if(!name){if(errEl){errEl.textContent='Name is required';errEl.style.display='block';}return;}
-  const update={full_name:name,title:title||null,email:email||null,phone:phone||null,mobile:mobile||null,linkedin_url:linkedin||null,status:status,role_type:roleType};
+  const update={full_name:name,title:title||null,email:email||null,phone:phone||null,mobile:mobile||null,linkedin_url:linkedin||null,role_type:roleType};
   try{
     const{error}=await db.from('contacts').update(update).eq('id',cid);
     if(error)throw error;

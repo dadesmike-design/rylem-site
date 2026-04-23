@@ -655,10 +655,8 @@ function renderHeader(){
   const ow=c.owner||'mike';
   const bdm=c.assigned_bdm||'';
   const wRep=c.working_rep||'';
-  const statusLabel=(c.status||'new').replace(/_/g,' ');
-  const allStatuses=['new','engaging','warm','meeting_set','won','lost','do_not_contact'];
-  const allReps=['mike','julia','april'];
   const allRoles=['champion','budget_holder','executive','end_user','other'];
+  const isDNC=c.not_interested||c.status==='do_not_contact';
 
   document.getElementById('hdr-card').innerHTML=`
     <div class="hdr-top">
@@ -673,18 +671,12 @@ function renderHeader(){
       <div class="hdr-owner-wrap">
         <span class="hdr-owner-pill owner-${ow}" onclick="toggleOwnerDD(event)">${esc(ownerName[ow]||ow)} <span class="caret">▼</span></span>
         <div class="hdr-owner-dd" id="owner-dd">
-          ${allReps.map(r=>`<div class="dd-opt" onclick="setOwner('${r}')">
+          ${['mike','julia','april'].map(r=>`<div class="dd-opt" onclick="setOwner('${r}')">
             <span class="dd-dot dd-dot-${r}"></span>${esc(ownerName[r])}
           </div>`).join('')}
         </div>
       </div>
       ${wRep?`<span class="hdr-working-rep">Working: ${esc(repNames[wRep]||wRep)}</span>`:''}
-      <div class="hdr-status-wrap">
-        <span class="hdr-status-badge" onclick="toggleStatusDD(event)">${esc(statusLabel)} <span class="caret">▼</span></span>
-        <div class="hdr-status-dd" id="status-dd">
-          ${allStatuses.map(s=>`<div class="dd-opt" onclick="setStatus('${s}')">${esc(s.replace(/_/g,' '))}</div>`).join('')}
-        </div>
-      </div>
       <div class="hdr-role-wrap">
         <span class="hdr-role-pill" onclick="toggleRoleDD(event)">${roleLabels[c.role_type||'other']} <span class="caret">▼</span></span>
         <div class="hdr-role-dd" id="role-dd">
@@ -695,15 +687,14 @@ function renderHeader(){
       ${c.email?`<a class="pill pill-icon" href="https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(c.email)}" target="_blank" rel="noopener" title="${esc(c.email)}">✉️</a>`:`<span class="pill pill-icon disabled">✉️</span>`}
       ${c.phone?`<a class="pill pill-icon" href="rcapp://r/call?number=${stripPhone(c.phone)}" onclick="logCall()" title="Call ${esc(c.phone)} via RingCentral" style="background:rgba(57,255,20,.1);border:1px solid rgba(57,255,20,.25);color:var(--neon-green)">📲</a>`:`<span class="pill pill-icon disabled" title="No phone number on file" style="opacity:.3">📲</span>`}
       ${c.linkedin_url?`<a class="pill pill-icon" href="${esc(c.linkedin_url)}" target="_blank" rel="noopener" title="LinkedIn">🔗</a>`:`<span class="pill pill-icon disabled">🔗</span>`}
-      <span class="pill" onclick="toggleContactDNC()" style="cursor:pointer;border:1px solid ${c.status==='do_not_contact'?'var(--neon-green)':'var(--neon-red)'};background:${c.status==='do_not_contact'?'rgba(57,255,20,.08)':'rgba(255,23,68,.08)'};color:${c.status==='do_not_contact'?'var(--neon-green)':'var(--neon-red)'};font-weight:700;font-size:11px">${c.status==='do_not_contact'?'✅ Remove DNC':'🚫 DNC'}</span>
-      <span class="pill" onclick="openStatusModal('${esc(contact.id)}','${esc(contact.account_id)}')" style="cursor:pointer;border:1px solid var(--neon-cyan);background:rgba(0,229,255,.1);color:var(--neon-cyan);font-weight:700;font-size:11px">⚙ Status</span>
+      <span class="pill" onclick="showMeetingDetailsModal()" style="cursor:pointer;border:1px solid var(--neon-cyan);background:rgba(0,229,255,.1);color:var(--neon-cyan);font-weight:700;font-size:11px">📅 Set Meeting</span>
+      <span class="pill" onclick="toggleContactDNC()" style="cursor:pointer;border:1px solid ${isDNC?'var(--neon-green)':'var(--neon-red)'};background:${isDNC?'rgba(57,255,20,.08)':'rgba(255,23,68,.08)'};color:${isDNC?'var(--neon-green)':'var(--neon-red)'};font-weight:700;font-size:11px">${isDNC?'✅ Remove DNC':'🚫 DNC'}</span>
     </div>
   `;
 }
 
-function closeAllDD(){['owner-dd','status-dd','role-dd'].forEach(id=>document.getElementById(id)?.classList.remove('open'));}
+function closeAllDD(){['owner-dd','role-dd'].forEach(id=>document.getElementById(id)?.classList.remove('open'));}
 function toggleOwnerDD(e){e.stopPropagation();closeAllDD();document.getElementById('owner-dd')?.classList.toggle('open');}
-function toggleStatusDD(e){e.stopPropagation();closeAllDD();document.getElementById('status-dd')?.classList.toggle('open');}
 function toggleRoleDD(e){e.stopPropagation();closeAllDD();document.getElementById('role-dd')?.classList.toggle('open');}
 document.addEventListener('click',closeAllDD);
 
@@ -719,17 +710,6 @@ async function setOwner(val){
 }
 
 const POST_MEETING_TEMPLATE_ID='240f3086-8b4c-45eb-af37-55232ac8f4b1';
-
-async function setStatus(val){
-  closeAllDD();
-  const {error}=await db.from('contacts').update({status:val}).eq('id',contact.id);
-  if(error){showToast('Error: '+error.message);return;}
-  contact.status=val;
-  renderHeader();
-  showToast('Status updated');
-  // If meeting_set, prompt for post-meeting follow up
-  if(val==='meeting_set') showMeetingDetailsModal();
-}
 
 let _mtgOutcome=null,_mtgType=null,_contactMeetings=[];
 
@@ -1014,11 +994,11 @@ async function dismissCallModal(){
 
 // ─── DNC STATE ───
 function isDNC(){
-  return contact.status==='do_not_contact' || account.do_not_contact;
+  return contact.not_interested || contact.status==='do_not_contact' || account.do_not_contact;
 }
 function renderDNCState(){
   const banner=document.getElementById('dnc-banner');
-  if(contact.status==='do_not_contact'){
+  if(contact.not_interested || contact.status==='do_not_contact'){
     banner.style.display='block'; banner.textContent='🚫 DO NOT CONTACT — This contact is hands off';
   } else if(account.do_not_contact){
     banner.style.display='block'; banner.textContent='🚫 DO NOT CONTACT — Account-level DNC';
@@ -1027,15 +1007,17 @@ function renderDNCState(){
   }
 }
 async function toggleContactDNC(){
-  const newStatus=contact.status==='do_not_contact'?'new':'do_not_contact';
-  const {error}=await db.from('contacts').update({status:newStatus}).eq('id',contact.id);
+  const wasDNC=contact.not_interested || contact.status==='do_not_contact';
+  const newVal=!wasDNC;
+  const {error}=await db.from('contacts').update({not_interested:newVal,status:null}).eq('id',contact.id);
   if(error){showToast('Error: '+error.message);return;}
-  contact.status=newStatus;
+  contact.not_interested=newVal;
+  contact.status=null;
   renderHeader();
   renderDNCState();
   renderTask();
-  await db.from('activity_log').insert({contact_id:contact.id,account_id:contact.account_id,rep:contact.working_rep||contact.owner||'system',event_type:newStatus==='do_not_contact'?'contact_dnc_flagged':'contact_dnc_removed',description:contact.full_name+(newStatus==='do_not_contact'?' marked Do Not Contact':' DNC flag removed')});
-  showToast(newStatus==='do_not_contact'?'Marked DNC':'DNC removed');
+  await db.from('activity_log').insert({contact_id:contact.id,account_id:contact.account_id,rep:contact.working_rep||contact.owner||'system',event_type:newVal?'contact_dnc_flagged':'contact_dnc_removed',description:contact.full_name+(newVal?' marked Do Not Contact':' DNC flag removed')});
+  showToast(newVal?'Marked DNC':'DNC removed');
 }
 
 // ─── SEQUENCE ───

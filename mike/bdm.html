@@ -2682,10 +2682,10 @@ document.getElementById('al-contact')?.addEventListener('input', (e) => {
 });
 
 async function checkContactDupe(name) {
-  const { data } = await db.from('contacts').select('id, full_name, status, account_id, accounts(company, assigned_rep)').ilike('full_name', name);
+  const { data } = await db.from('contacts').select('id, full_name, not_interested, account_id, accounts(company, assigned_rep)').ilike('full_name', name);
   if (data && data.length > 0) {
     // Check if existing contact is DNC
-    const dncContact = data.find(c => c.status === 'do_not_contact');
+    const dncContact = data.find(c => c.not_interested || c.status === 'do_not_contact');
     if (dncContact) {
       showDNCWarn(dncContact.full_name + ' is marked Do Not Contact at ' + (dncContact.accounts?.company||'unknown') + '. Submission blocked.');
     }
@@ -2870,7 +2870,7 @@ async function fetchRepTasks(rep) {
 
   // Filter out DNC contacts and DNC accounts
   const filtered = (tasks||[]).filter(t => {
-    if (t.contacts?.status === 'do_not_contact') return false;
+    if (t.contacts?.not_interested || t.contacts?.status === 'do_not_contact') return false;
     if (t.accounts?.do_not_contact) return false;
     return true;
   });
@@ -3887,9 +3887,9 @@ async function saveMeetingCompleted() {
 async function toggleStatusFlag(field, value) {
   const update = {};
   update[field] = value;
-  // Unsubscribed ON → also set DNC status + pause active sequence
+  // Unsubscribed ON → also set not_interested + pause active sequence
   if (field === 'unsubscribed' && value) {
-    update.status = 'do_not_contact';
+    update.not_interested = true;
     await db.from('sequences').update({ status: 'paused' }).eq('contact_id', _csmContactId).eq('status', 'active');
   }
   // Not interested ON → pause active sequence
@@ -3951,7 +3951,6 @@ async function editContactRow(contactId, accountId) {
   const currentPhone = c.phone || '';
   const currentMobile = c.mobile || '';
   const currentLinkedin = c.linkedin_url || '';
-  const currentStatus = c.status || 'new';
   const currentRole = c.role_type || 'champion';
 
   const editForm = document.createElement('div');
@@ -3971,17 +3970,6 @@ async function editContactRow(contactId, accountId) {
       <div class="cef-field"><label>LinkedIn</label><input type="url" class="cef-linkedin" value="${escHtml(currentLinkedin)}"></div>
     </div>
     <div class="cef-row">
-      <div class="cef-field"><label>Status</label>
-        <select class="cef-status">
-          <option value="new" ${currentStatus==='new'?'selected':''}>New</option>
-          <option value="engaging" ${currentStatus==='engaging'?'selected':''}>Engaging</option>
-          <option value="warm" ${currentStatus==='warm'?'selected':''}>Warm</option>
-          <option value="meeting_set" ${currentStatus==='meeting_set'?'selected':''}>Meeting Set</option>
-          <option value="won" ${currentStatus==='won'?'selected':''}>Won</option>
-          <option value="lost" ${currentStatus==='lost'?'selected':''}>Lost</option>
-          <option value="do_not_contact" ${currentStatus==='do_not_contact'?'selected':''}>Do Not Contact</option>
-        </select>
-      </div>
       <div class="cef-field"><label>Role Type</label>
         <select class="cef-role">
           <option value="champion" ${currentRole==='champion'?'selected':''}>Champion</option>
@@ -4024,7 +4012,6 @@ async function saveContactEdit(contactId, accountId) {
   const phone = form.querySelector('.cef-phone').value.trim();
   const mobile = form.querySelector('.cef-mobile').value.trim();
   const linkedin = form.querySelector('.cef-linkedin').value.trim();
-  const status = form.querySelector('.cef-status').value;
   const roleType = form.querySelector('.cef-role').value;
 
   if (!name) {
@@ -4039,7 +4026,6 @@ async function saveContactEdit(contactId, accountId) {
     phone: phone || null,
     mobile: mobile || null,
     linkedin_url: linkedin || null,
-    status: status,
     role_type: roleType
   };
 

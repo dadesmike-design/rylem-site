@@ -1848,12 +1848,13 @@ async function fetchWeeklyEmails(rep) {
   const { start, end } = getWeekRange();
   try {
     const { count } = await db
-      .from('activity_log')
+      .from('tasks')
       .select('id', { count: 'exact', head: true })
       .eq('rep', rep)
-      .eq('event_type', 'task_completed')
-      .gte('created_at', start)
-      .lte('created_at', end);
+      .eq('channel', 'email')
+      .eq('completed', true)
+      .gte('completed_at', start)
+      .lte('completed_at', end);
     return count || 0;
   } catch(e) { return 0; }
 }
@@ -1862,12 +1863,13 @@ async function fetchWeeklyCalls(rep) {
   const { start, end } = getWeekRange();
   try {
     const { count } = await db
-      .from('activity_log')
+      .from('tasks')
       .select('id', { count: 'exact', head: true })
       .eq('rep', rep)
-      .in('event_type', ['call_initiated', 'call_completed'])
-      .gte('created_at', start)
-      .lte('created_at', end);
+      .eq('channel', 'phone')
+      .eq('completed', true)
+      .gte('completed_at', start)
+      .lte('completed_at', end);
     return count || 0;
   } catch(e) { return 0; }
 }

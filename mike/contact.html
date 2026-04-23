@@ -1523,6 +1523,11 @@ async function saveMeetingSet(){
   const repKey=profile?.session?.user?.email?.includes('mike')?'mike':profile?.session?.user?.email?.includes('julia')?'julia':profile?.session?.user?.email?.includes('april')?'april':profile?.session?.user?.email?.includes('jean')?'jean':'dee';
   const {error}=await db.from('contacts').update({meeting_set_date:date,meeting_set_by:repKey}).eq('id',_csmContactId);
   if(error){showToast('Error: '+error.message);return;}
+  try { await db.from('activity_log').insert({
+    event_type:'meeting_set',
+    description:`Meeting set for ${date}`,
+    contact_id:_csmContactId, account_id:_csmAccountId, rep:repKey
+  }); } catch(e) { console.error('[saveMeetingSet] activity_log error:', e); }
   showToast('Meeting date saved');
   setTimeout(()=>{closeStatusModal();renderHeader();},1000);
 }

@@ -3121,6 +3121,11 @@ async function loadMeetingInsights(container) {
       .eq('event_type', 'lead_added')
       .gte('created_at', weekStartStr + 'T00:00:00');
 
+    // Also count contacts created this week (fallback — not all creation paths log lead_added)
+    const { count: contactsCreatedCount } = await db.from('contacts')
+      .select('*', { head: true, count: 'exact' })
+      .gte('created_at', weekStartStr + 'T00:00:00');
+
     // Get active reps
     const { data: activeReps } = await db.from('reps').select('rep_key, name');
 
@@ -3137,7 +3142,7 @@ async function loadMeetingInsights(container) {
 
     const allMeetings = [...logMeetings, ...extraContactMeetings, ...extraMeetingsTable];
     const meetingCount = allMeetings.length;
-    const leadsCount = (leadsAdded || []).length;
+    const leadsCount = Math.max((leadsAdded || []).length, contactsCreatedCount || 0);
     const conversionRate = leadsCount > 0 ? Math.round((meetingCount / leadsCount) * 100) : 0;
     const repsCount = (activeReps || []).length;
 

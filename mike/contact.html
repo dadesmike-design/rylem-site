@@ -500,6 +500,66 @@ window.rylemAuthReady.then(function() { boot(); });
 
 let contact=null,account=null,sequence=null,stepInfo=null,task=null,activityList=[],seqList=[];
 
+const SMARTLEAD_ALIAS_MAP={
+  'mike@rylemconsulting.com':17584923,'mike@hirerylem.com':17584914,'mike@scalewithrylem.com':17584910,'mike@rylemstaffing.com':17584902,
+  'julia@rylemconsulting.com':17584900,'julia@hirerylem.com':17584949,'julia@scalewithrylem.com':17584897,'julia@rylemstaffing.com':17584888,
+  'april@rylemconsulting.com':17584884,'april@hirerylem.com':17584878,'april@scalewithrylem.com':17584875,'april@rylemstaffing.com':17584851
+};
+const BDM_ALIAS_POOLS={
+  mike:['mike@rylemconsulting.com','mike@hirerylem.com','mike@scalewithrylem.com','mike@rylemstaffing.com'],
+  julia:['julia@rylemconsulting.com','julia@hirerylem.com','julia@scalewithrylem.com','julia@rylemstaffing.com'],
+  april:['april@rylemconsulting.com','april@hirerylem.com','april@scalewithrylem.com','april@rylemstaffing.com']
+};
+const _bdmAliasIndex=(function(){
+  try{const s=localStorage.getItem('rylem_bdm_alias_index');if(s){const p=JSON.parse(s);if(p&&typeof p==='object')return p;}}catch(e){}
+  return{mike:0,julia:0,april:0};
+})();
+function _saveAliasIndex(){try{localStorage.setItem('rylem_bdm_alias_index',JSON.stringify(_bdmAliasIndex));}catch(e){}}
+class AliasError extends Error{constructor(m){super(m);this.name='AliasError';}}
+function getSendingAlias(contact,task){
+  // a. task.sent_from — explicit override
+  if(task?.sent_from){
+    const aid=SMARTLEAD_ALIAS_MAP[task.sent_from.toLowerCase()];
+    if(!aid)throw new AliasError('Task sent_from "'+task.sent_from+'" has no Smartlead account ID');
+    return{alias:task.sent_from,accountId:aid,source:'task.sent_from'};
+  }
+  // b. contact.assigned_alias — sticky from prior send
+  if(contact?.assigned_alias){
+    const aid=SMARTLEAD_ALIAS_MAP[contact.assigned_alias.toLowerCase()];
+    if(!aid)throw new AliasError('Contact assigned_alias "'+contact.assigned_alias+'" has no Smartlead account ID');
+    return{alias:contact.assigned_alias,accountId:aid,source:'contact.assigned_alias'};
+  }
+  // c. Pool round-robin by contact.assigned_bdm
+  const bdm=contact?.assigned_bdm||null;
+  if(bdm&&BDM_ALIAS_POOLS[bdm]){
+    const pool=BDM_ALIAS_POOLS[bdm];
+    const idx=_bdmAliasIndex[bdm]%pool.length;
+    const alias=pool[idx];
+    _bdmAliasIndex[bdm]=idx+1;
+    _saveAliasIndex();
+    const aid=SMARTLEAD_ALIAS_MAP[alias.toLowerCase()];
+    if(!aid)throw new AliasError('Round-robin alias "'+alias+'" for BDM "'+bdm+'" has no Smartlead account ID');
+    return{alias,accountId:aid,source:'pool_round_robin:'+bdm};
+  }
+  // d. Fallback: logged-in user's own pool
+  const userRep=window.currentUser?.rep_key||null;
+  if(userRep&&BDM_ALIAS_POOLS[userRep]){
+    const pool=BDM_ALIAS_POOLS[userRep];
+    const idx=_bdmAliasIndex[userRep]%pool.length;
+    const alias=pool[idx];
+    _bdmAliasIndex[userRep]=idx+1;
+    _saveAliasIndex();
+    const aid=SMARTLEAD_ALIAS_MAP[alias.toLowerCase()];
+    if(!aid)throw new AliasError('Fallback alias "'+alias+'" for user "'+userRep+'" has no Smartlead account ID');
+    return{alias,accountId:aid,source:'fallback_pool:'+userRep};
+  }
+  // e. Hard fail
+  throw new AliasError('No sending alias resolved. Contact has no assigned_alias or assigned_bdm, and no logged-in user pool. Assign a BDM to this contact or set an alias manually.');
+}
+function getCurrentRep(){
+  return(window.currentUser&&window.currentUser.rep_key)||contact?.working_rep||contact?.owner||'mike';
+}
+
 async function boot(){
   const id=new URLSearchParams(location.search).get('id');
   if(!id){showError('No contact ID.');return;}
@@ -1099,7 +1159,10 @@ function renderTask(){
     }
   } else if(channelCls==='email'){
     const to=encodeURIComponent(contact?.email||'');
-    actionBtn=`<a class="btn btn-email-action" href="https://outlook.office.com/mail/deeplink/compose?to=${to}&subject=${encodeURIComponent('Quick intro — Rylem Staffing')}" target="_blank" rel="noopener">✉️ Open Outlook</a>`;
+    let alias='—';
+    try{alias=getSendingAlias(contact,task).alias;}catch(e){/* show dash if no alias */}
+    actionBtn=`<a class="btn btn-email-action" href="https://outlook.office.com/mail/deeplink/compose?to=${to}&subject=${encodeURIComponent('Quick intro \u2014 Rylem Staffing')}" target="_blank" rel="noopener">✉️ Open Outlook</a>`;
+    actionBtn+=`<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(0,119,181,.1);color:#6bb5e8;border:1px solid rgba(0,119,181,.2);margin-left:6px">📤 ${esc(alias)}</span>`;
   } else if(channelCls==='phone' && contact?.phone){
     actionBtn=`<a class="btn btn-phone-action" href="rcapp://r/call?number=${stripPhone(contact.phone)}" onclick="logCall()">📲 Call via RingCentral</a>`;
   }
@@ -1136,72 +1199,177 @@ async function generateMessage(){
 
   const referrer=document.getElementById('referrer-name')?.value?.trim()||null;
 
-  // Step 1: Get context from Supabase
-  const {data:ctx,error:ctxErr}=await db.rpc('build_message_context',{
-    p_contact_id:contact.id,
-    p_task_id:task?.id||null,
-    p_referrer_name:referrer
-  });
-  if(ctxErr||ctx?.error){
-    area.innerHTML=`<div style="color:var(--neon-red);font-size:12px">❌ ${esc(ctxErr?.message||ctx?.error||'Context build failed')}</div><button class="btn-generate" onclick="generateMessage()">🔄 Retry</button>`;
-    return;
+  // Determine alias
+  const {alias,accountId:genAccountId,source:aliasSource}=getSendingAlias(contact,task);
+  const senderFirstName=alias.split('@')[0].split('.')[0].charAt(0).toUpperCase()+alias.split('@')[0].split('.')[0].slice(1)||'Mike';
+
+  // Parse name
+  const nameParts=(contact?.full_name||'').trim().split(/\s+/);
+  const firstName=nameParts[0]||'';
+  const lastName=nameParts.slice(1).join(' ')||'';
+
+  // Signal from account
+  let signalType='cold_no_signal';
+  let signalDetail=null;
+  let signalSource=null;
+  const te=account?.trigger_event||'';
+  if(te){
+    const tel=te.toLowerCase();
+    if(tel.includes('hir')||tel.includes('role')||tel.includes('open pos')){signalType='hiring';signalDetail=te;signalSource='account_data';}
+    else if(tel.includes('fund')||tel.includes('rais')||tel.includes('series')){signalType='funding';signalDetail=te;signalSource='account_data';}
+    else if(tel.includes('cfo')||tel.includes('cto')||tel.includes('new vp')||tel.includes('leadership')||tel.includes('appoint')){signalType='leadership_change';signalDetail=te;signalSource='account_data';}
+    else{signalType='hiring';signalDetail=te;signalSource='account_data';}
   }
 
-  // Step 2: Enrich prompt for post-meeting sequences
-  let systemPrompt=ctx.system_prompt;
-  let userPrompt=ctx.user_prompt;
-  const isPostMeeting=sequence&&sequence.template_id===POST_MEETING_TEMPLATE_ID;
-  if(isPostMeeting){
-    const meetingNotes=(contact.intel||'').split('\n').filter(l=>l.includes('[Meeting ')).join('\n');
-    const daysSinceMeeting=Math.floor((Date.now()-new Date(contact.updated_at||Date.now()))/(1000*60*60*24));
-    // Get recent activity
-    const {data:recentAct}=await db.from('activity_log').select('event_type,description,created_at').eq('contact_id',contact.id).order('created_at',{ascending:false}).limit(10);
-    const actSummary=(recentAct||[]).map(a=>`${a.event_type}: ${a.description} (${new Date(a.created_at).toLocaleDateString()})`).join('\n');
-    const postMeetingCtx=`\n\nPOST-MEETING CONTEXT:\nThis is a post-meeting follow up message. The rep has already met this person in person or virtually. The tone should be warm, personal, and reference the meeting directly. Never use cold outreach language. Reference specific things discussed if available in the intel or notes. The relationship already exists — build on it. Do not introduce Rylem as if they have never heard of it.\n\nMeeting notes: ${meetingNotes||'No meeting notes captured'}\nDays since meeting: ${daysSinceMeeting}\nRecent activity since meeting:\n${actSummary||'None logged'}\nAccount signal: ${account?.trigger_event||'None'}\n`;
-    systemPrompt+=postMeetingCtx;
+  // Build structured request
+  const requestBody={
+    mode:'generate_email',
+    prospect:{
+      first_name:firstName,
+      last_name:lastName,
+      title:contact?.title||'',
+      company_name:account?.company||'',
+      email:contact?.email||''
+    },
+    signal:{type:signalType,detail:signalDetail,source:signalSource},
+    sequence:{template:'cold_outbound',step:task?.step_number||1},
+    sender:{
+      name:senderFirstName,
+      email_alias:alias||'mike@rylemconsulting.com',
+      signature_block:senderFirstName+'\nRylem Staffing'
+    },
+    verification_mode:'strict'
+  };
+
+  if(referrer){
+    requestBody.sequence.template='referral';
+    requestBody.signal={type:'referral',detail:'Referred by '+referrer,source:'user_input'};
   }
 
-  // Call Claude via Cloudflare Worker
-  let data;
   try{
-    const resp=await fetch('https://rylem-ai-proxy.rylem-ai.workers.dev',{
+    const resp=await fetch('https://rylem-ai-chat.rylem-ai.workers.dev',{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({system_prompt:systemPrompt,user_prompt:userPrompt})
+      body:JSON.stringify(requestBody)
     });
-    data=await resp.json();
-    if(!resp.ok) throw new Error(data.error||'Claude API error '+resp.status);
-    data.channel=ctx.channel; data.step_number=ctx.step_number; data.sequence_name=ctx.sequence_name;
-  }catch(e){
-    area.innerHTML=`<div style="color:var(--neon-red);font-size:12px">❌ ${esc(e.message)}</div><button class="btn-generate" onclick="generateMessage()">🔄 Retry</button>`;
-    return;
-  }
+    if(!resp.ok){const errData=await resp.json().catch(()=>({}));throw new Error(errData.error||'AI service returned '+resp.status);}
+    const data=await resp.json();
+    if(data.error) throw new Error(data.error);
 
-  const msg=data.message||'';
-  area.innerHTML=`
-    <textarea class="task-msg" id="task-msg">${esc(msg)}</textarea>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <button class="btn btn-cyan" onclick="copyMsg()">📋 Copy Message</button>
-      <span class="copy-toast" id="copy-toast">Copied!</span>
-      <button class="btn-regenerate" onclick="generateMessage()">🔄 Regenerate</button>
-      <span style="font-size:11px;color:var(--text3);margin-left:auto">${esc(data.sequence_name)} • Step ${data.step_number} • ${esc(data.channel)}</span>
-    </div>
-  `;
+    const emailSubject=data.subject||'';
+    const emailBody=data.body||'';
+    const verification=data.verification||null;
+    if(!emailBody) throw new Error('Empty email body from AI');
+
+    const fullEmail=emailSubject?`Subject: ${emailSubject}\n\n${emailBody}`:emailBody;
+    const subjectHtml=emailSubject?`<div style="font-size:12px;color:var(--neon-cyan);margin-bottom:6px;font-weight:600">Subject: ${esc(emailSubject)}</div>`:'';
+    const verifBadge=verification?(verification.passed?'<span style="color:var(--neon-green);font-size:10px;margin-left:8px">✅ Verified</span>':'<span style="color:var(--neon-red);font-size:10px;margin-left:8px">⚠️ Issues found</span>'):'';
+
+    area.innerHTML=`
+      <div class="ai-email-result" style="margin:10px 0">
+        <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">🤖 AI-Generated Email ${verifBadge}</div>
+        ${subjectHtml}
+        <textarea class="task-msg" id="task-msg">${esc(emailBody)}</textarea>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px">
+          <button class="btn btn-cyan" onclick="copyMsg()">📋 Copy</button>
+          <button class="btn btn-email-action" onclick="openOutlookGenerated()">✉️ Open Outlook</button>
+          <button class="btn btn-green" onclick="sendViaSmartleadContact()">🚀 Send via Smartlead</button>
+          <button class="btn-regenerate" onclick="generateMessage()">🔄 Regenerate</button>
+          <span style="font-size:11px;color:var(--text3);margin-left:auto">Step ${task?.step_number||1} • ${esc(task?.channel||'email')}</span>
+        </div>
+      </div>`;
+
+    // Store for Smartlead read
+    area.dataset.generatedSubject=emailSubject;
+    area.dataset.generatedBody=emailBody;
+    area.dataset.generatedAlias=alias;
+    if(verification){
+      area.dataset.verifPassed=verification.passed?'1':'0';
+      area.dataset.verifErrors=JSON.stringify(verification.errors||[]);
+      area.dataset.verifWarnings=JSON.stringify(verification.warnings||[]);
+    }
+
+    showToast('🤖 AI email generated!'+(verification&&!verification.passed?' ⚠️ Verification issues':''),true);
+  }catch(e){
+    console.error('AI email error:',e);
+    area.innerHTML=`<div style="color:var(--neon-red);font-size:12px">❌ ${esc(e.message)}</div><button class="btn-generate" onclick="generateMessage()">🔄 Retry</button>`;
+  }
+}
+
+function openOutlookGenerated(){
+  const area=document.getElementById('msg-area');
+  const subject=area?.dataset?.generatedSubject||'Quick intro — Rylem Staffing';
+  const body=document.getElementById('task-msg')?.value||area?.dataset?.generatedBody||'';
+  const to=encodeURIComponent(contact?.email||'');
+  window.open('https://outlook.office.com/mail/deeplink/compose?to='+to+'&subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body),'_blank');
+}
+
+async function sendViaSmartleadContact(){
+  const area=document.getElementById('msg-area');
+  let alias,accountId;
+  try{({alias,accountId}=getSendingAlias(contact,task));}catch(e){showToast('❌ '+e.message,false);return;}
+  const toEmail=contact?.email;
+  if(!toEmail){showToast('❌ No email on file',false);return;}
+
+  const emailBody=document.getElementById('task-msg')?.value||area?.dataset?.generatedBody||'';
+  const emailSubject=area?.dataset?.generatedSubject||'Quick intro — Rylem Staffing';
+  if(!emailBody){showToast('❌ Generate an email first',false);return;}
+
+  // Find the send button to show loading state
+  const sendBtn=area?.querySelector('button[onclick="sendViaSmartleadContact()"]');
+  if(sendBtn){sendBtn.disabled=true;sendBtn.textContent='🚀 Sending...';}
+
+  try{
+    // Pre-send verification
+    const nameParts=(contact?.full_name||'').trim().split(/\s+/);
+    const verifyResp=await fetch('https://rylem-ai-chat.rylem-ai.workers.dev',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        mode:'verify_email',subject:emailSubject,body:emailBody,step:task?.step_number||1,
+        prospect:{first_name:nameParts[0]||'',last_name:nameParts.slice(1).join(' ')||'',company_name:account?.company||'',email:toEmail},
+        verification_mode:'strict'
+      })
+    });
+    const verifyData=await verifyResp.json().catch(()=>({}));
+    const verification=verifyData.verification||null;
+
+    if(verification&&!verification.passed){
+      showToast('⚠️ Verification failed — fix issues before sending',false);
+      if(sendBtn){sendBtn.disabled=false;sendBtn.textContent='🚀 Send via Smartlead';}
+      return;
+    }
+
+    const resp=await fetch('https://rylem-ai-chat.rylem-ai.workers.dev',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        mode:'smartlead_send',to_email:toEmail,to_name:contact?.full_name||'',
+        from_alias:alias,from_account_id:accountId,
+        subject:emailSubject,body:emailBody
+      })
+    });
+    const respData=await resp.json().catch(()=>({}));
+    if(!resp.ok) throw new Error('Smartlead '+resp.status+': '+(respData.error||respData.message||'no detail'));
+    if(respData.error) throw new Error(respData.error);
+
+    showToast('🚀 Email sent from '+alias+'!',true);
+    // Log activity
+    await db.from('activity_log').insert({
+      contact_id:contact.id,account_id:contact.account_id,task_id:task?.id||null,sequence_id:task?.sequence_id||null,
+      rep:getCurrentRep(),event_type:'email_sent',description:'Email sent via Smartlead to '+contact.full_name,
+      metadata:{channel:'email',step_number:task?.step_number,from_alias:alias,subject:emailSubject}
+    });
+    // Mark done
+    await markDone();
+  }catch(err){
+    console.error('Smartlead send error:',err);
+    showToast('❌ Send failed: '+(err.message||'Unknown error'),false);
+    if(sendBtn){sendBtn.disabled=false;sendBtn.textContent='🚀 Send via Smartlead';}
+  }
 }
 
 function copyMsg(){
   const el=document.getElementById('task-msg');if(!el)return;
-  navigator.clipboard.writeText(el.value).then(async ()=>{
-    const toast=document.getElementById('copy-toast');toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2000);
-    // Log to activity
-    const seq=seqList.find(s=>s.id===task?.sequence_id);
-    await db.from('activity_log').insert({
-      contact_id:contact.id,account_id:contact.account_id,
-      task_id:task?.id||null,sequence_id:task?.sequence_id||null,
-      rep:contact.working_rep||contact.owner||account?.assigned_rep||'system',
-      event_type:'message_generated',
-      description:'AI message copied for '+contact.full_name+' ('+( task?.channel||'unknown')+' step '+(task?.step_number||'?')+')',
-      metadata:{channel:task?.channel,step_number:task?.step_number,sequence_name:seq?.sequence_templates?.name||'unknown'}
-    });
+  navigator.clipboard.writeText(el.value).then(()=>{
+    showToast('📋 Copied to clipboard!',true);
   });
 }
 

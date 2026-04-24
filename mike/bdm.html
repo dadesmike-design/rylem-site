@@ -2820,7 +2820,7 @@ function openAddLead(prefillCompany, prefillAccountId) {
           if (selId.startsWith('al-bdm')) sel.innerHTML = '<option value="">-- Select BDM --</option>';
           repsList.forEach(r => {
             const opt = document.createElement('option');
-            opt.value = r.rep_key;
+            opt.value = r.id;
             opt.textContent = r.name;
             sel.appendChild(opt);
           });
@@ -3611,7 +3611,7 @@ async function loadMeetingInsights(container) {
         .select('rep, meeting_date, contact_id')
         .gte('meeting_date', weekStartStr),
       db.from('contacts')
-        .select('meeting_set_by, meeting_set_date')
+        .select('id, meeting_set_by, meeting_set_date')
         .not('meeting_set_date', 'is', null)
         .gte('meeting_set_date', weekStartStr),
       // 4-week leads per week
@@ -3628,13 +3628,14 @@ async function loadMeetingInsights(container) {
       ))
     ]);
 
-    // Merge this-week meeting sources (same dedup logic)
+    // Merge this-week meeting sources (dedup by contact_id first, then rep+date fallback)
     const logMeetings = (meetingEvRes.data || []);
     const logContactIds = new Set(logMeetings.map(m => m.contact_id).filter(Boolean));
-    const contactMeetings = (meetingContactsRes.data || []).map(c => ({ rep: c.meeting_set_by, created_at: c.meeting_set_date, event_type: 'meeting_set' }));
-    const logReps = new Set(logMeetings.map(m => m.rep + '|' + String(m.created_at).slice(0,10)));
-    const extraContactMeetings = contactMeetings.filter(c => !logReps.has((c.rep||'') + '|' + String(c.created_at||'').slice(0,10)));
-    const meetingsTableMeetings = (meetingsRowsRes.data || []).map(m => ({ rep: m.rep, created_at: m.meeting_date, event_type: 'meeting_set', contact_id: m.contact_id }));
+    const contactMeetings = (meetingContactsRes.data || []).map(c => ({ rep: c.meeting_set_by || 'unknown', created_at: c.meeting_set_date, event_type: 'meeting_set', contact_id: c.id }));
+    // Dedup: prefer activity_log entries; only add contacts entries if no log entry exists for that contact
+    const extraContactMeetings = contactMeetings.filter(c => !logContactIds.has(c.contact_id));
+    const meetingsTableMeetings = (meetingsRowsRes.data || []).map(m => ({ rep: m.rep || 'unknown', created_at: m.meeting_date, event_type: 'meeting_set', contact_id: m.contact_id }));
+    // Dedup: only add meetings table entries if no activity_log entry exists for that contact
     const extraMeetingsTable = meetingsTableMeetings.filter(m => !logContactIds.has(m.contact_id));
     const allMeetings = [...logMeetings, ...extraContactMeetings, ...extraMeetingsTable];
     const meetingCount = allMeetings.length;

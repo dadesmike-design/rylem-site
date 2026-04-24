@@ -202,6 +202,16 @@ button,input,select{font-family:inherit}
 .task-card:hover{border-color:var(--border-hover)}
 .task-card.done{opacity:.38;filter:grayscale(.6)}
 .task-card.skipped{opacity:.25}
+.btn-handoff{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;cursor:pointer;font-size:12px;white-space:nowrap}
+.btn-handoff:hover{filter:brightness(1.15)}
+.handoff-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9000;display:flex;align-items:center;justify-content:center}
+.handoff-modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;min-width:300px;max-width:400px}
+.handoff-modal h3{margin:0 0 16px;font-size:16px}
+.handoff-options{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.handoff-opt{padding:12px 16px;border:2px solid var(--border);border-radius:var(--radius);cursor:pointer;text-align:center;font-weight:600;transition:all .2s}
+.handoff-opt:hover,.handoff-opt.selected{border-color:var(--accent);background:rgba(99,102,241,.1)}
+.handoff-opt.selected{box-shadow:0 0 0 1px var(--accent)}
+.handoff-btns{display:flex;gap:10px;justify-content:flex-end}
 .task-card-top{
   display:flex;align-items:center;gap:14px;padding:16px 18px;cursor:default
 }
@@ -1272,6 +1282,7 @@ function buildTaskCard(task, idx, tid, rep) {
     </div>
     <div class="task-actions" id="ta_${tid}">
       ${buildActionBtn(task, tid)}
+      ${(task.type === 'call' || task.type === 'phone') && (window._rylemProfile?.role === 'sdr') ? `<button class="btn btn-handoff" onclick="showHandoffModal('${task.id}','${escAttr(task.contact)}','${escAttr(task.company)}','${escAttr(task.contact_id)}','${escAttr(task.sequence_id)}')">🤝 Assign to BDM</button>` : ''}
       <button class="btn btn-done ${done ? 'is-done' : ''}" id="done_${tid}" onclick="handleDone('${rep}','${tid}','${escAttr(task.company)}')">
         ${done ? '✅ Done' : '✅ Mark Done'}
       </button>
@@ -1369,6 +1380,92 @@ function getTypeInfo(type) {
   if (type === 'email') return { emoji:'✉️', label:'Email', iconClass:'icon-email' };
   if (type === 'call' || type === 'phone') return { emoji:'📞', label:'Call', iconClass:'icon-call' };
   return { emoji:'📌', label:'Task', iconClass:'icon-linkedin' };
+}
+
+// ─── SDR → BDM CALL HANDOFF ─────────────────────────────
+let _handoffBdm = null;
+
+function showHandoffModal(taskId, contactName, companyName, contactId, sequenceId) {
+  _handoffBdm = null;
+  const existing = document.getElementById('handoff-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'handoff-overlay';
+  overlay.className = 'handoff-overlay';
+  overlay.innerHTML = `
+    <div class="handoff-modal">
+      <h3>🤝 Assign call to BDM</h3>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px">
+        ${esc(contactName)} at ${esc(companyName)}
+      </div>
+      <div class="handoff-options">
+        <div class="handoff-opt" data-bdm="mike" onclick="selectHandoffBdm(this,'mike')">Mike</div>
+        <div class="handoff-opt" data-bdm="julia" onclick="selectHandoffBdm(this,'julia')">Julia</div>
+        <div class="handoff-opt" data-bdm="april" onclick="selectHandoffBdm(this,'april')">April</div>
+      </div>
+      <div class="handoff-btns">
+        <button class="btn" onclick="document.getElementById('handoff-overlay').remove()">Cancel</button>
+        <button class="btn btn-handoff" id="handoff-confirm" disabled onclick="confirmHandoff('${taskId}','${contactId}','${sequenceId}')">Confirm</button>
+      </div>
+    </div>`;
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
+function selectHandoffBdm(el, bdmKey) {
+  document.querySelectorAll('.handoff-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  _handoffBdm = bdmKey;
+  document.getElementById('handoff-confirm').disabled = false;
+}
+
+async function confirmHandoff(taskId, contactId, sequenceId) {
+  if (!_handoffBdm) return;
+  const btn = document.getElementById('handoff-confirm');
+  btn.disabled = true;
+  btn.textContent = 'Assigning...';
+
+  const sdr = state.rep;
+  try {
+    // 1. Update tasks.rep to selected BDM
+    const { error: e1 } = await db.from('tasks').update({ rep: _handoffBdm }).eq('id', taskId);
+    if (e1) throw e1;
+
+    // 2. Mark task completed
+    const { error: e2 } = await db.from('tasks').update({
+      completed: true,
+      completed_at: new Date().toISOString()
+    }).eq('id', taskId);
+    if (e2) throw e2;
+
+    // 3. Log handoff in activity_log
+    const { error: e3 } = await db.from('activity_log').insert({
+      event_type: 'task_handoff',
+      rep: sdr,
+      contact_id: contactId || null,
+      sequence_id: sequenceId || null,
+      details: { handed_to: _handoffBdm, contact_id: contactId, sequence_id: sequenceId }
+    });
+    if (e3) console.warn('activity_log insert failed:', e3);
+
+    // UI: remove card + toast
+    const card = document.getElementById('tc_' + taskId);
+    if (card) { card.style.transition = 'opacity .3s'; card.style.opacity = '0'; setTimeout(() => card.remove(), 300); }
+    showToast('🤝 Handed off to ' + _handoffBdm.charAt(0).toUpperCase() + _handoffBdm.slice(1), true);
+
+    // Refresh tasks
+    state.supabaseTasks = await fetchRepTasks(sdr);
+    renderTasksOnly();
+  } catch(err) {
+    console.error('Handoff failed:', err);
+    showToast('❌ Handoff failed: ' + err.message, true);
+    btn.disabled = false;
+    btn.textContent = 'Confirm';
+    return;
+  }
+
+  document.getElementById('handoff-overlay')?.remove();
 }
 
 function toggleMessage(tid) {
@@ -3124,6 +3221,7 @@ async function fetchRepTasks(rep) {
   return filtered.map(t => ({
     id: t.id,
     _supabase_id: t.id,
+    contact_id: t.contact_id || '',
     company: t.accounts?.company || '',
     contact: t.contacts?.full_name || '',
     title: t.contacts?.title || '',

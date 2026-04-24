@@ -436,8 +436,8 @@ button,input,select{font-family:inherit}
 .sr-company{color:var(--accent);font-size:12px;font-weight:600;white-space:nowrap}
 .sr-city{color:var(--text3);font-size:11px;white-space:nowrap}
 .sr-rep-tag{background:rgba(168,85,247,.15);color:var(--purple);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:.3px;white-space:nowrap}
-.search-flash{animation:flashPulse 1.5s ease-out}
-@keyframes flashPulse{0%{box-shadow:0 0 0 0 rgba(41,121,255,.9)}25%{box-shadow:0 0 18px 4px rgba(41,121,255,.7)}50%{box-shadow:0 0 10px 2px rgba(41,121,255,.4)}100%{box-shadow:none}}
+.search-flash{animation:flashPulse 1.5s ease-out;position:relative;z-index:1}
+@keyframes flashPulse{0%{background:rgba(0,229,255,.35);box-shadow:0 0 20px 4px rgba(0,229,255,.8)}30%{background:rgba(0,229,255,.25);box-shadow:0 0 14px 2px rgba(0,229,255,.5)}60%{background:rgba(0,229,255,.1);box-shadow:0 0 6px 0 rgba(0,229,255,.3)}100%{background:transparent;box-shadow:none}}
 .sr-acct-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s}
 .sr-acct-item:hover{background:var(--surface3)}
 .sr-acct-name{font-weight:600;color:var(--accent);font-size:13px}
@@ -3677,7 +3677,7 @@ async function jumpToContact(accountId, contactId) {
   }, 400);
 }
 
-// Scroll-to-result highlight: blue pulse for 1.5s
+// Scroll-to-result highlight: bright cyan pulse for 1.5s
 function flashHighlight(el) {
   if (!el) return;
   el.scrollIntoView({ behavior: 'smooth', block: 'center' });

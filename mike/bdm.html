@@ -553,6 +553,34 @@ button,input,select{font-family:inherit}
 .mi-bar-track{flex:1;height:10px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;overflow:hidden}
 .mi-bar-fill{height:100%;border-radius:5px;transition:width .6s ease}
 .mi-bar-count{font-size:11px;font-weight:700;color:var(--text2);min-width:24px}
+.mi-rep-row{cursor:pointer;border-radius:6px;padding:4px 6px;margin:-4px -6px;transition:background .15s}
+.mi-rep-row:hover{background:rgba(255,255,255,.05)}
+.mi-stat.clickable{cursor:pointer;transition:background .15s}
+.mi-stat.clickable:hover{background:var(--surface3)}
+.meetings-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:flex;align-items:center;justify-content:center}
+.meetings-modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;width:90%;max-width:680px;max-height:80vh;display:flex;flex-direction:column}
+.mm-header{padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.mm-title{font-size:18px;font-weight:700;color:var(--text)}
+.mm-close{background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;padding:4px 8px}
+.mm-body{overflow-y:auto;padding:16px 24px 24px;flex:1}
+.mm-table{width:100%;border-collapse:collapse}
+.mm-table th{text-align:left;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;font-weight:600;padding:8px 12px;border-bottom:1px solid var(--border)}
+.mm-table td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px}
+.mm-table tr:hover td{background:rgba(255,255,255,.02)}
+.mm-link{color:var(--accent);text-decoration:none;font-weight:600}
+.mm-link:hover{text-decoration:underline}
+.mm-empty{text-align:center;color:var(--text2);padding:40px 0;font-size:14px}
+.mm-pager{display:flex;justify-content:center;gap:8px;padding:12px 0}
+.mm-pager button{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px}
+.mm-pager button:disabled{opacity:.3;cursor:default}
+.mi-sparkline{display:flex;align-items:flex-end;gap:3px;height:36px;margin-top:6px}
+.mi-spark-bar{flex:1;border-radius:2px 2px 0 0;min-width:8px;transition:height .4s ease}
+.mi-spark-label{font-size:9px;color:var(--text3);text-align:center;margin-top:2px}
+.mi-trend-row{display:flex;align-items:center;gap:6px;margin-top:4px}
+.mi-trend-arrow{font-size:14px;font-weight:700}
+.mi-trend-arrow.up{color:var(--green)}
+.mi-trend-arrow.down{color:var(--red)}
+.mi-trend-arrow.flat{color:var(--text3)}
 </style>
 </head>
 <body>
@@ -582,7 +610,7 @@ button,input,select{font-family:inherit}
         <span class="sp-label">Accounts</span>
         <span class="sp-val accent" id="stat-accounts">0</span>
       </div>
-      <div class="stat-pill">
+      <div class="stat-pill" style="cursor:pointer" onclick="openMeetingsModal()" title="View this week's meetings">
         <span class="sp-label">🗓 Meetings</span>
         <span class="sp-val green" id="stat-meetings">0</span>
         <span class="sp-label">this week</span>
@@ -3212,65 +3240,88 @@ async function loadMeetingInsights(container) {
     weekStart.setHours(0, 0, 0, 0);
     const weekStartStr = weekStart.toISOString().split('T')[0];
 
-    // Query meeting events this week (includes meeting_logged from contact.html)
-    const { data: meetingEvents } = await db.from('activity_log')
-      .select('rep, created_at, event_type, contact_id')
-      .in('event_type', ['meeting_set', 'meeting_completed', 'meeting_logged'])
-      .gte('created_at', weekStartStr + 'T00:00:00');
+    // 4-week date ranges for sparklines (this week + 3 prior)
+    const weekRanges = [];
+    for (let w = 3; w >= 0; w--) {
+      const ws = new Date(weekStart);
+      ws.setDate(ws.getDate() - 7 * w);
+      const we = new Date(ws);
+      we.setDate(we.getDate() + 7);
+      weekRanges.push({ start: ws.toISOString().split('T')[0], end: we.toISOString().split('T')[0] });
+    }
 
-    // ALSO count meetings from meetings table (fallback for contact.html submitMeeting path)
-    const { data: meetingsRows } = await db.from('meetings')
-      .select('rep, meeting_date, contact_id')
-      .gte('meeting_date', weekStartStr);
+    // Parallel: this-week meetings + 4-week leads + 4-week meetings (for conversion sparkline)
+    const [meetingEvRes, meetingsRowsRes, meetingContactsRes, leads4w, meetings4w] = await Promise.all([
+      db.from('activity_log')
+        .select('rep, created_at, event_type, contact_id')
+        .in('event_type', ['meeting_set', 'meeting_completed', 'meeting_logged'])
+        .gte('created_at', weekStartStr + 'T00:00:00'),
+      db.from('meetings')
+        .select('rep, meeting_date, contact_id')
+        .gte('meeting_date', weekStartStr),
+      db.from('contacts')
+        .select('meeting_set_by, meeting_set_date')
+        .not('meeting_set_date', 'is', null)
+        .gte('meeting_set_date', weekStartStr),
+      // 4-week leads per week
+      Promise.all(weekRanges.map(wr =>
+        db.from('activity_log').select('id').eq('event_type', 'lead_added')
+          .gte('created_at', wr.start + 'T00:00:00').lt('created_at', wr.end + 'T00:00:00')
+          .then(r => (r.data || []).length)
+      )),
+      // 4-week meetings per week (from activity_log only for speed)
+      Promise.all(weekRanges.map(wr =>
+        db.from('activity_log').select('id').in('event_type', ['meeting_set', 'meeting_completed', 'meeting_logged'])
+          .gte('created_at', wr.start + 'T00:00:00').lt('created_at', wr.end + 'T00:00:00')
+          .then(r => (r.data || []).length)
+      ))
+    ]);
 
-    // ALSO count meetings from contacts table (fallback if activity_log insert failed)
-    const { data: meetingContacts } = await db.from('contacts')
-      .select('meeting_set_by, meeting_set_date')
-      .not('meeting_set_date', 'is', null)
-      .gte('meeting_set_date', weekStartStr);
-
-    // Query leads added this week
-    const { data: leadsAdded } = await db.from('activity_log')
-      .select('id')
-      .eq('event_type', 'lead_added')
-      .gte('created_at', weekStartStr + 'T00:00:00');
-
-    // Also count contacts created this week (fallback — not all creation paths log lead_added)
-    const { count: contactsCreatedCount } = await db.from('contacts')
-      .select('*', { head: true, count: 'exact' })
-      .gte('created_at', weekStartStr + 'T00:00:00');
-
-    // Get active reps
-    const { data: activeReps } = await db.from('reps').select('rep_key, name');
-
-    // Merge all sources (dedup by contact_id first, then by rep+date)
-    const logMeetings = (meetingEvents || []);
+    // Merge this-week meeting sources (same dedup logic)
+    const logMeetings = (meetingEvRes.data || []);
     const logContactIds = new Set(logMeetings.map(m => m.contact_id).filter(Boolean));
-
-    const contactMeetings = (meetingContacts || []).map(c => ({ rep: c.meeting_set_by, created_at: c.meeting_set_date, event_type: 'meeting_set' }));
+    const contactMeetings = (meetingContactsRes.data || []).map(c => ({ rep: c.meeting_set_by, created_at: c.meeting_set_date, event_type: 'meeting_set' }));
     const logReps = new Set(logMeetings.map(m => m.rep + '|' + String(m.created_at).slice(0,10)));
     const extraContactMeetings = contactMeetings.filter(c => !logReps.has((c.rep||'') + '|' + String(c.created_at||'').slice(0,10)));
-
-    const meetingsTableMeetings = (meetingsRows || []).map(m => ({ rep: m.rep, created_at: m.meeting_date, event_type: 'meeting_set', contact_id: m.contact_id }));
+    const meetingsTableMeetings = (meetingsRowsRes.data || []).map(m => ({ rep: m.rep, created_at: m.meeting_date, event_type: 'meeting_set', contact_id: m.contact_id }));
     const extraMeetingsTable = meetingsTableMeetings.filter(m => !logContactIds.has(m.contact_id));
-
     const allMeetings = [...logMeetings, ...extraContactMeetings, ...extraMeetingsTable];
     const meetingCount = allMeetings.length;
-    const leadsCount = Math.max((leadsAdded || []).length, contactsCreatedCount || 0);
-    const conversionRate = leadsCount > 0 ? Math.round((meetingCount / leadsCount) * 100) : 0;
-    const repsCount = (activeReps || []).length;
 
     // Per-rep breakdown
     const repMap = {};
-    (activeReps || []).forEach(r => { repMap[r.rep_key] = { name: r.name, count: 0 }; });
     allMeetings.forEach(m => {
       if (repMap[m.rep]) repMap[m.rep].count++;
       else repMap[m.rep] = { name: m.rep, count: 1 };
     });
     const repEntries = Object.values(repMap).sort((a, b) => b.count - a.count);
     const maxCount = Math.max(1, ...repEntries.map(r => r.count));
-
     const colors = ['var(--accent)', 'var(--green)', 'var(--purple)', 'var(--yellow)', 'var(--red)'];
+
+    // 4-week leads sparkline
+    const leads4 = leads4w; // array of 4 counts
+    const maxLeads = Math.max(1, ...leads4);
+    const leadsSpark = leads4.map(v => {
+      const h = Math.round((v / maxLeads) * 100);
+      return `<div style="flex:1;text-align:center"><div class="mi-sparkline"><div class="mi-spark-bar" style="height:${h}%;background:var(--purple)"></div></div><div class="mi-spark-label">${v}</div></div>`;
+    }).join('');
+
+    // 4-week conversion sparkline
+    const conv4 = meetings4w.map((mCount, i) => {
+      const l = leads4[i] || 1;
+      return l > 0 ? Math.round((mCount / l) * 100) : 0;
+    });
+    const maxConv = Math.max(1, ...conv4);
+    const convSpark = conv4.map(v => {
+      const h = Math.round((v / maxConv) * 100);
+      return `<div style="flex:1;text-align:center"><div class="mi-sparkline"><div class="mi-spark-bar" style="height:${h}%;background:var(--green)"></div></div><div class="mi-spark-label">${v}%</div></div>`;
+    }).join('');
+
+    // Trend arrows (this week vs last week)
+    const leadsTrend = leads4[3] > leads4[2] ? 'up' : leads4[3] < leads4[2] ? 'down' : 'flat';
+    const leadsArrow = leadsTrend === 'up' ? '▲' : leadsTrend === 'down' ? '▼' : '—';
+    const convTrend = conv4[3] > conv4[2] ? 'up' : conv4[3] < conv4[2] ? 'down' : 'flat';
+    const convArrow = convTrend === 'up' ? '▲' : convTrend === 'down' ? '▼' : '—';
 
     // Build section
     const hdr = makeSectionHeader('Meeting Insights', meetingCount, meetingCount > 0 ? 'green' : 'accent');
@@ -3280,15 +3331,24 @@ async function loadMeetingInsights(container) {
     panel.className = 'meeting-insights';
     panel.innerHTML = `
       <div class="mi-stats">
-        <div class="mi-stat"><div class="mi-val">${meetingCount}</div><div class="mi-label">Meetings This Week</div></div>
-        <div class="mi-stat green"><div class="mi-val">${conversionRate}%</div><div class="mi-label">Lead → Meeting</div></div>
-        <div class="mi-stat purple"><div class="mi-val">${leadsCount}</div><div class="mi-label">Leads Added</div></div>
-        <div class="mi-stat yellow"><div class="mi-val">${repsCount}</div><div class="mi-label">Active Reps</div></div>
+        <div class="mi-stat clickable" onclick="openMeetingsModal()">
+          <div class="mi-val">${meetingCount}</div><div class="mi-label">Meetings This Week</div>
+        </div>
+        <div class="mi-stat green">
+          <div class="mi-val">${conv4[3]}%</div><div class="mi-label">Lead → Meeting</div>
+          <div class="mi-trend-row"><span class="mi-trend-arrow ${convTrend}">${convArrow}</span></div>
+          <div style="display:flex;gap:2px;margin-top:4px">${convSpark}</div>
+        </div>
+        <div class="mi-stat purple">
+          <div class="mi-val">${leads4[3]}</div><div class="mi-label">Leads Added</div>
+          <div class="mi-trend-row"><span class="mi-trend-arrow ${leadsTrend}">${leadsArrow}</span></div>
+          <div style="display:flex;gap:2px;margin-top:4px">${leadsSpark}</div>
+        </div>
       </div>
       <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Per-Rep Meetings</div>
       <div class="mi-rep-bars">
         ${repEntries.map((r, i) => `
-          <div class="mi-rep-row">
+          <div class="mi-rep-row" onclick="openMeetingsModal('${escAttr(r.name)}')">
             <div class="mi-rep-name">${esc(r.name)}</div>
             <div class="mi-bar-track">
               <div class="mi-bar-fill" style="width:${Math.round((r.count / maxCount) * 100)}%;background:${colors[i % colors.length]}"></div>
@@ -3300,6 +3360,143 @@ async function loadMeetingInsights(container) {
   } catch(e) {
     console.warn('Meeting insights load error:', e);
   }
+}
+
+// ─── MEETINGS MODAL (lazy-loaded) ────────────────────────
+let mmCurrentPage = 0;
+const MM_PAGE_SIZE = 50;
+let mmRepFilter = null;
+let mmAllRows = [];
+
+async function openMeetingsModal(repName) {
+  mmCurrentPage = 0;
+  mmRepFilter = repName || null;
+  mmAllRows = [];
+
+  // Show modal shell immediately
+  let backdrop = document.getElementById('meetings-modal-backdrop');
+  if (!backdrop) {
+    backdrop = document.createElement('div');
+    backdrop.id = 'meetings-modal-backdrop';
+    backdrop.className = 'meetings-modal-backdrop';
+    backdrop.onclick = (e) => { if (e.target === backdrop) closeMeetingsModal(); };
+    document.body.appendChild(backdrop);
+  }
+  backdrop.innerHTML = `
+    <div class="meetings-modal">
+      <div class="mm-header">
+        <div class="mm-title">${mmRepFilter ? esc(mmRepFilter) + ' — Meetings This Week' : 'Meetings This Week'}</div>
+        <button class="mm-close" onclick="closeMeetingsModal()">✕</button>
+      </div>
+      <div class="mm-body" id="mm-body"><div class="mm-empty">Loading...</div></div>
+    </div>`;
+  backdrop.style.display = 'flex';
+
+  // Lazy fetch — fires on modal open, not page load
+  try {
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() + mondayOffset);
+    weekStart.setHours(0, 0, 0, 0);
+    const ws = weekStart.toISOString().split('T')[0];
+
+    // Fetch meetings with contact + account info — only the columns displayed
+    const [logRes, meetingsRes, contactsRes] = await Promise.all([
+      db.from('activity_log')
+        .select('rep, created_at, event_type, contact_id, contacts!inner(id, full_name, account_id, accounts!inner(id, company))')
+        .in('event_type', ['meeting_set', 'meeting_completed', 'meeting_logged'])
+        .gte('created_at', ws + 'T00:00:00'),
+      db.from('meetings')
+        .select('rep, meeting_date, contact_id, contacts!inner(id, full_name, account_id, accounts!inner(id, company))')
+        .gte('meeting_date', ws),
+      db.from('contacts')
+        .select('id, full_name, meeting_set_by, meeting_set_date, accounts!inner(id, company)')
+        .not('meeting_set_date', 'is', null)
+        .gte('meeting_set_date', ws)
+    ]);
+
+    const seen = new Set();
+    const rows = [];
+
+    // Process activity_log meetings
+    for (const m of (logRes.data || [])) {
+      if (mmRepFilter && m.rep !== mmRepFilter) continue;
+      if (m.contact_id && seen.has(m.contact_id)) continue;
+      if (m.contact_id) seen.add(m.contact_id);
+      const c = m.contacts || {};
+      const a = c.accounts || {};
+      rows.push({ name: c.full_name || '—', company: a.company || '—', contactId: c.id, accountId: a.id, rep: m.rep, date: String(m.created_at || '').slice(0, 10) });
+    }
+
+    // Process meetings table (dedup by contact_id)
+    for (const m of (meetingsRes.data || [])) {
+      if (mmRepFilter && m.rep !== mmRepFilter) continue;
+      if (m.contact_id && seen.has(m.contact_id)) continue;
+      if (m.contact_id) seen.add(m.contact_id);
+      const c = m.contacts || {};
+      const a = c.accounts || {};
+      rows.push({ name: c.full_name || '—', company: a.company || '—', contactId: c.id, accountId: a.id, rep: m.rep, date: m.meeting_date || '—' });
+    }
+
+    // Process contacts with meeting_set_date (dedup by contact id)
+    for (const c of (contactsRes.data || [])) {
+      if (mmRepFilter && c.meeting_set_by !== mmRepFilter) continue;
+      if (seen.has(c.id)) continue;
+      seen.add(c.id);
+      const a = c.accounts || {};
+      rows.push({ name: c.full_name || '—', company: a.company || '—', contactId: c.id, accountId: a.id, rep: c.meeting_set_by || '—', date: c.meeting_set_date || '—' });
+    }
+
+    mmAllRows = rows.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+    renderMeetingsPage();
+  } catch(e) {
+    console.error('Meetings modal error:', e);
+    document.getElementById('mm-body').innerHTML = '<div class="mm-empty">Error loading meetings</div>';
+  }
+}
+
+function renderMeetingsPage() {
+  const body = document.getElementById('mm-body');
+  if (!body) return;
+  const start = mmCurrentPage * MM_PAGE_SIZE;
+  const pageRows = mmAllRows.slice(start, start + MM_PAGE_SIZE);
+  const totalPages = Math.ceil(mmAllRows.length / MM_PAGE_SIZE);
+
+  if (!pageRows.length) {
+    body.innerHTML = '<div class="mm-empty">No meetings this week</div>';
+    return;
+  }
+
+  let html = '<table class="mm-table"><thead><tr><th>Contact</th><th>Company</th><th>Rep</th><th>Date</th></tr></thead><tbody>';
+  for (const r of pageRows) {
+    const nameLink = r.contactId ? `<a class="mm-link" href="contact.html?id=${r.contactId}">${esc(r.name)}</a>` : esc(r.name);
+    const compLink = r.accountId ? `<a class="mm-link" href="client.html?id=${r.accountId}">${esc(r.company)}</a>` : esc(r.company);
+    html += `<tr><td>${nameLink}</td><td>${compLink}</td><td>${esc(r.rep)}</td><td>${esc(r.date)}</td></tr>`;
+  }
+  html += '</tbody></table>';
+
+  if (totalPages > 1) {
+    html += `<div class="mm-pager">
+      <button onclick="mmGoPage(${mmCurrentPage - 1})" ${mmCurrentPage === 0 ? 'disabled' : ''}>← Prev</button>
+      <span style="color:var(--text2);font-size:12px;line-height:32px">Page ${mmCurrentPage + 1} of ${totalPages}</span>
+      <button onclick="mmGoPage(${mmCurrentPage + 1})" ${mmCurrentPage >= totalPages - 1 ? 'disabled' : ''}>Next →</button>
+    </div>`;
+  }
+  body.innerHTML = html;
+}
+
+function mmGoPage(p) {
+  const total = Math.ceil(mmAllRows.length / MM_PAGE_SIZE);
+  if (p < 0 || p >= total) return;
+  mmCurrentPage = p;
+  renderMeetingsPage();
+}
+
+function closeMeetingsModal() {
+  const backdrop = document.getElementById('meetings-modal-backdrop');
+  if (backdrop) backdrop.style.display = 'none';
 }
 
 // ─── TOAST ────────────────────────────────────────────────

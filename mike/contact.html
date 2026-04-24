@@ -685,7 +685,7 @@ function renderHeader(){
       </div>
       ${loc?`<span class="pill pill-loc">📍 ${esc(loc)}</span>`:''}
       ${c.email?`<a class="pill pill-icon" href="https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(c.email)}" target="_blank" rel="noopener" title="${esc(c.email)}">✉️</a>`:`<span class="pill pill-icon disabled">✉️</span>`}
-      ${c.phone?`<a class="pill pill-icon" href="rcapp://r/call?number=${stripPhone(c.phone)}" onclick="logCall()" title="Call ${esc(c.phone)} via RingCentral" style="background:rgba(57,255,20,.1);border:1px solid rgba(57,255,20,.25);color:var(--neon-green)">📲</a>`:`<span class="pill pill-icon disabled" title="No phone number on file" style="opacity:.3">📲</span>`}
+      ${c.phone?`<a class="pill pill-icon" href="javascript:void(0)" onclick="ringOut('${escAttr(c.phone)}')" title="Call ${esc(c.phone)} via RingCentral" style="background:rgba(57,255,20,.1);border:1px solid rgba(57,255,20,.25);color:var(--neon-green)">📲</a>`:`<span class="pill pill-icon disabled" title="No phone number on file" style="opacity:.3">📲</span>`}
       ${c.linkedin_url?`<a class="pill pill-icon" href="${esc(c.linkedin_url)}" target="_blank" rel="noopener" title="LinkedIn">🔗</a>`:`<span class="pill pill-icon disabled">🔗</span>`}
       <span class="pill" onclick="showMeetingDetailsModal()" style="cursor:pointer;border:1px solid var(--neon-cyan);background:rgba(0,229,255,.1);color:var(--neon-cyan);font-weight:700;font-size:11px">📅 Set Meeting</span>
       <span class="pill" onclick="toggleContactDNC()" style="cursor:pointer;border:1px solid ${isDNC?'var(--neon-green)':'var(--neon-red)'};background:${isDNC?'rgba(57,255,20,.08)':'rgba(255,23,68,.08)'};color:${isDNC?'var(--neon-green)':'var(--neon-red)'};font-weight:700;font-size:11px">${isDNC?'✅ Remove DNC':'🚫 DNC'}</span>
@@ -945,11 +945,118 @@ async function setRole(val){
 }
 
 // ─── RINGCENTRAL ───
+const RC_WORKER_URL = 'https://rylem-ai-chat.rylem-ai.workers.dev';
 function stripPhone(p){return (p||'').replace(/[\s\-\(\)\.\+]/g,'');}
 let _callTimer=null;
+
+// Visual state for ringOut buttons
+function _ringBtnState(btn, state, label) {
+  if (!btn) return;
+  const orig = btn.dataset.origLabel || btn.innerHTML;
+  if (!btn.dataset.origLabel) btn.dataset.origLabel = orig;
+  if (state === 'ringing') btn.innerHTML = '⏳ Ringing...';
+  else if (state === 'connected') btn.innerHTML = '✅ Connected';
+  else if (state === 'failed') btn.innerHTML = '❌ ' + (label || 'Failed');
+  else btn.innerHTML = orig;
+  if (state === 'connected') {
+    btn.style.background = 'rgba(57,255,20,.2)';
+    setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; delete btn.dataset.origLabel; }, 3000);
+  } else if (state === 'failed') {
+    btn.style.background = 'rgba(240,64,96,.15)';
+    setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; delete btn.dataset.origLabel; }, 3000);
+  }
+}
+
+function _findRingBtn(phone) {
+  const btns = document.querySelectorAll('[onclick*="ringOut"]');
+  for (const b of btns) {
+    const m = b.getAttribute('onclick') || '';
+    if (m.includes(phone) || m.includes(stripPhone(phone))) return b;
+  }
+  return null;
+}
+
+async function ringOut(phone, repKey) {
+  if (!phone) return;
+  const clean = stripPhone(phone);
+  if (!/^\d{10,15}$/.test(clean)) {
+    window.location.href = 'tel:' + phone;
+    return;
+  }
+  const e164 = clean.startsWith('1') && clean.length === 11 ? '+' + clean : '+1' + clean;
+  const rk = repKey || contact.working_rep || contact.owner || account.assigned_rep || 'mike';
+  const btn = _findRingBtn(phone);
+  _ringBtnState(btn, 'ringing');
+  try {
+    const resp = await fetch(RC_WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'ringout', phone: e164, rep_key: rk })
+    });
+    const data = await resp.json();
+    if (data.success) {
+      console.log('[ringOut] Call initiated:', data.call);
+      _ringBtnState(btn, 'connected');
+      showToast('📞 RingOut connected');
+      // Auto-log to activity_log
+      await _logRingOutContact(e164, rk, data.call);
+      // Poll for final status after 10s
+      setTimeout(() => _pollRingOutStatus(data.call?.id, btn, e164, rk), 10000);
+      // Show outcome modal after 30s
+      if(_callTimer) clearTimeout(_callTimer);
+      _callTimer=setTimeout(()=>{
+        document.getElementById('call-modal-name').textContent=contact.full_name+(contact.title?' — '+contact.title:'');
+        document.getElementById('call-note').value='';
+        document.getElementById('call-modal').classList.add('open');
+      },30000);
+    } else {
+      console.warn('[ringOut] Failed, falling back to tel:', data.error);
+      _ringBtnState(btn, 'failed', data.error?.substring(0, 30));
+      window.location.href = 'tel:' + phone;
+    }
+  } catch (err) {
+    console.warn('[ringOut] Error, falling back to tel:', err);
+    _ringBtnState(btn, 'failed');
+    window.location.href = 'tel:' + phone;
+  }
+}
+
+async function _logRingOutContact(phone, rep, callData) {
+  try {
+    await db.from('activity_log').insert({
+      contact_id: contact.id,
+      account_id: contact.account_id,
+      rep: rep,
+      event_type: 'call_initiated',
+      description: 'RingOut call to ' + contact.full_name + ' (' + phone + ')',
+      metadata: { method: 'ringout', phone: phone, rc_session_id: callData?.id || null, status: callData?.status?.callStatus || 'initiated' }
+    });
+    const {data:acts}=await db.from('activity_log').select('*').eq('contact_id',contact.id).order('created_at',{ascending:false}).limit(50);
+    activityList=acts||[];
+    renderActivity();
+  } catch (e) { console.warn('[ringOut] activity_log write failed:', e); }
+}
+
+async function _pollRingOutStatus(sessionId, btn, phone, rep) {
+  if (!sessionId) return;
+  try {
+    const resp = await fetch(RC_WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'ringout_status', session_id: sessionId })
+    });
+    const data = await resp.json();
+    if (data.success && data.call) {
+      const status = data.call.status?.callStatus || data.call.status;
+      if (status === 'Disconnected' || status === 'Failed' || status === 'NoAnswer') {
+        _ringBtnState(btn, 'failed', status);
+      }
+    }
+  } catch (e) { console.warn('[ringOut] Status poll failed:', e); }
+}
+
 function logCall(){
-  // RC deep link fires immediately via the href — don't block it
-  // Show outcome modal after 30s delay
+  // Fallback: RC deep link + outcome modal (used when ringOut not triggered)
   document.getElementById('call-modal-name').textContent=contact.full_name+(contact.title?' — '+contact.title:'');
   document.getElementById('call-note').value='';
   if(_callTimer) clearTimeout(_callTimer);
@@ -1167,7 +1274,7 @@ function renderTask(){
     actionBtn=`<a class="btn btn-email-action" href="https://outlook.office.com/mail/deeplink/compose?to=${to}&subject=${encodeURIComponent('Quick intro \u2014 Rylem Staffing')}" target="_blank" rel="noopener">✉️ Open Outlook</a>`;
     actionBtn+=`<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(0,119,181,.1);color:#6bb5e8;border:1px solid rgba(0,119,181,.2);margin-left:6px">📤 ${esc(alias)}</span>`;
   } else if(channelCls==='phone' && contact?.phone){
-    actionBtn=`<a class="btn btn-phone-action" href="rcapp://r/call?number=${stripPhone(contact.phone)}" onclick="logCall()">📲 Call via RingCentral</a>`;
+    actionBtn=`<a class="btn btn-phone-action" href="javascript:void(0)" onclick="ringOut('${escAttr(contact.phone)}')">📲 Call via RingCentral</a>`;
   }
 
   // Determine if referral sequence
@@ -1739,6 +1846,7 @@ async function toggleStatusFlag(toggleId){
 }
 
 function esc(s){return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''}
+function escAttr(s){return s?String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"'):'';}
 </script>
 
 <!-- status modal -->

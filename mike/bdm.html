@@ -2323,20 +2323,10 @@ async function overrideAndSendContact(contactId, contactName, contactEmail, from
 
 // ─── ACCOUNTS / SEQUENCE (SUPABASE) ──────────────────────
 async function fetchRepAccounts(rep) {
-  const profile = window._rylemProfile || {};
-  const isSdr = profile.role === 'sdr';
-  const isAdmin = profile.role === 'admin';
-
+  // All users see only their own accounts. The rep switcher changes the `rep` value.
   let accounts, accErr;
-  if (isSdr || isAdmin) {
-    // Admins and SDRs see ALL accounts - full visibility
-    const res = await db.from('accounts').select('*').order('company');
-    accounts = res.data; accErr = res.error;
-  } else {
-    // BDMs/managers see their own assigned accounts
-    const res = await db.from('accounts').select('*').eq('assigned_rep', rep);
-    accounts = res.data; accErr = res.error;
-  }
+  const res = await db.from('accounts').select('*').eq('assigned_rep', rep).order('company');
+  accounts = res.data; accErr = res.error;
   if (accErr) { console.error('accounts fetch error:', accErr); return []; }
 
   // Get contact counts per account via individual head requests (reliable, no row limit)
@@ -2957,15 +2947,13 @@ document.getElementById('add-lead-form')?.addEventListener('submit', async (e) =
 
 // ─── SUPABASE TASKS ──────────────────────────────────────
 async function fetchRepTasks(rep) {
-  const profile = window._rylemProfile || {};
-  const isAdmin = profile.role === 'admin';
   let query = db
     .from('tasks')
     .select('*, contacts(full_name, title, email, phone, mobile, linkedin_url, status), accounts(company, do_not_contact, trigger_event, trigger_date, open_roles_count, domain, hq_city, status), sequences!inner(status)')
     .eq('completed', false)
     .eq('sequences.status', 'active')
+    .eq('rep', rep)
     .lte('due_date', localDateStr());
-  if (!isAdmin) query = query.eq('rep', rep);
   query = query.order('due_date');
   const { data: tasks, error } = await query;
   if (error) { console.error('tasks fetch error:', error); return []; }

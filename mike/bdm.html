@@ -435,6 +435,9 @@ button,input,select{font-family:inherit}
 .sr-title{color:var(--text2);font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sr-company{color:var(--accent);font-size:12px;font-weight:600;white-space:nowrap}
 .sr-city{color:var(--text3);font-size:11px;white-space:nowrap}
+.sr-rep-tag{background:rgba(168,85,247,.15);color:var(--purple);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:.3px;white-space:nowrap}
+.search-flash{animation:flashPulse 1.5s ease-out}
+@keyframes flashPulse{0%{box-shadow:0 0 0 0 rgba(41,121,255,.9)}25%{box-shadow:0 0 18px 4px rgba(41,121,255,.7)}50%{box-shadow:0 0 10px 2px rgba(41,121,255,.4)}100%{box-shadow:none}}
 .sr-acct-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s}
 .sr-acct-item:hover{background:var(--surface3)}
 .sr-acct-name{font-weight:600;color:var(--accent);font-size:13px}
@@ -3330,25 +3333,29 @@ async function handleSearch(q) {
 
   clearTimeout(searchDebounce);
   searchDebounce = setTimeout(async () => {
-    // Load search cache once per session (all contacts + accounts)
-    if (!searchCache || searchCache.rep !== state.rep) {
-      const accounts = state.supabaseAccounts || [];
-      const ids = accounts.map(a => a.id);
+    // Load search cache once per session — ALL accounts/contacts, not filtered by rep
+    if (!searchCache) {
+      const allAccts = [];
+      for (let offset = 0; offset < 5000; offset += 1000) {
+        const { data } = await db.from('accounts').select('id, company, hq_city, hq_state, assigned_rep').range(offset, offset + 999);
+        if (!data || !data.length) break;
+        allAccts.push(...data);
+      }
+      const allIds = allAccts.map(a => a.id);
       const allContacts = [];
-      for (let i = 0; i < ids.length; i += 20) {
-        const batch = ids.slice(i, i + 20);
+      for (let i = 0; i < allIds.length; i += 20) {
+        const batch = allIds.slice(i, i + 20);
         const { data } = await db.from('contacts').select('id, full_name, title, account_id, city').in('account_id', batch).limit(1000);
         if (data) allContacts.push(...data);
       }
       const acctMap = {};
-      accounts.forEach(a => { acctMap[a.id] = a; });
+      allAccts.forEach(a => { acctMap[a.id] = a; });
       searchCache = {
-        rep: state.rep,
-        accounts: accounts.map(a => ({ id: a.id, company: a.company || '', city: a.hq_city || '', state: a.hq_state || '' })),
+        accounts: allAccts.map(a => ({ id: a.id, company: a.company || '', city: a.hq_city || '', state: a.hq_state || '', rep: a.assigned_rep || '' })),
         contacts: allContacts.map(c => {
           const acct = acctMap[c.account_id] || {};
           return { id: c.id, name: c.full_name || '', title: c.title || '', city: c.city || '',
-            account_id: c.account_id, company: acct.company || '?' };
+            account_id: c.account_id, company: acct.company || '?', rep: acct.assigned_rep || '' };
         })
       };
     }
@@ -3373,20 +3380,28 @@ async function handleSearch(q) {
       let html = '';
       if (acctHits.length) {
         html += '<div class="sr-group-label">Accounts</div>';
-        html += acctHits.map(a => `
-          <div class="sr-acct-item" onclick="scrollToAccount('${a.id}')">
+        html += acctHits.map(a => {
+          const repTag = a.rep && a.rep !== state.rep ? `<span class="sr-rep-tag">${esc(a.rep)}</span>` : '';
+          return `
+          <div class="sr-acct-item" onclick="scrollToAccount('${a.id}','${a.rep}')">
             <span class="sr-acct-name">${esc(a.company)}</span>
             <span class="sr-acct-meta">${esc([a.city,a.state].filter(Boolean).join(', '))}</span>
-          </div>`).join('');
+            ${repTag}
+          </div>`;
+        }).join('');
       }
       if (contactHits.length) {
         html += '<div class="sr-group-label">Contacts</div>';
-        html += contactHits.map(h => `
-          <div class="sr-item" onclick="goToContact('${h.id}','${h.account_id}')">
+        html += contactHits.map(h => {
+          const repTag = h.rep && h.rep !== state.rep ? `<span class="sr-rep-tag">${esc(h.rep)}</span>` : '';
+          return `
+          <div class="sr-item" onclick="goToContact('${h.id}','${h.account_id}','${h.rep}')">
             <span class="sr-name">${esc(h.name)}</span>
             <span class="sr-title">${esc(h.title)}</span>
             <span class="sr-company">${esc(h.company)}</span>
-          </div>`).join('');
+            ${repTag}
+          </div>`;
+        }).join('');
       }
       box.innerHTML = html;
     }
@@ -3394,36 +3409,43 @@ async function handleSearch(q) {
   }, 200);
 }
 
-function scrollToAccount(accountId) {
+function scrollToAccount(accountId, accountRep) {
   document.getElementById('search-results').classList.remove('open');
   document.getElementById('global-search').value = '';
-  const row = document.querySelector(`[data-account-id="${accountId}"]`);
-  if (row) {
-    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    row.style.transition = 'box-shadow .3s';
-    row.style.boxShadow = '0 0 0 2px var(--accent)';
-    setTimeout(() => { row.style.boxShadow = ''; }, 2000);
+  // If account belongs to another rep, switch to that rep first
+  if (accountRep && accountRep !== state.rep) {
+    switchRep(accountRep);
+    // Wait for data to load, then scroll
+    setTimeout(() => {
+      const row = document.querySelector(`[data-account-id="${accountId}"]`);
+      if (row) flashHighlight(row);
+    }, 600);
+    return;
   }
+  const row = document.querySelector(`[data-account-id="${accountId}"]`);
+  if (row) flashHighlight(row);
 }
 
-function goToContact(contactId, accountId) {
+function goToContact(contactId, accountId, contactRep) {
   document.getElementById('search-results').classList.remove('open');
   document.getElementById('global-search').value = '';
+  // If contact belongs to another rep, switch to that rep first
+  if (contactRep && contactRep !== state.rep) {
+    switchRep(contactRep);
+    setTimeout(() => { jumpToContact(accountId, contactId); }, 600);
+    return;
+  }
   // Try to find the contact within the current BDM page first
   if (accountId) {
     const acctRow = document.querySelector(`[data-account-id="${accountId}"]`);
     if (acctRow) {
-      // Scroll to the account, then open the contact's status modal
       acctRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      acctRow.style.transition = 'box-shadow .3s';
-      acctRow.style.boxShadow = '0 0 0 2px var(--neon-cyan)';
-      setTimeout(() => { acctRow.style.boxShadow = ''; }, 3000);
+      flashHighlight(acctRow);
       // Try to find and highlight the specific contact row
       const contactRows = acctRow.querySelectorAll('.contact-row');
       for (const cr of contactRows) {
         if (cr.dataset.contactId === contactId) {
-          cr.style.background = 'rgba(0,229,255,0.15)';
-          setTimeout(() => { cr.style.background = ''; }, 3000);
+          flashHighlight(cr);
           break;
         }
       }
@@ -3437,7 +3459,6 @@ function goToContact(contactId, accountId) {
 async function jumpToContact(accountId, contactId) {
   document.getElementById('search-results').classList.remove('open');
   document.getElementById('global-search').value = '';
-  searchCache = null; // reset so next search re-fetches
 
   // Expand the account
   const detail = document.getElementById('acd_' + accountId);
@@ -3450,23 +3471,21 @@ async function jumpToContact(accountId, contactId) {
     const hit = detail ? detail.querySelector(`[data-contact-id="${contactId}"]`) : null;
     if (hit) {
       hit.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      const nameEl = hit.querySelector('.contact-name');
-      if (nameEl) {
-        nameEl.style.background = '#fff';
-        nameEl.style.color = '#000';
-        nameEl.style.fontWeight = '800';
-        nameEl.style.boxShadow = '0 0 20px #fff, 0 0 40px #00e5ff, 0 0 60px rgba(0,229,255,0.6)';
-        nameEl.style.borderRadius = '4px';
-        nameEl.style.padding = '2px 8px';
-        nameEl.style.transition = 'all 2.5s ease-out';
-        setTimeout(() => { nameEl.style.background = ''; nameEl.style.color = ''; nameEl.style.fontWeight = ''; nameEl.style.boxShadow = ''; nameEl.style.padding = ''; }, 3000);
-      }
+      flashHighlight(hit);
       return;
     }
     // Fallback: scroll to account card
     const card = document.getElementById('ac_' + accountId);
-    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (card) { card.scrollIntoView({ behavior: 'smooth', block: 'start' }); flashHighlight(card); }
   }, 400);
+}
+
+// Scroll-to-result highlight: blue pulse for 1.5s
+function flashHighlight(el) {
+  if (!el) return;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  el.classList.add('search-flash');
+  setTimeout(() => { el.classList.remove('search-flash'); }, 1500);
 }
 
 // Close search on click outside
@@ -4321,6 +4340,11 @@ async function _refreshContactRow(accountId) {
     </div>
   </div>
 </div>
+<!-- Scroll to top -->
+<button id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="position:fixed;bottom:24px;right:24px;width:44px;height:44px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:18px;cursor:pointer;display:none;z-index:999;box-shadow:0 2px 8px rgba(0,0,0,.3);transition:opacity .2s,transform .2s" onmouseenter="this.style.transform='scale(1.1)'" onmouseleave="this.style.transform='scale(1)'">↑</button>
+<script>
+window.addEventListener('scroll',()=>{document.getElementById('scroll-top').style.display=window.scrollY>300?'block':'none'});
+</script>
 </body>
 </html>
 

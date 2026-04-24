@@ -833,7 +833,8 @@ function showAddContactModal(){
     <div style="display:flex;flex-direction:column;gap:12px">
       <input id="ac-name" placeholder="Full name *" style="${inputStyle()}">
       <input id="ac-title" placeholder="Title (e.g. VP Engineering)" style="${inputStyle()}">
-      <input id="ac-email" placeholder="Email" type="email" style="${inputStyle()}">
+      <input id="ac-email" placeholder="Email *" type="email" required style="${inputStyle()}">
+      <div id="ac-email-dupe" style="display:none;color:var(--neon-red);font-size:12px;padding:4px 0">Contact already exists with this email. Duplicate blocked.</div>
       <input id="ac-phone" placeholder="Phone" style="${inputStyle()}">
       <input id="ac-linkedin" placeholder="LinkedIn URL" style="${inputStyle()}">
       <select id="ac-role" style="${inputStyle()}">
@@ -858,13 +859,24 @@ async function submitAddContact(){
   const role_type=document.getElementById('ac-role').value;
   const errEl=document.getElementById('ac-err');
   const btn=document.getElementById('ac-submit');
+  const emailDupeEl=document.getElementById('ac-email-dupe');
   errEl.textContent='';
+  emailDupeEl.style.display='none';
   if(!name){errEl.textContent='Name is required';return;}
-  // Dupe check
+  if(!email||!email.includes('@')){errEl.textContent='Email is required';return;}
+  // Dupe check by name
   const{data:dupes}=await db.from('contacts').select('id').eq('account_id',account.id).ilike('full_name',name);
   if(dupes&&dupes.length){errEl.textContent='Contact with this name already exists on this account';return;}
+  // Dupe check by email (cross-account)
+  const{data:emailDupes}=await db.from('contacts').select('id,full_name,accounts(company)').ilike('email',email);
+  if(emailDupes&&emailDupes.length){
+    const d=emailDupes[0];
+    emailDupeEl.textContent=`Contact already exists with this email — ${d.full_name} at ${d.accounts?.company||'unknown'}. Duplicate blocked.`;
+    emailDupeEl.style.display='block';
+    return;
+  }
   btn.disabled=true;btn.textContent='Adding...';
-  const{data,error}=await db.from('contacts').insert({account_id:account.id,full_name:name,title,email:email||null,phone:phone||null,linkedin_url:linkedin||null,role_type,status:'new'}).select().single();
+  const{data,error}=await db.from('contacts').insert({account_id:account.id,full_name:name,title,email,phone:phone||null,linkedin_url:linkedin||null,role_type,status:'new'}).select().single();
   if(error){errEl.textContent=error.message;btn.disabled=false;btn.textContent='Add Contact';return;}
   // Log to activity_log
   const loggedInRep=(window.currentUser&&window.currentUser.rep_name)||account.assigned_rep||'system';

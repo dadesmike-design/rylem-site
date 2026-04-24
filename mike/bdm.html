@@ -630,6 +630,12 @@ button,input,select{font-family:inherit}
           <span class="dupe-icon">🚫</span>
           <div class="dupe-text" style="color:var(--neon-red)"><span id="al-dnc-msg"></span></div>
         </div>
+        <div class="dupe-warning" id="al-email-dupe" style="display:none">
+          <span class="dupe-icon">📧</span>
+          <div class="dupe-text">
+            Contact already exists — <strong id="al-email-dupe-name"></strong> at <strong id="al-email-dupe-company"></strong> (rep: <span id="al-email-dupe-rep"></span>). Duplicate blocked.
+          </div>
+        </div>
         <div class="form-row">
           <div class="form-group">
             <label>Contact Name *</label>
@@ -642,8 +648,8 @@ button,input,select{font-family:inherit}
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>Email</label>
-            <input type="email" id="al-email" placeholder="e.g. jane@stripe.com">
+            <label>Email *</label>
+            <input type="email" id="al-email" required placeholder="e.g. jane@stripe.com">
           </div>
           <div class="form-group">
             <label>LinkedIn URL</label>
@@ -2367,6 +2373,8 @@ function getRepAccounts(rep) {
 // ─── ADD LEAD MODAL ─────────────────────────────────────
 let _dupeContact = null;  // holds existing contact if dupe found
 let _dupeTimer = null;
+let _emailDupeContact = null;  // holds existing contact if email dupe found
+let _emailDupeTimer = null;
 
 let _dncBlocked = false;
 let _seqTemplates = [];
@@ -2463,8 +2471,10 @@ function openAddLead(prefillCompany, prefillAccountId) {
   const repRow = document.getElementById('al-rep').parentElement;
   repRow.style.display = (profile.role === 'sdr') ? 'none' : '';
   _dupeContact = null;
+  _emailDupeContact = null;
   _dncBlocked = false;
   document.getElementById('al-dupe').style.display = 'none';
+  document.getElementById('al-email-dupe').style.display = 'none';
   document.getElementById('al-dnc-warn').style.display = 'none';
   // Pre-fill company if called from account card
   if (prefillCompany) {
@@ -2495,8 +2505,10 @@ function closeAddLead(clearAll) {
   document.getElementById('al-company').readOnly = false;
   document.getElementById('al-company').dataset.accountId = '';
   _dupeContact = null;
+  _emailDupeContact = null;
   _dncBlocked = false;
   document.getElementById('al-dupe').style.display = 'none';
+  document.getElementById('al-email-dupe').style.display = 'none';
   document.getElementById('al-dnc-warn').style.display = 'none';
   // Reset sequence selector to default (first template = Cold Outreach)
   _selectedSeqId=_seqTemplates.length?_seqTemplates[0].id:'';
@@ -2629,11 +2641,28 @@ document.getElementById('bulk-add-form')?.addEventListener('submit', async (e) =
         accountId = acc.id;
       }
 
-      // Check duplicate contact
+      // Check duplicate contact (by name + account)
       const { data: dupes } = await db.from('contacts').select('id,full_name').eq('account_id', accountId).ilike('full_name', l.contact);
       if (dupes && dupes.length > 0) {
         skipped++;
         resultsDiv.innerHTML += `<div style="color:var(--yellow)">⏭ Line ${l.line}: ${l.contact} at ${l.company} - already exists, skipped</div>`;
+        continue;
+      }
+
+      // Require email — hard block
+      if (!l.email || !l.email.includes('@')) {
+        skipped++;
+        resultsDiv.innerHTML += `<div style="color:var(--red)">⏭ Line ${l.line}: ${l.contact} at ${l.company} - no email, skipped</div>`;
+        continue;
+      }
+
+      // Check duplicate contact (by email — cross-account)
+      const { data: emailDupes } = await db.from('contacts').select('id,full_name,accounts(company)').ilike('email', l.email);
+      if (emailDupes && emailDupes.length > 0) {
+        skipped++;
+        const dupe = emailDupes[0];
+        const dupeCompany = dupe.accounts?.company || 'unknown';
+        resultsDiv.innerHTML += `<div style="color:var(--red)">⏭ Line ${l.line}: ${l.email} - already exists as ${dupe.full_name} at ${dupeCompany}, skipped</div>`;
         continue;
       }
 
@@ -2748,12 +2777,42 @@ function hideDupe() {
   updateSubmitState();
 }
 
+// Debounced email dupe check
+document.getElementById('al-email')?.addEventListener('input', (e) => {
+  clearTimeout(_emailDupeTimer);
+  const val = e.target.value.trim();
+  if (!val || !val.includes('@')) { hideEmailDupe(); return; }
+  _emailDupeTimer = setTimeout(() => checkEmailDupe(val), 400);
+});
+
+async function checkEmailDupe(email) {
+  const { data } = await db.from('contacts').select('id, full_name, email, account_id, accounts(company, assigned_rep)').ilike('email', email);
+  if (data && data.length > 0) {
+    _emailDupeContact = data[0];
+    document.getElementById('al-email-dupe-name').textContent = _emailDupeContact.full_name;
+    document.getElementById('al-email-dupe-company').textContent = _emailDupeContact.accounts?.company || 'unknown';
+    document.getElementById('al-email-dupe-rep').textContent = _emailDupeContact.accounts?.assigned_rep || '?';
+    document.getElementById('al-email-dupe').style.display = 'flex';
+  } else {
+    hideEmailDupe();
+  }
+  updateSubmitState();
+}
+
+function hideEmailDupe() {
+  _emailDupeContact = null;
+  document.getElementById('al-email-dupe').style.display = 'none';
+  updateSubmitState();
+}
+
 function updateSubmitState() {
   const co = document.getElementById('al-company')?.value.trim();
   const cn = document.getElementById('al-contact')?.value.trim();
+  const em = document.getElementById('al-email')?.value.trim();
   const bdm = document.getElementById('al-bdm')?.value;
-  const blocked = !!_dupeContact || _dncBlocked;
-  document.getElementById('al-submit').disabled = !(co && cn && bdm && !blocked);
+  const emailValid = em && em.includes('@') && em.includes('.');
+  const blocked = !!_dupeContact || !!_emailDupeContact || _dncBlocked;
+  document.getElementById('al-submit').disabled = !(co && cn && emailValid && bdm && !blocked);
 }
 
 // Enable/disable submit on any input

@@ -284,6 +284,9 @@ button,input,select,textarea{font-family:inherit}
 .call-out-btn.voicemail{border-color:rgba(0,207,255,.3)}.call-out-btn.voicemail:hover{background:rgba(0,207,255,.1);border-color:#00cfff;box-shadow:0 0 16px rgba(0,207,255,.15)}
 .call-out-btn.no-answer{border-color:rgba(136,136,136,.3)}.call-out-btn.no-answer:hover{background:rgba(136,136,136,.1);border-color:var(--text2);box-shadow:0 0 16px rgba(136,136,136,.15)}
 .call-out-btn.wrong-number{border-color:rgba(255,23,68,.3)}.call-out-btn.wrong-number:hover{background:rgba(255,23,68,.1);border-color:var(--neon-red);box-shadow:0 0 16px rgba(255,23,68,.15)}
+.call-out-btn.follow-up{border-color:rgba(255,170,0,.3)}.call-out-btn.follow-up:hover{background:rgba(255,170,0,.1);border-color:#ffaa00;box-shadow:0 0 16px rgba(255,170,0,.15)}
+.call-out-btn.not-interested{border-color:rgba(255,23,68,.3)}.call-out-btn.not-interested:hover{background:rgba(255,23,68,.1);border-color:var(--neon-red);box-shadow:0 0 16px rgba(255,23,68,.15)}
+.call-out-btn.meeting-set{border-color:rgba(57,255,20,.3)}.call-out-btn.meeting-set:hover{background:rgba(57,255,20,.12);border-color:var(--neon-green);box-shadow:0 0 20px rgba(57,255,20,.25)}
 .call-note-input{width:100%;padding:10px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;font-family:inherit;outline:none;margin-bottom:14px}
 .call-note-input:focus{border-color:var(--neon-cyan)}
 .call-dismiss{font-size:12px;color:var(--text3);cursor:pointer;border:none;background:none;padding:6px 12px}
@@ -467,6 +470,15 @@ button,input,select,textarea{font-family:inherit}
       </button>
       <button class="call-out-btn no-answer" onclick="logCallOutcome('no_answer')">
         <span class="ico">📵</span>No Answer
+      </button>
+      <button class="call-out-btn follow-up" onclick="logCallOutcome('follow_up')">
+        <span class="ico">🔄</span>Follow Up Later
+      </button>
+      <button class="call-out-btn not-interested" onclick="logCallOutcome('not_interested')">
+        <span class="ico">🚫</span>Not Interested
+      </button>
+      <button class="call-out-btn meeting-set" onclick="logCallOutcome('meeting_set')">
+        <span class="ico">📅</span>Meeting Set!
       </button>
       <button class="call-out-btn wrong-number" onclick="logCallOutcome('wrong_number')">
         <span class="ico">❌</span>Wrong #
@@ -1068,19 +1080,55 @@ async function logCallOutcome(outcome){
   document.getElementById('call-modal').classList.remove('open');
   if(_callTimer){clearTimeout(_callTimer);_callTimer=null;}
   const note=document.getElementById('call-note').value.trim();
-  const labels={connected:'Connected',voicemail:'Left Voicemail',no_answer:'No Answer',wrong_number:'Wrong Number'};
+  const labels={connected:'Connected',voicemail:'Left Voicemail',no_answer:'No Answer',follow_up:'Follow Up Later',not_interested:'Not Interested',meeting_set:'Meeting Set',wrong_number:'Wrong Number'};
   const rep=contact.working_rep||contact.owner||account.assigned_rep||'system';
+
+  // Determine event_type based on outcome
+  let eventType = 'call_completed';
+  if (outcome === 'meeting_set') eventType = 'meeting_set';
+  else if (outcome === 'not_interested') eventType = 'call_dnc';
+
   await db.from('activity_log').insert({
     contact_id:contact.id,account_id:contact.account_id,rep:rep,
-    event_type:'call_completed',
+    event_type:eventType,
     description:'Call to '+contact.full_name+' \u2014 '+(labels[outcome]||outcome),
-    metadata:{outcome:outcome,note:note||null}
+    metadata:{outcome:outcome,note:note||null,method:'ringout'}
   });
+
+  // Handle special outcomes
+  if (outcome === 'meeting_set') {
+    // Give the rep credit — set meeting_set_date and meeting_set_by
+    const today = new Date().toISOString().split('T')[0];
+    await db.from('contacts').update({
+      meeting_set_date: today,
+      meeting_set_by: rep
+    }).eq('id', contact.id);
+    contact.meeting_set_date = today;
+    contact.meeting_set_by = rep;
+    renderHeader();
+    renderDNCState();
+    showToast('📅 Meeting set — credit to ' + rep);
+    // Open the meeting details modal so they can fill in date/time
+    setTimeout(() => showMeetingDetailsModal(), 300);
+  } else if (outcome === 'not_interested') {
+    // Flag as DNC
+    await db.from('contacts').update({not_interested:true,status:null}).eq('id',contact.id);
+    contact.not_interested = true;
+    renderHeader();
+    renderDNCState();
+    showToast('🚫 Marked Not Interested');
+  } else if (outcome === 'follow_up') {
+    // Log a note for follow-up tracking — no status change needed
+    showToast('🔄 Follow up logged');
+  } else {
+    showToast((labels[outcome]||outcome)+' logged');
+  }
+
   // Refresh activity
   const {data:acts}=await db.from('activity_log').select('*').eq('contact_id',contact.id).order('created_at',{ascending:false}).limit(50);
   activityList=acts||[];
   renderActivity();
-  showToast((labels[outcome]||outcome)+' logged');
+  renderTask();
 }
 async function dismissCallModal(){
   document.getElementById('call-modal').classList.remove('open');

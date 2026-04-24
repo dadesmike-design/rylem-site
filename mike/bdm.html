@@ -101,6 +101,27 @@ button,input,select{font-family:inherit}
   background:rgba(0,0,0,.7);backdrop-filter:blur(4px)
 }
 .modal-overlay.open{display:flex}
+/* ─── CALL OUTCOME MODAL ─── */
+.call-modal-overlay{position:fixed;inset:0;z-index:9990;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center}
+.call-modal-overlay.open{display:flex}
+.call-modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px 24px;width:380px;max-width:92vw;text-align:center;animation:callSlide .2s ease-out}
+@keyframes callSlide{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.call-modal h3{font-size:18px;margin-bottom:4px}.call-modal .sub{font-size:13px;color:var(--text2);margin-bottom:22px}
+.call-outcomes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.call-out-btn{padding:16px 10px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:6px}
+.call-out-btn:hover{transform:scale(1.03)}
+.call-out-btn .ico{font-size:24px}
+.call-out-btn.connected{border-color:rgba(57,255,20,.3)}.call-out-btn.connected:hover{background:rgba(57,255,20,.1);border-color:var(--neon-green);box-shadow:0 0 16px rgba(57,255,20,.15)}
+.call-out-btn.voicemail{border-color:rgba(0,207,255,.3)}.call-out-btn.voicemail:hover{background:rgba(0,207,255,.1);border-color:#00cfff;box-shadow:0 0 16px rgba(0,207,255,.15)}
+.call-out-btn.no-answer{border-color:rgba(136,136,136,.3)}.call-out-btn.no-answer:hover{background:rgba(136,136,136,.1);border-color:var(--text2);box-shadow:0 0 16px rgba(136,136,136,.15)}
+.call-out-btn.wrong-number{border-color:rgba(255,23,68,.3)}.call-out-btn.wrong-number:hover{background:rgba(255,23,68,.1);border-color:var(--neon-red);box-shadow:0 0 16px rgba(255,23,68,.15)}
+.call-out-btn.follow-up{border-color:rgba(255,170,0,.3)}.call-out-btn.follow-up:hover{background:rgba(255,170,0,.1);border-color:#ffaa00;box-shadow:0 0 16px rgba(255,170,0,.15)}
+.call-out-btn.not-interested{border-color:rgba(255,23,68,.3)}.call-out-btn.not-interested:hover{background:rgba(255,23,68,.1);border-color:var(--neon-red);box-shadow:0 0 16px rgba(255,23,68,.15)}
+.call-out-btn.meeting-set{border-color:rgba(57,255,20,.3)}.call-out-btn.meeting-set:hover{background:rgba(57,255,20,.12);border-color:var(--neon-green);box-shadow:0 0 20px rgba(57,255,20,.25)}
+.call-note-input{width:100%;padding:10px 14px;border-radius:var(--radius-sm,8px);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;font-family:inherit;outline:none;margin-bottom:14px}
+.call-note-input:focus{border-color:var(--neon-cyan)}
+.call-dismiss{font-size:12px;color:var(--text3);cursor:pointer;border:none;background:none;padding:6px 12px}
+.call-dismiss:hover{color:var(--text2)}
 .modal-card{
   background:var(--surface);border:1px solid var(--border-hover);border-radius:16px;
   width:560px;max-width:92vw;max-height:90vh;overflow-y:auto;
@@ -910,6 +931,22 @@ function _findRingBtn(phone) {
   return null;
 }
 
+// Find contact object by phone number for call outcome tracking
+function _findContactByPhone(phone) {
+  const clean = stripPhone(phone);
+  // Search tasks first (most likely context)
+  if (state.supabaseTasks) {
+    const t = state.supabaseTasks.find(t => stripPhone(t.phone || '') === clean);
+    if (t) return { id: t.contact_id, account_id: t.account_id, full_name: t.contact_name || t.name || 'Unknown', title: t.title || '' };
+  }
+  // Search contacts in account view
+  if (state.contacts) {
+    const c = state.contacts.find(c => stripPhone(c.phone || '') === clean || stripPhone(c.mobile || '') === clean);
+    if (c) return c;
+  }
+  return null;
+}
+
 async function ringOut(phone, repKey) {
   if (!phone) return;
   const clean = stripPhone(phone);
@@ -934,6 +971,11 @@ async function ringOut(phone, repKey) {
       showToast('📞 RingOut connected');
       // Auto-log to activity_log
       _logRingOut(e164, rk, data.call);
+      // Show call outcome modal after 30s
+      const callContact = _findContactByPhone(e164);
+      if (callContact) {
+        setTimeout(() => showCallOutcomeModal(callContact), 30000);
+      }
       // Poll for final status after 10s
       setTimeout(() => _pollRingOutStatus(data.call?.id, btn, e164, rk), 10000);
     } else {
@@ -999,6 +1041,93 @@ async function _pollRingOutStatus(sessionId, btn, phone, rep) {
       }
     }
   } catch (e) { console.warn('[ringOut] Status poll failed:', e); }
+}
+
+// ─── CALL OUTCOME TRACKING ───
+let _callTimer = null;
+let _callContact = null;
+
+function showCallOutcomeModal(c) {
+  _callContact = c;
+  document.getElementById('call-modal-name').textContent = c.full_name + (c.title ? ' — ' + c.title : '');
+  document.getElementById('call-note').value = '';
+  document.getElementById('call-modal').classList.add('open');
+  // Auto-dismiss after 90s if no response
+  if (_callTimer) clearTimeout(_callTimer);
+  _callTimer = setTimeout(() => dismissCallModal(), 90000);
+}
+
+async function logCallOutcome(outcome) {
+  document.getElementById('call-modal').classList.remove('open');
+  if (_callTimer) { clearTimeout(_callTimer); _callTimer = null; }
+  const c = _callContact;
+  if (!c) return;
+  const note = document.getElementById('call-note').value.trim();
+  const labels = {connected:'Connected',voicemail:'Left Voicemail',no_answer:'No Answer',follow_up:'Follow Up Later',not_interested:'Not Interested',meeting_set:'Meeting Set',wrong_number:'Wrong Number'};
+  const rep = state.rep || 'system';
+
+  // Determine event_type
+  let eventType = 'call_completed';
+  if (outcome === 'meeting_set') eventType = 'meeting_set';
+  else if (outcome === 'not_interested') eventType = 'call_dnc';
+
+  await db.from('activity_log').insert({
+    contact_id: c.id,
+    account_id: c.account_id,
+    rep: rep,
+    event_type: eventType,
+    description: 'Call to ' + c.full_name + ' — ' + (labels[outcome] || outcome),
+    metadata: { outcome: outcome, note: note || null, method: 'ringout' }
+  });
+
+  // Handle special outcomes
+  if (outcome === 'meeting_set') {
+    const today = new Date().toISOString().split('T')[0];
+    await db.from('contacts').update({
+      meeting_set_date: today,
+      meeting_set_by: rep
+    }).eq('id', c.id);
+    c.meeting_set_date = today;
+    c.meeting_set_by = rep;
+    _showToast('📅 Meeting set — credit to ' + rep);
+  } else if (outcome === 'not_interested') {
+    await db.from('contacts').update({ not_interested: true, status: null }).eq('id', c.id);
+    c.not_interested = true;
+    _showToast('🚫 Marked Not Interested');
+  } else if (outcome === 'follow_up') {
+    _showToast('🔄 Follow up logged');
+  } else {
+    _showToast((labels[outcome] || outcome) + ' logged');
+  }
+
+  // Refresh the contact list to reflect changes
+  if (typeof loadContacts === 'function') loadContacts();
+}
+
+async function dismissCallModal() {
+  document.getElementById('call-modal').classList.remove('open');
+  if (_callTimer) { clearTimeout(_callTimer); _callTimer = null; }
+  const c = _callContact;
+  if (!c) return;
+  const note = document.getElementById('call-note').value.trim();
+  const rep = state.rep || 'system';
+  await db.from('activity_log').insert({
+    contact_id: c.id,
+    account_id: c.account_id,
+    rep: rep,
+    event_type: 'call_initiated',
+    description: 'Call to ' + c.full_name + ' — outcome unknown',
+    metadata: { outcome: 'unknown', note: note || null, method: 'ringout' }
+  });
+  _showToast('Call logged');
+}
+
+function _showToast(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 20px;border-radius:10px;font-size:13px;z-index:99999;animation:callSlide .2s ease-out';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
 }
 
 // ─── STATE ──────────────────────────────────────────────
@@ -4761,6 +4890,39 @@ async function _refreshContactRow(accountId) {
 </div>
 <!-- Scroll to top -->
 <button id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="position:fixed;bottom:24px;right:24px;width:44px;height:44px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:18px;cursor:pointer;display:none;z-index:999;box-shadow:0 2px 8px rgba(0,0,0,.3);transition:opacity .2s,transform .2s" onmouseenter="this.style.transform='scale(1.1)'" onmouseleave="this.style.transform='scale(1)'">↑</button>
+
+<!-- CALL OUTCOME MODAL -->
+<div class="call-modal-overlay" id="call-modal">
+  <div class="call-modal">
+    <h3>📞 How did the call go?</h3>
+    <div class="sub" id="call-modal-name"></div>
+    <div class="call-outcomes">
+      <button class="call-out-btn connected" onclick="logCallOutcome('connected')">
+        <span class="ico">✅</span>Connected
+      </button>
+      <button class="call-out-btn voicemail" onclick="logCallOutcome('voicemail')">
+        <span class="ico">📩</span>Left VM
+      </button>
+      <button class="call-out-btn no-answer" onclick="logCallOutcome('no_answer')">
+        <span class="ico">📵</span>No Answer
+      </button>
+      <button class="call-out-btn follow-up" onclick="logCallOutcome('follow_up')">
+        <span class="ico">🔄</span>Follow Up Later
+      </button>
+      <button class="call-out-btn not-interested" onclick="logCallOutcome('not_interested')">
+        <span class="ico">🚫</span>Not Interested
+      </button>
+      <button class="call-out-btn meeting-set" onclick="logCallOutcome('meeting_set')">
+        <span class="ico">📅</span>Meeting Set!
+      </button>
+      <button class="call-out-btn wrong-number" onclick="logCallOutcome('wrong_number')">
+        <span class="ico">❌</span>Wrong #
+      </button>
+    </div>
+    <input type="text" class="call-note-input" id="call-note" placeholder="Add a note (optional)…">
+    <div><button class="call-dismiss" onclick="dismissCallModal()">Skip — log without outcome</button></div>
+  </div>
+</div>
 <script>
 window.addEventListener('scroll',()=>{document.getElementById('scroll-top').style.display=window.scrollY>300?'block':'none'});
 </script>

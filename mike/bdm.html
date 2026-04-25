@@ -1532,6 +1532,7 @@ function showHandoffModal(taskId, contactName, companyName, contactId, sequenceI
         <div class="handoff-opt" data-bdm="mike" onclick="selectHandoffBdm(this,'mike')">Mike</div>
         <div class="handoff-opt" data-bdm="julia" onclick="selectHandoffBdm(this,'julia')">Julia</div>
         <div class="handoff-opt" data-bdm="april" onclick="selectHandoffBdm(this,'april')">April</div>
+        <div class="handoff-opt" data-bdm="honey" onclick="selectHandoffBdm(this,'honey')">Honey</div>
       </div>
       <div class="handoff-btns">
         <button class="btn" onclick="document.getElementById('handoff-overlay').remove()">Cancel</button>
@@ -1557,28 +1558,11 @@ async function confirmHandoff(taskId, contactId, sequenceId) {
 
   const sdr = state.rep;
   try {
-    // 1. Update tasks.rep to selected BDM
+    // Reassign task to BDM — stays completed=false so it surfaces in BDM queue
     const { error: e1 } = await db.from('tasks').update({ rep: _handoffBdm }).eq('id', taskId);
     if (e1) throw e1;
 
-    // 2. Mark task completed
-    const { error: e2 } = await db.from('tasks').update({
-      completed: true,
-      completed_at: new Date().toISOString()
-    }).eq('id', taskId);
-    if (e2) throw e2;
-
-    // 3. Log handoff in activity_log
-    const { error: e3 } = await db.from('activity_log').insert({
-      event_type: 'task_handoff',
-      rep: sdr,
-      contact_id: contactId || null,
-      sequence_id: sequenceId || null,
-      details: { handed_to: _handoffBdm, contact_id: contactId, sequence_id: sequenceId }
-    });
-    if (e3) console.warn('activity_log insert failed:', e3);
-
-    // UI: remove card + toast
+    // UI: remove card from SDR queue + toast
     const card = document.getElementById('tc_' + taskId);
     if (card) { card.style.transition = 'opacity .3s'; card.style.opacity = '0'; setTimeout(() => card.remove(), 300); }
     showToast('🤝 Handed off to ' + _handoffBdm.charAt(0).toUpperCase() + _handoffBdm.slice(1), true);

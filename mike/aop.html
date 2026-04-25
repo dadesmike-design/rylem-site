@@ -334,7 +334,7 @@ async function loadTierA() {
   try {
     const { data, error } = await db
       .from('aop_rankings')
-      .select('id, account_id, rank, tier, rank_score, rank_reasoning, market, last_ranked_at, accounts!inner(id, company, composite_signal_score, market as acct_market)')
+      .select('id, account_id, rank, tier, rank_score, rank_reasoning, market, last_ranked_at, accounts!inner(id, company, composite_signal_score, market)')
       .eq('rep', state.rep)
       .eq('tier', 'A')
       .order('rank', { ascending: true })
@@ -359,7 +359,7 @@ async function loadTierB() {
   try {
     const { data, error } = await db
       .from('aop_rankings')
-      .select('id, account_id, rank, tier, rank_score, rank_reasoning, market, last_ranked_at, accounts!inner(id, company, composite_signal_score, market as acct_market)')
+      .select('id, account_id, rank, tier, rank_score, rank_reasoning, market, last_ranked_at, accounts!inner(id, company, composite_signal_score, market)')
       .eq('rep', state.rep)
       .eq('tier', 'B')
       .order('rank', { ascending: true })
@@ -394,7 +394,7 @@ function renderTier(tier, rows) {
     const companyId = acct ? acct.id : r.account_id;
     const companyName = acct ? (acct.company || 'Unknown') : 'Unknown';
     const signalScore = acct ? acct.composite_signal_score : null;
-    const market = r.market || (acct ? acct.acct_market : '') || '';
+    const market = r.market || (acct ? acct.market : '') || '';
     const reasoning = r.rank_reasoning || '';
     const isExpanded = state.expandedCards.has(r.account_id);
     const effort = state.effortCache[r.account_id];
@@ -491,7 +491,7 @@ function reRenderCard(accountId) {
   const companyId = acct ? acct.id : r.account_id;
   const companyName = acct ? (acct.company || 'Unknown') : 'Unknown';
   const signalScore = acct ? acct.composite_signal_score : null;
-  const market = r.market || (acct ? acct.acct_market : '') || '';
+  const market = r.market || (acct ? acct.market : '') || '';
   const reasoning = r.rank_reasoning || '';
   const isExpanded = state.expandedCards.has(accountId);
   const effort = state.effortCache[accountId];

@@ -1396,6 +1396,7 @@ async function generateMessage(){
       email_alias:alias||'mike@rylemconsulting.com',
       signature_block:getSignatureBlock(alias)
     },
+    account_id:contact?.account_id||null,
     verification_mode:'strict'
   };
 

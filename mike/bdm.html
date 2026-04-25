@@ -1695,6 +1695,7 @@ async function generateAIEmail(tid, contactName, contactTitle, company) {
       email_alias: senderAlias || 'miked@rylem.com',
       signature_block: getSignatureBlock(senderAlias)
     },
+    account_id: contact?.account_id || null,
     verification_mode: 'strict'
   };
 
@@ -2527,6 +2528,7 @@ async function smartleadSendContact(contactId, contactName, contactEmail, fromAl
           email_alias: fromAlias,
           signature_block: getSignatureBlock(fromAlias)
         },
+        account_id: contact?.account_id || null,
         verification_mode: 'strict'
       })
     });

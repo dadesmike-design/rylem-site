@@ -397,6 +397,7 @@ function renderHeader(){
     ${a.trigger_event?`<div class="signal-bar">⚡ <strong>Signal:</strong> ${esc(a.trigger_event)}${a.trigger_date?' <span style="color:var(--text3)">('+esc(a.trigger_date)+')</span>':''}</div>`:''}
     <button id="dnc-toggle" onclick="toggleDNC()" style="margin-top:10px;padding:6px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid ${a.do_not_contact?'var(--neon-green)':'var(--neon-red)'};background:${a.do_not_contact?'rgba(57,255,20,.08)':'rgba(255,23,68,.08)'};color:${a.do_not_contact?'var(--neon-green)':'var(--neon-red)'}">${a.do_not_contact?'✅ Remove DNC':'🚫 Mark DNC'}</button>
     <button onclick="showStatusModal()" style="margin-top:10px;margin-left:8px;padding:6px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--border-hover);background:var(--surface2);color:var(--text2);transition:.15s" onmouseover="this.style.borderColor='var(--neon-cyan)';this.style.color='var(--neon-cyan)'" onmouseout="this.style.borderColor='var(--border-hover)';this.style.color='var(--text2)'">🔄 Change Status</button>
+    <button id="prior-client-toggle" onclick="togglePriorClient()" style="margin-top:10px;margin-left:8px;padding:6px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid ${a.prior_client?'rgba(245,200,66,.5)':'var(--border-hover)'};background:${a.prior_client?'rgba(245,200,66,.1)':'var(--surface2)'};color:${a.prior_client?'var(--neon-amber)':'var(--text2)'};transition:.15s">${a.prior_client?'⭐ Prior Client':'☆ Mark Prior Client'}</button>
   `;
   document.getElementById('hdr-card').innerHTML=html;
 }
@@ -414,6 +415,15 @@ async function toggleDNC(){
   renderDNCBanner();
   // Also log it
   await db.from('activity_log').insert({account_id:account.id,rep:account.assigned_rep||'system',event_type:newVal?'dnc_flagged':'dnc_removed',description:account.company+(newVal?' marked Do Not Contact':' DNC flag removed')});
+}
+
+async function togglePriorClient(){
+  const newVal=!account.prior_client;
+  const {error}=await db.from('accounts').update({prior_client:newVal}).eq('id',account.id);
+  if(error){alert('Error: '+error.message);return;}
+  account.prior_client=newVal;
+  renderHeader();
+  await db.from('activity_log').insert({account_id:account.id,rep:account.assigned_rep||'system',event_type:newVal?'prior_client_set':'prior_client_removed',description:account.company+(newVal?' marked as Prior Client':' Prior Client flag removed')});
 }
 
 function toggleRepDD(e){e.stopPropagation();document.getElementById('rep-dd').classList.toggle('open');}

@@ -378,6 +378,7 @@ button,input,select{font-family:inherit}
 .acct-status-on_hold{background:rgba(245,200,66,.12);color:#f5c842;border:1px solid rgba(245,200,66,.25)}
 .acct-status-closed_not_a_fit,.acct-status-closed_lost{background:rgba(122,143,166,.12);color:#7a8fa6;border:1px solid rgba(122,143,166,.2)}
 .acct-status-dnc{background:rgba(255,23,68,.12);color:#ff1744;border:1px solid rgba(255,23,68,.25)}
+.prior-client-badge{background:rgba(245,200,66,.12);color:#f5c842;border:1px solid rgba(245,200,66,.25)}
 /* toggle switch */
 .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
 .toggle-row:last-child{border-bottom:none}
@@ -2729,7 +2730,8 @@ async function fetchRepAccounts(rep) {
       contacts: null, // loaded on expand
       acct_status: a.status || '',
       domain: a.domain || '',
-      assigned_rep: a.assigned_rep || ''
+      assigned_rep: a.assigned_rep || '',
+      prior_client: a.prior_client || false
     };
   });
 }
@@ -3424,7 +3426,7 @@ function buildAccountCard(acc) {
   row.dataset.accountId = acc.id;
   row.onclick = () => toggleAccount(acc.id);
   row.innerHTML = `
-    <div class="account-name"><a href="client.html?id=${acc.id}" style="color:var(--text);text-decoration:none" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text)'">${esc(acc.company)}</a>${buildAcctStatusBadge(acc)}</div>
+    <div class="account-name"><a href="client.html?id=${acc.id}" style="color:var(--text);text-decoration:none" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text)'\">${esc(acc.company)}</a>${acc.prior_client?'<span class="acct-status-badge prior-client-badge">⭐ Prior Client</span>':''}${buildAcctStatusBadge(acc)}</div>
     <div class="account-meta">
       <div class="champion">${ctCount} contact${ctCount !== 1 ? 's' : ''}</div>
       <div>${steps[curStep - 1]?.name || 'New'}</div>

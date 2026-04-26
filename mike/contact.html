@@ -833,6 +833,9 @@ async function submitMeeting(){
   // 1b. Also set meeting_set_date on contact for dashboard fallback queries
   await db.from('contacts').update({meeting_set_date:mtgDate,meeting_set_by:rep}).eq('id',contact.id);
 
+  // 1c. Pause all active sequences — meeting is happening, outreach stops
+  try { await db.from('sequences').update({status:'paused'}).eq('contact_id',contact.id).eq('status','active'); } catch(e) { console.error('[submitMeeting] sequence pause error:', e); }
+
   // 2. Append to contacts.intel
   const dateStr=mtgDate.replace(/(\d{4})-(\d{2})-(\d{2})/,(_,y,m,d)=>{const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return `${months[parseInt(m)-1]} ${parseInt(d)}, ${y}`;});
   const intelLine=`[Meeting ${dateStr}]: ${notes||'No notes'}${nextStep?' | Next step: '+nextStep:''}${_mtgOutcome?' | Outcome: '+_mtgOutcome:''}`;
@@ -1106,6 +1109,10 @@ async function logCallOutcome(outcome){
     }).eq('id', contact.id);
     contact.meeting_set_date = today;
     contact.meeting_set_by = rep;
+    // Pause all active sequences — meeting is happening, outreach stops
+    try {
+      await db.from('sequences').update({status:'paused'}).eq('contact_id',contact.id).eq('status','active');
+    } catch(e) { console.error('[logCallOutcome] sequence pause error:', e); }
     renderHeader();
     renderDNCState();
     showToast('📅 Meeting set — credit to ' + rep);
@@ -1851,6 +1858,8 @@ async function saveMeetingSet(){
   const repKey=profile?.session?.user?.email?.includes('mike')?'mike':profile?.session?.user?.email?.includes('julia')?'julia':profile?.session?.user?.email?.includes('april')?'april':profile?.session?.user?.email?.includes('jean')?'jean':'dee';
   const {error}=await db.from('contacts').update({meeting_set_date:date,meeting_set_by:repKey}).eq('id',_csmContactId);
   if(error){showToast('Error: '+error.message);return;}
+  // Pause all active sequences — meeting is happening, outreach stops
+  try { await db.from('sequences').update({status:'paused'}).eq('contact_id',_csmContactId).eq('status','active'); } catch(e) { console.error('[saveMeetingSet] sequence pause error:', e); }
   try { await db.from('activity_log').insert({
     event_type:'meeting_set',
     description:`Meeting set for ${date}`,

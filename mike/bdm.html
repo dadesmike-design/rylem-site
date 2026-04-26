@@ -1099,6 +1099,8 @@ async function logCallOutcome(outcome) {
     }).eq('id', c.id);
     c.meeting_set_date = today;
     c.meeting_set_by = rep;
+    // Pause all active sequences — meeting is happening, outreach stops
+    try { await db.from('sequences').update({status:'paused'}).eq('contact_id',c.id).eq('status','active'); } catch(e) { console.error('[logCallOutcome] sequence pause error:', e); }
     _showToast('📅 Meeting set — credit to ' + rep);
   } else if (outcome === 'not_interested') {
     await db.from('contacts').update({ not_interested: true, status: null }).eq('id', c.id);
@@ -4500,6 +4502,8 @@ async function saveMeetingSet() {
   try {
     await db.from('contacts').update({ meeting_set_date: dt, meeting_set_by: state.rep }).eq('id', _csmContactId);
   } catch(e) { console.error('contact update error:', e); }
+  // Pause all active sequences — meeting is happening, outreach stops
+  try { await db.from('sequences').update({status:'paused'}).eq('contact_id',_csmContactId).eq('status','active'); } catch(e) { console.error('[saveMeetingSet] sequence pause error:', e); }
   try {
     await db.from('activity_log').insert({
       event_type: 'meeting_set',

@@ -1,0 +1,8 @@
+-- Competitor placement signals from fingerprint trace (April 2026)
+-- Run in Supabase SQL Editor
+
+INSERT INTO account_signals (account_id, signal_type, source, headline, signal_score, market) VALUES ('5b7af74a-6593-4ed9-bb86-722ff44010dd', 'competitor_placement', 'fingerprint_trace', 'Pikemann placed Senior Financial Analyst (E-Commerce FP&A) - $135-145K, Tukwila', 25, 'seattle');
+INSERT INTO account_signals (account_id, signal_type, source, headline, signal_score, market) VALUES ('d651524d-8245-4f85-b5a6-c8a3779cf696', 'competitor_placement', 'fingerprint_trace', 'Fuel Talent placed SDE I - same building (500 108th Ave NE, Bellevue)', 25, 'seattle');
+INSERT INTO account_signals (account_id, signal_type, source, headline, signal_score, market) VALUES ('2609bf0c-534e-4c35-a5fd-70394c71e263', 'competitor_placement', 'fingerprint_trace', 'Pikemann placed Payroll Processor - Banner/Ellucian, union payroll, Bellingham', 25, 'seattle');
+INSERT INTO account_signals (account_id, signal_type, source, headline, signal_score, market) VALUES ('f6f89553-f9ba-4e62-ac7a-3ac30803cfa6', 'competitor_placement', 'fingerprint_trace', 'Fuel Talent placed Sr Software Engineer Full Stack - Renton health tech', 25, 'seattle');
+INSERT INTO account_signals (account_id, signal_type, source, headline, signal_score, market) VALUES ('e65cd78d-576f-4541-b97d-1508fe21a643', 'competitor_placement', 'fingerprint_trace', 'CFS placed Senior Director International Accounting - LinkedIn match, Dallas', 25, 'dfw');

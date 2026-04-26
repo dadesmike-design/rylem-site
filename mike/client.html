@@ -172,6 +172,16 @@ button,input,select,textarea{font-family:inherit}
 .mtg-cancel{width:100%;padding:10px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text3);margin-top:8px}
 .mtg-cancel:hover{border-color:var(--text3);color:var(--text)}
 
+/* ACCOUNT STATUS BADGES */
+.acct-status-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px;white-space:nowrap;display:inline-block;margin-left:8px;vertical-align:middle}
+.acct-status-active{background:rgba(16,217,135,.12);color:#10d987;border:1px solid rgba(16,217,135,.25)}
+.acct-status-meeting_set{background:rgba(59,130,246,.12);color:#3b82f6;border:1px solid rgba(59,130,246,.25)}
+.acct-status-in_follow_up{background:rgba(0,212,212,.12);color:#00d4d4;border:1px solid rgba(0,212,212,.25)}
+.acct-status-stalled{background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.25)}
+.acct-status-on_hold{background:rgba(245,200,66,.12);color:#f5c842;border:1px solid rgba(245,200,66,.25)}
+.acct-status-closed_not_a_fit,.acct-status-closed_lost{background:rgba(122,143,166,.12);color:#7a8fa6;border:1px solid rgba(122,143,166,.2)}
+.acct-status-dnc{background:rgba(255,23,68,.12);color:#ff1744;border:1px solid rgba(255,23,68,.25)}
+
 /* AI SUMMARY */
 .ai-text{font-size:14px;line-height:1.8;color:var(--text)}
 .ai-loading{color:var(--text3);font-style:italic}
@@ -328,6 +338,20 @@ function showError(msg){
   el.innerHTML=`<div class="spin">❌</div><p>${msg} <a href="bdm.html">Go back</a></p>`;
 }
 
+// ─── STATUS HELPERS ───
+function getStatusBadgeClass(status){
+  const map={active:'acct-status-active',meeting_set:'acct-status-meeting_set',in_follow_up:'acct-status-in_follow_up',stalled:'acct-status-stalled',on_hold:'acct-status-on_hold',closed_not_a_fit:'acct-status-closed_not_a_fit',closed_lost:'acct-status-closed_lost',dnc:'acct-status-dnc'};
+  return map[status]||'acct-status-stalled';
+}
+function getStatusLabel(status){
+  const map={active:'Active',meeting_set:'Meeting Set',in_follow_up:'In Follow Up',stalled:'Stalled',on_hold:'On Hold',closed_not_a_fit:'Closed — Not a Fit',closed_lost:'Closed — Lost',dnc:'Do Not Contact'};
+  return map[status]||'Unknown';
+}
+function getStatusIcon(status){
+  const map={active:'🟢',meeting_set:'📅',in_follow_up:'🔄',stalled:'⚠️',on_hold:'⏸️',closed_not_a_fit:'🔒',closed_lost:'🔒',dnc:'🚫'};
+  return map[status]||'●';
+}
+
 // ─── HEADER ───
 function renderHeader(){
   const a=account;
@@ -342,7 +366,7 @@ function renderHeader(){
     <div class="hdr-top">
       <div class="hdr-avatar">${initial}</div>
       <div>
-        <div class="hdr-name">${esc(a.company)}</div>
+        <div class="hdr-name">${esc(a.company)}<span class="acct-status-badge ${getStatusBadgeClass(a.status)}" title="Status: ${getStatusLabel(a.status)}${a.status_changed_at?'&#10;Changed: '+new Date(a.status_changed_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' '+new Date(a.status_changed_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}):''}${a.status_changed_by?'&#10;by '+a.status_changed_by:''}">${getStatusIcon(a.status)} ${getStatusLabel(a.status)}</span></div>
       </div>
       <div style="margin-left:auto;display:flex;gap:8px"><button onclick="editAccountInline()" style="padding:8px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--border-hover);background:var(--surface2);color:var(--text2);transition:.15s" onmouseover="this.style.borderColor='var(--neon-purple)';this.style.color='var(--neon-purple)'" onmouseout="this.style.borderColor='var(--border-hover)';this.style.color='var(--text2)'">✏️ Edit Account</button><button onclick="showAddContactModal()" style="padding:8px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;border:1px solid rgba(0,229,255,.3);background:rgba(0,229,255,.08);color:var(--neon-cyan);transition:.15s" onmouseover="this.style.background='rgba(0,229,255,.18)'" onmouseout="this.style.background='rgba(0,229,255,.08)'">＋ Add Contact</button></div>
     </div>
@@ -372,12 +396,13 @@ function renderHeader(){
     </div>
     ${a.trigger_event?`<div class="signal-bar">⚡ <strong>Signal:</strong> ${esc(a.trigger_event)}${a.trigger_date?' <span style="color:var(--text3)">('+esc(a.trigger_date)+')</span>':''}</div>`:''}
     <button id="dnc-toggle" onclick="toggleDNC()" style="margin-top:10px;padding:6px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid ${a.do_not_contact?'var(--neon-green)':'var(--neon-red)'};background:${a.do_not_contact?'rgba(57,255,20,.08)':'rgba(255,23,68,.08)'};color:${a.do_not_contact?'var(--neon-green)':'var(--neon-red)'}">${a.do_not_contact?'✅ Remove DNC':'🚫 Mark DNC'}</button>
+    <button onclick="showStatusModal()" style="margin-top:10px;margin-left:8px;padding:6px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--border-hover);background:var(--surface2);color:var(--text2);transition:.15s" onmouseover="this.style.borderColor='var(--neon-cyan)';this.style.color='var(--neon-cyan)'" onmouseout="this.style.borderColor='var(--border-hover)';this.style.color='var(--text2)'">🔄 Change Status</button>
   `;
   document.getElementById('hdr-card').innerHTML=html;
 }
 
 function renderDNCBanner(){
-  document.getElementById('dnc-banner').style.display=account.do_not_contact?'block':'none';
+  document.getElementById('dnc-banner').style.display=(account.do_not_contact||account.status==='dnc')?'block':'none';
 }
 
 async function toggleDNC(){
@@ -700,6 +725,114 @@ async function submitComplete(meetingId){
   const {data:acts}=await db.from('activity_log').select('*').eq('account_id',account.id).order('created_at',{ascending:false}).limit(50);
   activity=acts||[];
   renderActivity();
+}
+
+// ─── STATUS CHANGE MODAL ───
+function showStatusModal(){
+  if(document.getElementById('status-modal')) document.getElementById('status-modal').remove();
+  const m=document.createElement('div');
+  m.id='status-modal';
+  m.className='mtg-modal-overlay';
+  const statuses=[
+    {value:'active',label:'Active'},
+    {value:'meeting_set',label:'Meeting Set'},
+    {value:'in_follow_up',label:'In Follow Up'},
+    {value:'stalled',label:'Stalled'},
+    {value:'on_hold',label:'On Hold'},
+    {value:'closed_not_a_fit',label:'Closed — Not a Fit'},
+    {value:'closed_lost',label:'Closed — Lost'},
+    {value:'dnc',label:'Do Not Contact'}
+  ];
+  m.innerHTML=`
+  <div class="mtg-modal">
+    <h2>🔄 Change Account Status</h2>
+    <div class="sub">${esc(account.company)} — current: ${getStatusLabel(account.status)}</div>
+    <div class="mtg-field">
+      <label>New Status</label>
+      <select id="status-new" style="width:100%;padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;outline:none">
+        ${statuses.map(s=>`<option value="${s.value}"${account.status===s.value?' selected':''}>${s.label}</option>`).join('')}
+      </select>
+    </div>
+    <div class="mtg-field">
+      <label>Note <span id="status-note-req" style="color:var(--neon-red);font-size:11px;display:none">* Required for closed statuses</span></label>
+      <textarea id="status-note" placeholder="Why is the status changing? Required for closed statuses." style="min-height:80px"></textarea>
+    </div>
+    <div id="status-err" style="color:var(--neon-red);font-size:12px;min-height:16px;margin-bottom:4px"></div>
+    <button class="mtg-submit" id="status-submit" onclick="submitStatusChange()">Update Status</button>
+    <button class="mtg-cancel" onclick="document.getElementById('status-modal').remove()">Cancel</button>
+  </div>`;
+  m.addEventListener('click',e=>{if(e.target===m)m.remove()});
+  document.body.appendChild(m);
+  // Show/hide required note label based on selection
+  document.getElementById('status-new').addEventListener('change',function(){
+    const req=['closed_not_a_fit','closed_lost'].includes(this.value);
+    document.getElementById('status-note-req').style.display=req?'inline':'none';
+  });
+}
+
+async function submitStatusChange(){
+  const btn=document.getElementById('status-submit');
+  const newStatus=document.getElementById('status-new').value;
+  const note=document.getElementById('status-note').value.trim();
+  const errEl=document.getElementById('status-err');
+  errEl.textContent='';
+
+  // Validation: note required for closed statuses
+  if((newStatus==='closed_not_a_fit'||newStatus==='closed_lost')&&!note){
+    errEl.textContent='A note is required when closing an account.';
+    return;
+  }
+
+  btn.disabled=true;btn.textContent='Updating...';
+  const changedBy=window.currentUser?.rep_key||'unknown';
+
+  const {error}=await db.rpc('set_account_status',{
+    p_account_id:account.id,
+    p_new_status:newStatus,
+    p_changed_by:changedBy,
+    p_note:note||null
+  });
+
+  if(error){
+    errEl.textContent='❌ '+error.message;
+    btn.disabled=false;btn.textContent='Update Status';
+    return;
+  }
+
+  // Update local account object
+  account.status=newStatus;
+  account.status_changed_at=new Date().toISOString();
+  account.status_changed_by=changedBy;
+  account.status_note=note||null;
+
+  // Log activity
+  const rep=window.currentUser?.rep_name||account.assigned_rep||'system';
+  await db.from('activity_log').insert({
+    account_id:account.id,
+    rep_id:rep,
+    rep:rep,
+    event_type:'status_changed',
+    description:`Account status changed to ${getStatusLabel(newStatus)}${note?' — '+note:''} by ${changedBy}`
+  });
+
+  // Close modal and refresh
+  document.getElementById('status-modal').remove();
+  renderHeader();
+  renderDNCBanner();
+  // Refresh activity
+  const {data:acts}=await db.from('activity_log').select('*').eq('account_id',account.id).order('created_at',{ascending:false}).limit(50);
+  activity=acts||[];
+  renderActivity();
+  showToast(`Status updated to ${getStatusLabel(newStatus)}`);
+}
+
+function showToast(msg){
+  const t=document.createElement('div');
+  t.textContent=msg;
+  t.style.cssText='position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:10000;padding:10px 22px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--neon-green);color:var(--neon-green);font-size:13px;font-weight:700;box-shadow:0 4px 20px rgba(0,0,0,.5);pointer-events:none;opacity:0;transition:opacity .3s';
+  document.body.appendChild(t);
+  requestAnimationFrame(()=>{t.style.opacity='1';});
+  setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),300);},2500);
 }
 
 // ─── NOTES ───

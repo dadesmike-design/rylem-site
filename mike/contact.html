@@ -1827,6 +1827,28 @@ async function openStatusModal(contactId,accountId){
       <div>✅ <strong>Completed:</strong> ${esc(c.meeting_completed_date)} (${esc(c.meeting_type==='in_person'?'In Person':'Virtual')})</div>
       <div>👤 <strong>Completed by:</strong> ${esc(repNames[c.meeting_completed_by]||c.meeting_completed_by||'—')}</div>
     </div>`;
+  }else if(c.meeting_set_date){
+    mc.innerHTML=`<div class="meeting-info">
+      <div>📅 <strong>Meeting:</strong> ${esc(c.meeting_set_date)}</div>
+      <div>👤 <strong>Set by:</strong> ${esc(repNames[c.meeting_set_by]||c.meeting_set_by||'—')}</div>
+    </div>
+    <button class="btn btn-submit" style="margin-top:10px" onclick="showCompleteForm()">Mark Completed</button>
+    <div class="meeting-form" id="csm-complete-form">
+      <div class="form-group" style="margin-bottom:10px"><label>Completed Date</label><input type="date" id="csm-complete-date" value="${localDateStr()}"></div>
+      <div class="form-group" style="margin-bottom:10px"><label>Meeting Type</label>
+        <select id="csm-meeting-type"><option value="virtual">Virtual</option><option value="in_person">In Person</option></select>
+      </div>
+      <div class="form-group" style="margin-bottom:10px"><label>Next Action *</label>
+        <select id="csm-next-action"><option value="">— Select —</option><option value="send_proposal">Send Proposal</option><option value="schedule_followup">Schedule Follow-Up Call</option><option value="send_candidates">Send Candidates</option><option value="check_in">Check In (7 days)</option><option value="none">No Next Action</option></select>
+      </div>
+      <div class="form-group" style="margin-bottom:10px"><label>Next Action Date *</label><input type="date" id="csm-next-date"></div>
+      <div class="form-group" style="margin-bottom:10px"><label>Notes</label><input type="text" id="csm-next-note" placeholder="One-line note" maxlength="200"></div>
+      <button class="btn btn-submit" onclick="saveMeetingCompleted()">Confirm Completed</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn" style="background:var(--red);color:#fff;flex:1" onclick="saveMeetingCancelled()">🚫 Cancelled</button>
+      <button class="btn" style="background:#b45309;color:#fff;flex:1" onclick="saveMeetingNoShow()">👻 No Show</button>
+    </div>`;
   }else{
     mc.innerHTML=`<button class="btn btn-submit" onclick="showSetMeetingForm()">Set Meeting</button>
     <div class="meeting-form" id="csm-set-form">
@@ -1876,17 +1898,69 @@ function showCompleteForm(){
 async function saveMeetingCompleted(){
   const dateInput=document.getElementById('csm-complete-date');
   const typeSelect=document.getElementById('csm-meeting-type');
-  if(!dateInput?.value||!typeSelect?.value){showToast('Fill both fields');return;}
+  const nextAction=document.getElementById('csm-next-action');
+  const nextDate=document.getElementById('csm-next-date');
+  const nextNote=document.getElementById('csm-next-note');
+  if(!dateInput?.value||!typeSelect?.value){showToast('Fill date and type');return;}
+  if(!nextAction?.value){showToast('Select a next action');return;}
+  if(nextAction.value!=='none'&&!nextDate?.value){showToast('Pick a next action date');return;}
   const {data:profile}=await db.auth.getSession();
   const completedBy=profile?.session?.user?.email?.includes('mike')?'mike':profile?.session?.user?.email?.includes('julia')?'julia':profile?.session?.user?.email?.includes('april')?'april':profile?.session?.user?.email?.includes('jean')?'jean':'dee';
+  const nextSteps=nextAction.value==='none'?null:{
+    next_action:nextAction.value,
+    next_date:nextDate?.value||null,
+    note:nextNote?.value||''
+  };
   const {error}=await db.from('contacts').update({
     meeting_completed_date:dateInput.value,
     meeting_completed_by:completedBy,
     meeting_type:typeSelect.value
   }).eq('id',_csmContactId);
   if(error){showToast('Error: '+error.message);return;}
-  showToast('Meeting marked completed');
-  // TODO: client.html should show Meeting History section for meeting_completed_date IS NOT NULL
+  // End active sequence
+  try{await db.from('sequences').update({status:'completed'}).eq('contact_id',_csmContactId).eq('status','active');}catch(e){console.error('[saveMeetingCompleted] sequence end error:',e);}
+  // Log with next steps metadata
+  try{await db.from('activity_log').insert({
+    event_type:'meeting_completed',
+    description:`Meeting completed on ${dateInput.value} (${typeSelect.value==='in_person'?'In Person':'Virtual'})`+(nextSteps?`. Next: ${nextSteps.next_action} on ${nextSteps.next_date}`:''),
+    contact_id:_csmContactId,account_id:_csmAccountId,rep:completedBy,
+    metadata:nextSteps?JSON.stringify(nextSteps):null
+  });}catch(e){console.error('[saveMeetingCompleted] activity_log error:',e);}
+  showToast('✅ Meeting completed!');
+  setTimeout(()=>{closeStatusModal();renderHeader();},1000);
+}
+
+async function saveMeetingCancelled(){
+  const {data:profile}=await db.auth.getSession();
+  const repKey=profile?.session?.user?.email?.includes('mike')?'mike':profile?.session?.user?.email?.includes('julia')?'julia':profile?.session?.user?.email?.includes('april')?'april':profile?.session?.user?.email?.includes('jean')?'jean':'dee';
+  // Clear meeting date, resume paused sequences
+  const {error}=await db.from('contacts').update({meeting_set_date:null,meeting_set_by:null}).eq('id',_csmContactId);
+  if(error){showToast('Error: '+error.message);return;}
+  try{await db.from('sequences').update({status:'active'}).eq('contact_id',_csmContactId).eq('status','paused');}catch(e){console.error('[saveMeetingCancelled] sequence resume error:',e);}
+  try{await db.from('activity_log').insert({
+    event_type:'meeting_cancelled',
+    description:'Meeting cancelled — sequence resumed',
+    contact_id:_csmContactId,account_id:_csmAccountId,rep:repKey,
+    metadata:JSON.stringify({reschedule_needed:true})
+  });}catch(e){console.error('[saveMeetingCancelled] activity_log error:',e);}
+  showToast('🚫 Meeting cancelled — sequence resumed');
+  setTimeout(()=>{closeStatusModal();renderHeader();},1000);
+}
+
+async function saveMeetingNoShow(){
+  const {data:profile}=await db.auth.getSession();
+  const repKey=profile?.session?.user?.email?.includes('mike')?'mike':profile?.session?.user?.email?.includes('julia')?'julia':profile?.session?.user?.email?.includes('april')?'april':profile?.session?.user?.email?.includes('jean')?'jean':'dee';
+  // Clear meeting date, resume paused sequences
+  const {error}=await db.from('contacts').update({meeting_set_date:null,meeting_set_by:null}).eq('id',_csmContactId);
+  if(error){showToast('Error: '+error.message);return;}
+  try{await db.from('sequences').update({status:'active'}).eq('contact_id',_csmContactId).eq('status','paused');}catch(e){console.error('[saveMeetingNoShow] sequence resume error:',e);}
+  try{await db.from('activity_log').insert({
+    event_type:'meeting_no_show',
+    description:'Contact no-showed — sequence resumed',
+    contact_id:_csmContactId,account_id:_csmAccountId,rep:repKey,
+    metadata:JSON.stringify({reschedule_needed:true})
+  });}catch(e){console.error('[saveMeetingNoShow] activity_log error:',e);}
+  showToast('👻 No show — sequence resumed');
   setTimeout(()=>{closeStatusModal();renderHeader();},1000);
 }
 
@@ -1914,13 +1988,7 @@ function escAttr(s){return s?String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")
     <h2>Status — <span id="csm-name"></span></h2>
     <div class="sub">Manage meeting log and contact intel flags.</div>
     <div id="csm-meeting-content"></div>
-    <div id="csm-complete-form" class="meeting-form">
-      <div class="form-group" style="margin-bottom:10px"><label>Completed Date</label><input type="date" id="csm-complete-date" value="${localDateStr()}"></div>
-      <div class="form-group" style="margin-bottom:10px"><label>Meeting Type</label>
-        <select id="csm-meeting-type"><option value="virtual">Virtual</option><option value="in_person">In Person</option></select>
-      </div>
-      <button class="btn btn-submit" onclick="saveMeetingCompleted()">Confirm Completed</button>
-    </div>
+
     <div class="status-flags">
       <div class="status-flag">
         <span class="flag-label">💬 Replied</span>

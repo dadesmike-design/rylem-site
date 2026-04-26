@@ -4400,7 +4400,16 @@ async function openStatusModal(contactId, accountId) {
       <div class="form-group" style="margin-bottom:10px"><label>Meeting Type</label>
         <select id="csm-meeting-type"><option value="virtual">Virtual</option><option value="in_person">In Person</option></select>
       </div>
+      <div class="form-group" style="margin-bottom:10px"><label>Next Action *</label>
+        <select id="csm-next-action"><option value="">— Select —</option><option value="send_proposal">Send Proposal</option><option value="schedule_followup">Schedule Follow-Up Call</option><option value="send_candidates">Send Candidates</option><option value="check_in">Check In (7 days)</option><option value="none">No Next Action</option></select>
+      </div>
+      <div class="form-group" style="margin-bottom:10px"><label>Next Action Date *</label><input type="date" id="csm-next-date"></div>
+      <div class="form-group" style="margin-bottom:10px"><label>Notes</label><input type="text" id="csm-next-note" placeholder="One-line note" maxlength="200"></div>
       <button class="btn btn-submit" onclick="saveMeetingCompleted()">Confirm Completed</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn" style="background:var(--red);color:#fff;flex:1" onclick="saveMeetingCancelled()">🚫 Cancelled</button>
+      <button class="btn" style="background:#b45309;color:#fff;flex:1" onclick="saveMeetingNoShow()">👻 No Show</button>
     </div>`;
   } else {
     mc.innerHTML = `<button class="btn btn-submit" onclick="showSetMeetingForm()">Set Meeting</button>
@@ -4519,9 +4528,18 @@ async function saveMeetingSet() {
 async function saveMeetingCompleted() {
   const dt = document.getElementById('csm-complete-date').value;
   if (!dt) { showToast('Date is required'); return; }
-  // 1. Write completed fields + meeting type
-  // TODO: client.html should query contacts where meeting_completed_date IS NOT NULL for this account and display them in a "Meeting History" section so reps can see who has already been met before enrolling contacts in sequences.
   const tp = document.getElementById('csm-meeting-type').value;
+  const nextAction = document.getElementById('csm-next-action');
+  const nextDate = document.getElementById('csm-next-date');
+  const nextNote = document.getElementById('csm-next-note');
+  if (!nextAction?.value) { showToast('Select a next action'); return; }
+  if (nextAction.value !== 'none' && !nextDate?.value) { showToast('Pick a next action date'); return; }
+  const nextSteps = nextAction.value === 'none' ? null : {
+    next_action: nextAction.value,
+    next_date: nextDate?.value || null,
+    note: nextNote?.value || ''
+  };
+  // 1. Write completed fields + meeting type
   await db.from('contacts').update({ meeting_completed_date: dt, meeting_completed_by: state.rep, meeting_type: tp }).eq('id', _csmContactId);
   // 2. End active sequence
   await db.from('sequences').update({ status: 'completed' }).eq('contact_id', _csmContactId).eq('status', 'active');
@@ -4545,13 +4563,48 @@ async function saveMeetingCompleted() {
       });
     }
   }
-  // 4. Log
+  // 4. Log with next steps metadata
   await db.from('activity_log').insert({
     event_type: 'meeting_completed',
-    description: `Meeting completed on ${dt} (${tp === 'in_person' ? 'In Person' : 'Virtual'})` + (followUp ? '. Follow-up sequence started.' : ''),
-    contact_id: _csmContactId, account_id: _csmAccountId, rep: state.rep
+    description: `Meeting completed on ${dt} (${tp === 'in_person' ? 'In Person' : 'Virtual'})` + (followUp ? '. Follow-up sequence started.' : '') + (nextSteps ? `. Next: ${nextSteps.next_action} on ${nextSteps.next_date}` : ''),
+    contact_id: _csmContactId, account_id: _csmAccountId, rep: state.rep,
+    metadata: nextSteps ? JSON.stringify(nextSteps) : null
   });
   showToast('✅ Meeting completed!' + (followUp ? ' Follow-up sequence started.' : ''), true);
+  await _refreshContactRow(_csmAccountId);
+  openStatusModal(_csmContactId, _csmAccountId);
+}
+
+async function saveMeetingCancelled() {
+  // Clear meeting date, resume paused sequences
+  await db.from('contacts').update({ meeting_set_date: null, meeting_set_by: null }).eq('id', _csmContactId);
+  try { await db.from('sequences').update({ status: 'active' }).eq('contact_id', _csmContactId).eq('status', 'paused'); } catch (e) { console.error('[saveMeetingCancelled] sequence resume error:', e); }
+  try {
+    await db.from('activity_log').insert({
+      event_type: 'meeting_cancelled',
+      description: 'Meeting cancelled — sequence resumed',
+      contact_id: _csmContactId, account_id: _csmAccountId, rep: state.rep,
+      metadata: JSON.stringify({ reschedule_needed: true })
+    });
+  } catch (e) { console.error('[saveMeetingCancelled] activity_log error:', e); }
+  showToast('🚫 Meeting cancelled — sequence resumed', true);
+  await _refreshContactRow(_csmAccountId);
+  openStatusModal(_csmContactId, _csmAccountId);
+}
+
+async function saveMeetingNoShow() {
+  // Clear meeting date, resume paused sequences
+  await db.from('contacts').update({ meeting_set_date: null, meeting_set_by: null }).eq('id', _csmContactId);
+  try { await db.from('sequences').update({ status: 'active' }).eq('contact_id', _csmContactId).eq('status', 'paused'); } catch (e) { console.error('[saveMeetingNoShow] sequence resume error:', e); }
+  try {
+    await db.from('activity_log').insert({
+      event_type: 'meeting_no_show',
+      description: 'Contact no-showed — sequence resumed',
+      contact_id: _csmContactId, account_id: _csmAccountId, rep: state.rep,
+      metadata: JSON.stringify({ reschedule_needed: true })
+    });
+  } catch (e) { console.error('[saveMeetingNoShow] activity_log error:', e); }
+  showToast('👻 No show — sequence resumed', true);
   await _refreshContactRow(_csmAccountId);
   openStatusModal(_csmContactId, _csmAccountId);
 }
